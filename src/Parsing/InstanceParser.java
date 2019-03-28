@@ -1,13 +1,11 @@
 package Parsing;
 
 import entities.Course;
+import entities.Student;
 
-import javax.xml.namespace.QName;
 import javax.xml.stream.XMLEventReader;
 import javax.xml.stream.XMLInputFactory;
 import javax.xml.stream.XMLStreamException;
-import javax.xml.stream.events.Attribute;
-import javax.xml.stream.events.EndElement;
 import javax.xml.stream.events.StartElement;
 import javax.xml.stream.events.XMLEvent;
 import java.io.FileInputStream;
@@ -17,20 +15,19 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.function.BiConsumer;
-import java.util.function.BiFunction;
-import java.util.function.Function;
 
 public class InstanceParser {
 
     private Map<String, BiConsumer<XMLEventReader, StartElement>> tagFunctions = new HashMap<>();
 
     private List<Course> courses = new ArrayList<>();
-//    private List<Constraint> constraints = new ArrayList<>();
+    private List<Student> students = new ArrayList<>();
 //    private List<Room> rooms = new ArrayList<>();
 //    private List<Distribution> distributions = new ArrayList<>();
 
     private void init(){
         tagFunctions.put("course", this::handleCourse);
+        tagFunctions.put("student", this::handleStudent);
     }
 
 
@@ -52,7 +49,6 @@ public class InstanceParser {
                     if(f != null){
                         f.accept(xmlEventReader, startElement);
                     }
-
                 }
             }
         } catch (XMLStreamException e) {
@@ -63,10 +59,22 @@ public class InstanceParser {
     private void handleCourse(XMLEventReader reader, StartElement el) {
 
         CourseParser courseParser = new CourseParser();
-        Course course = null;
+        Course course;
         try {
             course = courseParser.parse(reader, el);
             courses.add(course);
+        } catch (XMLStreamException e) {
+            System.out.println("Error while handling course");
+            e.printStackTrace();
+        }
+    }
+
+    private void handleStudent(XMLEventReader reader, StartElement el){
+        StudentParser parser = new StudentParser();
+        Student student;
+        try {
+            student = parser.parse(reader, el);
+            students.add(student);
         } catch (XMLStreamException e) {
             System.out.println("Error while handling course");
             e.printStackTrace();
@@ -77,6 +85,8 @@ public class InstanceParser {
         InstanceParser p = new InstanceParser();
         try {
             p.parse("lums-sum17.xml");
+//            p.parse("pu-cs-fal07.xml");
+//            p.parse("pu-c8-spr07.xml");
         } catch (FileNotFoundException e) {
             e.printStackTrace();
         }
