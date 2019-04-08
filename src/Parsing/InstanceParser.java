@@ -1,7 +1,6 @@
 package Parsing;
 
-import entities.Course;
-import entities.Student;
+import entities.*;
 
 import javax.xml.stream.XMLEventReader;
 import javax.xml.stream.XMLInputFactory;
@@ -20,33 +19,34 @@ public class InstanceParser {
 
     private Map<String, BiConsumer<XMLEventReader, StartElement>> tagFunctions = new HashMap<>();
 
-    private List<Course> courses = new ArrayList<>();
-    private List<Student> students = new ArrayList<>();
-//    private List<Room> rooms = new ArrayList<>();
-//    private List<Distribution> distributions = new ArrayList<>();
+    private Instance instance = new Instance();
 
-    private void init(){
+    private FileInputStream file;
+
+    private void init() {       //            p.parse("pu-cs-fal07.xml");
+//            p.parse("pu-c8-spr07.xml");
+
         tagFunctions.put("course", this::handleCourse);
         tagFunctions.put("student", this::handleStudent);
     }
 
 
-
-    public InstanceParser() {
+    public InstanceParser(String filename) throws FileNotFoundException {
+        file = new FileInputStream(filename);
         init();
     }
 
-    public void parse(String filename) throws FileNotFoundException {
+    public Instance parse() {
         XMLInputFactory xmlInputFactory = XMLInputFactory.newInstance();
         try {
-            XMLEventReader xmlEventReader = xmlInputFactory.createXMLEventReader(new FileInputStream(filename));
+            XMLEventReader xmlEventReader = xmlInputFactory.createXMLEventReader(file);
             while (xmlEventReader.hasNext()) {
                 XMLEvent ev = xmlEventReader.nextEvent();
-                if(ev.isStartElement()){
+                if (ev.isStartElement()) {
                     StartElement startElement = ev.asStartElement();
                     String tag = startElement.getName().getLocalPart();
                     BiConsumer<XMLEventReader, StartElement> f = tagFunctions.get(tag);
-                    if(f != null){
+                    if (f != null) {
                         f.accept(xmlEventReader, startElement);
                     }
                 }
@@ -54,6 +54,7 @@ public class InstanceParser {
         } catch (XMLStreamException e) {
             e.printStackTrace();
         }
+        return instance;
     }
 
     private void handleCourse(XMLEventReader reader, StartElement el) {
@@ -62,19 +63,19 @@ public class InstanceParser {
         Course course;
         try {
             course = courseParser.parse(reader, el);
-            courses.add(course);
+            instance.courses.add(course);
         } catch (XMLStreamException e) {
             System.out.println("Error while handling course");
             e.printStackTrace();
         }
     }
 
-    private void handleStudent(XMLEventReader reader, StartElement el){
+    private void handleStudent(XMLEventReader reader, StartElement el) {
         StudentParser parser = new StudentParser();
         Student student;
         try {
             student = parser.parse(reader, el);
-            students.add(student);
+            instance.students.add(student);
         } catch (XMLStreamException e) {
             System.out.println("Error while handling course");
             e.printStackTrace();
@@ -82,13 +83,18 @@ public class InstanceParser {
     }
 
     public static void main(String[] args) {
-        InstanceParser p = new InstanceParser();
+        InstanceParser p;
         try {
-            p.parse("lums-sum17.xml");
-//            p.parse("pu-cs-fal07.xml");
-//            p.parse("pu-c8-spr07.xml");
+            p = new InstanceParser("lums-sum17.xml");
+            //            p.parse("pu-cs-fal07.xml");
+            //            p.parse("pu-c8-spr07.xml");
+            Instance x = p.parse();
+
         } catch (FileNotFoundException e) {
             e.printStackTrace();
         }
+
+
+
     }
 }
