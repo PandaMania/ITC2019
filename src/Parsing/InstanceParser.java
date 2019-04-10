@@ -28,6 +28,8 @@ public class InstanceParser {
 
         tagFunctions.put("course", this::handleCourse);
         tagFunctions.put("student", this::handleStudent);
+        tagFunctions.put("room", this::handleRoom);
+        tagFunctions.put("distribution", this::handledistribution);
     }
 
 
@@ -56,6 +58,34 @@ public class InstanceParser {
         }
         return instance;
     }
+
+    private void handleRoom(XMLEventReader reader, StartElement el) {
+
+        RoomParser roomParser = new RoomParser();
+        Room room;
+
+        try {
+            room = roomParser.parse(reader, el);
+            instance.rooms.add(room);
+        } catch (XMLStreamException e) {
+            System.out.println("Error while handling room");
+            e.printStackTrace();
+        }
+    }
+
+    private void handledistribution(XMLEventReader reader, StartElement el) {
+
+        DistributionParser distributionParser = new DistributionParser();
+        Distribution distribution;
+        try {
+            distribution = distributionParser.parse(reader, el);
+            instance.distributions.add(distribution);
+        } catch (XMLStreamException e) {
+            System.out.println("Error while handling room");
+            e.printStackTrace();
+        }
+    }
+
 
     private void handleCourse(XMLEventReader reader, StartElement el) {
 
