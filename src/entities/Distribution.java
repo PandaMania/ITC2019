@@ -6,5 +6,5 @@ public class Distribution {
     public String type;
     public boolean required;
     public int penalty;
-    public ArrayList<Integer> idInDistribution;
+    public ArrayList<Integer> idInDistribution= new ArrayList<>();
 }
