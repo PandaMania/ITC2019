@@ -23,7 +23,7 @@ public class DistributionParser {
 
 
         Attribute penalty= el.getAttributeByName(QName.valueOf("penalty"));
-        distribution.penalty= Integer.parseInt(required.getValue());
+        distribution.penalty= Integer.parseInt(penalty.getValue());
 
         XMLEvent event = reader.nextEvent();
         while(!(event.isEndElement() && event.asEndElement().getName().getLocalPart().equals("distribution"))) {

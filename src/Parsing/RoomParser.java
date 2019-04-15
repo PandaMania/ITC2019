@@ -15,7 +15,7 @@ public class RoomParser {
         // Create Room
         Room room = new Room();
         // Read ID
-        Attribute capacity =  el.getAttributeByName(QName.valueOf("room capacity"));
+        Attribute capacity =  el.getAttributeByName(QName.valueOf("capacity"));
         room.capacity = Integer.parseInt(capacity.getValue());
 
         Attribute id = el.getAttributeByName(QName.valueOf("id"));
@@ -33,11 +33,26 @@ public class RoomParser {
                 Attribute distAttr = startElement.getAttributeByName(QName.valueOf("value"));
                 Integer distance = Integer.parseInt(distAttr.getValue());
                 room.distanceToRooms.put(roomid,distance);
+            }else if(name.equals("unavailable")){
+                Attribute weeksAttr= startElement.getAttributeByName(QName.valueOf("weeks"));
+                String weeks= weeksAttr.getValue();
+
+                Attribute lengthAttr= startElement.getAttributeByName(QName.valueOf("length"));
+                String   length= lengthAttr.getValue();
+
+                Attribute startAttr= startElement.getAttributeByName(QName.valueOf("start"));
+                String   start= startAttr.getValue();
+
+                Attribute daysAttr= startElement.getAttributeByName(QName.valueOf("days"));
+                String   days= daysAttr.getValue();
+
+                room.unaivailableweeks.add("weeks= " +weeks + " ,length= "+ length + " ,start= " + start + " ,days= " + days);
+
+            } else{
+                throw new IllegalArgumentException("Unexpected element encountered");
             }
         }
-        else{
-            throw new IllegalArgumentException("Unexpected element encountered");
-        }
+
 
         }
         return room;
