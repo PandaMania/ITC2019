@@ -52,7 +52,7 @@ public class RoomParser {
                 throw new IllegalArgumentException("Unexpected element encountered");
             }
         }
-
+            event = reader.nextEvent();
 
         }
         return room;

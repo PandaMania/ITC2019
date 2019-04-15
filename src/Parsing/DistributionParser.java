@@ -39,6 +39,7 @@ public class DistributionParser {
             else{
                 throw new IllegalArgumentException("Unexpected element encountered");
             }
+            event = reader.nextEvent();
         }
         return distribution;
     }
