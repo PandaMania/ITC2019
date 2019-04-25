@@ -1,6 +1,8 @@
 package Parsing;
 
 import entities.*;
+import entities.course.Course;
+import entities.distribution.Distribution;
 
 import javax.xml.stream.XMLEventReader;
 import javax.xml.stream.XMLInputFactory;
@@ -9,9 +11,8 @@ import javax.xml.stream.events.StartElement;
 import javax.xml.stream.events.XMLEvent;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.function.BiConsumer;
 
@@ -67,6 +68,12 @@ public class InstanceParser {
         try {
             room = roomParser.parse(reader, el);
             instance.rooms.add(room);
+//            for (Map.Entry<Integer, Integer> entry : room.distanceToRooms.entrySet()) {
+//                HashSet<Integer> set = new HashSet<>();
+//                set.
+//            }
+//
+//            instance.distances.put()
         } catch (XMLStreamException e) {
             System.out.println("Error while handling room");
             e.printStackTrace();
@@ -115,10 +122,11 @@ public class InstanceParser {
     public static void main(String[] args) {
         InstanceParser p;
         try {
-            p = new InstanceParser("iku-fal17.xml");
+            p = new InstanceParser(//"lums-sum17.xml");
             //            p.parse("pu-cs-fal07.xml");
-            //            p.parse("pu-c8-spr07.xml");
+                        "pu-c8-spr07.xml");
             Instance x = p.parse();
+            System.out.println(x);
 
         } catch (FileNotFoundException e) {
             e.printStackTrace();

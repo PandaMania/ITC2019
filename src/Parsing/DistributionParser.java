@@ -1,6 +1,6 @@
 package Parsing;
 
-import entities.*;
+import entities.distribution.Distribution;
 
 import javax.xml.namespace.QName;
 import javax.xml.stream.XMLEventReader;
@@ -36,10 +36,10 @@ public class DistributionParser {
                 if (name.equals("class")) {
                     Attribute idAttribute = startElement.getAttributeByName(QName.valueOf("id"));
                     distribution.idInDistribution.add(Integer.parseInt(idAttribute.getValue()));
-                }
+                }else {
+                    throw new IllegalArgumentException("Unexpected element encountered");
 
-            }else {
-                throw new IllegalArgumentException("Unexpected element encountered");
+                }
 
             }
             event = reader.nextEvent();

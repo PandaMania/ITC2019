@@ -1,4 +1,4 @@
-package entities;
+package entities.course;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -8,7 +8,7 @@ public class CourseClass{
     public String id;
     public int limit;
     public boolean roomNeeded;
-    // TODO: Maybe use entities.CourseClass instead
+    // TODO: Maybe use entities.course.CourseClass instead
     public String parentId;
     // Room Id's to penalties
     // TODO: Maybe use Map<Room, Integer> instead?

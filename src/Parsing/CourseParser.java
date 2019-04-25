@@ -1,6 +1,6 @@
 package Parsing;
 
-import entities.*;
+import entities.course.*;
 
 import javax.xml.namespace.QName;
 import javax.xml.stream.XMLEventReader;

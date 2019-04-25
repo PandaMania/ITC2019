@@ -1,4 +1,6 @@
-package entities;
+package entities.course;
+
+import entities.course.CourseClass;
 
 import java.util.ArrayList;
 

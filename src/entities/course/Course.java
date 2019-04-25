@@ -1,4 +1,4 @@
-package entities;
+package entities.course;
 
 import java.util.ArrayList;
 

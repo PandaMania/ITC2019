@@ -1,6 +1,5 @@
 package Parsing;
 
-import entities.Course;
 import entities.Student;
 
 import javax.xml.namespace.QName;
