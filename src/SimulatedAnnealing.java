@@ -11,22 +11,22 @@ public class SimulatedAnnealing {
 
   // Constructor:
   public SimulatedAnnealing (double start_temperature){
-      this.temperature = start_temperature;
+    this.temperature = start_temperature;
   }
 
 	private int getNumClasses(Instance instance){
 		List<String> counter = new ArrayList<>();
 		for (entities.course.Course course : instance.courses){
-				for (entities.course.CourseConfiguration config : course.configs){
-						for (entities.course.SubPart subpart : config.subparts){
-								for (entities.course.CourseClass courseclass : subpart.classes){
-											String id = courseclass.id;
-											if (!counter.contains(id)){
-												counter.add(id);
-											}
-								}
+			for (entities.course.CourseConfiguration config : course.configs){
+				for (entities.course.SubPart subpart : config.subparts){
+					for (entities.course.CourseClass courseclass : subpart.classes){
+						String id = courseclass.id;
+						if (!counter.contains(id)){
+							counter.add(id);
 						}
+					}
 				}
+			}
 		}
 		//System.out.println(instance.courses);
 		return counter.size();
@@ -53,15 +53,15 @@ public class SimulatedAnnealing {
 	}
 
 	private List<int[]> makeDeepCopy(List<int[]> representation){
-        List<int[]> deepcopy = new ArrayList<>();
-        for (int[] item : representation){
-            deepcopy.add(item.clone());
-        }
-        return deepcopy;
+      List<int[]> deepcopy = new ArrayList<>();
+      for (int[] item : representation){
+        deepcopy.add(item.clone());
+      }
+      return deepcopy;
     }
 
 	private Boolean getProbBool(double prob){
-			return Math.random() <= prob;
+		return Math.random() <= prob;
 	}
 
 	private List<int[]> initRepresentation (Instance instance) {
@@ -115,20 +115,20 @@ public class SimulatedAnnealing {
 		double representation_cost = this.cost(representation);
 
 		while (true) {
-				List<int[]> neighbor = this.getRandomNeighbor(representation);
-				double neighbor_cost = this.cost(representation);
-				double prob = Math.min(1.0, Math.exp(-(neighbor_cost - representation_cost) / this.temperature));
-				if (this.getProbBool(prob)){
-					representation = this.makeDeepCopy(neighbor);
-					representation_cost = neighbor_cost;
-				}
+			List<int[]> neighbor = this.getRandomNeighbor(representation);
+			double neighbor_cost = this.cost(representation);
+			double prob = Math.min(1.0, Math.exp(-(neighbor_cost - representation_cost) / this.temperature));
+			if (this.getProbBool(prob)){
+				representation = this.makeDeepCopy(neighbor);
+				representation_cost = neighbor_cost;
+			}
 
-				// adjustment of temperature:
+			// adjustment of temperature:
 
-				// break condition:
-				if (true){
-						break;
-				}
+			// break condition:
+			if (true){
+				break;
+			}
 		}
 		return representation;
 	}
@@ -143,11 +143,11 @@ public class SimulatedAnnealing {
 		List<int[]> solution;
 
     try {
-        parser = new InstanceParser("lums-sum17.xml");
-        instance = parser.parse();
-				S = new SimulatedAnnealing(0.9);
-				representation = S.initRepresentation(instance);
-				solution = S.optimize(representation);
+      parser = new InstanceParser("lums-sum17.xml");
+      instance = parser.parse();
+			S = new SimulatedAnnealing(0.9);
+			representation = S.initRepresentation(instance);
+			solution = S.optimize(representation);
 
     } catch (FileNotFoundException e) {
         e.printStackTrace();
