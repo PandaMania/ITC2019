@@ -1,8 +1,11 @@
 import Parsing.*;
 import entities.*;
+import entities.course.CourseClass;
+
 import java.io.*;
 import java.util.*;
 import java.util.concurrent.ThreadLocalRandom;
+import java.util.stream.Stream;
 
 public class SimulatedAnnealing {
 
@@ -14,22 +17,10 @@ public class SimulatedAnnealing {
     	this.temperature = start_temperature;
     }
 
-    private int getNumClasses(Instance instance){
-	List<String> counter = new ArrayList<>();
-	    for (entities.course.Course course : instance.courses){
-	        for (entities.course.CourseConfiguration config : course.configs){
-		    for (entities.course.SubPart subpart : config.subparts){
-		        for (entities.course.CourseClass courseclass : subpart.classes){
-			    String id = courseclass.id;
-			    if (!counter.contains(id)){
-			        counter.add(id);
-			    }
-			}
-        	    }
-		}
-	    }
+    private long getNumClasses(Instance instance){
+        return instance.getClasses().count();
         //System.out.println(instance.courses);
-        return counter.size();
+//        return counter.size();
     }
 
     private int getNumWeeks(Instance instance){
@@ -67,19 +58,33 @@ public class SimulatedAnnealing {
     private List<int[]> initRepresentation (Instance instance) {
         // TO DO !!!
 
-        int numClasses = this.getNumClasses(instance);
+        long numClasses = this.getNumClasses(instance);
         int numRooms = instance.rooms.size();
         int numDays = getNumDays(instance);
         int numWeeks = this.getNumWeeks(instance);
         int numStudents = instance.students.size();
 
         // [class_id, room_id, start, end, days, weeks, students]
+        // I don't think and end is necessary as we know the length of a class soit would become;
+        // [class_id, room_id, start, days, weeks, students]
         // representation.add(classAssignment_1)
         // representation.add(classAssignment_2)
         // ...
 
-        int[] classAssignment = new int[4 + numDays + numWeeks + numStudents];
+//        int[] classAssignment = new int[4 + numDays + numWeeks + numStudents];
+
+        Stream<CourseClass> allCourses = instance.getClasses();
+
         List<int[]> representation = new ArrayList<>();
+        for (Iterator<CourseClass> it = allCourses.iterator(); it.hasNext(); ) {
+            CourseClass Class = it.next();
+            int[] classAssignment = new int[3 + numDays + numWeeks + numStudents];
+            classAssignment[0] = Integer.parseInt(Class.id);
+            representation.add(classAssignment);
+
+        }
+
+
 
         return representation;
     }
