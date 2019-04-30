@@ -13,10 +13,13 @@ public class DistributionParser {
 
     public Distribution parse(XMLEventReader reader, StartElement el) throws XMLStreamException {
         // Create distribution
-        Distribution distribution = new Distribution();
         // Read ID
-        Attribute type = el.getAttributeByName(QName.valueOf("type"));
-        distribution.type = String.valueOf(type.getValue());
+        Attribute typeAttr = el.getAttributeByName(QName.valueOf("type"));
+        String type = String.valueOf(typeAttr.getValue());
+
+        Distribution distribution = Distribution.get(type);
+
+        distribution.type = type;
         // Use reader to expand until we hit the EndElement of the course
         Attribute required = el.getAttributeByName(QName.valueOf("required"));
         Attribute penalty = el.getAttributeByName(QName.valueOf("penalty"));

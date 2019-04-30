@@ -1,6 +1,7 @@
 import Parsing.*;
 import entities.*;
 import entities.course.CourseClass;
+import entities.distribution.Distribution;
 
 import java.io.*;
 import java.util.*;
@@ -9,21 +10,23 @@ import java.util.stream.Stream;
 
 public class SimulatedAnnealing {
 
+    private final Instance instance;
     // Parameters:
     private double temperature;
 
     // Constructor:
-    public SimulatedAnnealing (double start_temperature){
-    	this.temperature = start_temperature;
+    public SimulatedAnnealing(double start_temperature, Instance instance) {
+        this.temperature = start_temperature;
+        this.instance = instance;
     }
 
-    private long getNumClasses(Instance instance){
+    private long getNumClasses(Instance instance) {
         return instance.getClasses().count();
         //System.out.println(instance.courses);
 //        return counter.size();
     }
 
-    private int getNumWeeks(Instance instance){
+    private int getNumWeeks(Instance instance) {
         // uses assumption that room 0 is unavaiable at some time ...
         String s = instance.rooms.get(0).unaivailableweeks.get(0);
         int start = s.indexOf("weeks= ") + "weeks= ".length();
@@ -33,7 +36,7 @@ public class SimulatedAnnealing {
         return end - start;
     }
 
-    private int getNumDays(Instance instance){
+    private int getNumDays(Instance instance) {
         // uses assumption that room 0 is unavaiable at some time ...
         String s = instance.rooms.get(0).unaivailableweeks.get(0);
         int start = s.indexOf("days= ") + "days= ".length();
@@ -43,19 +46,19 @@ public class SimulatedAnnealing {
         return end - start;
     }
 
-    private List<int[]> makeDeepCopy(List<int[]> representation){
+    private List<int[]> makeDeepCopy(List<int[]> representation) {
         List<int[]> deepcopy = new ArrayList<>();
-        for (int[] item : representation){
+        for (int[] item : representation) {
             deepcopy.add(item.clone());
         }
         return deepcopy;
     }
 
-    private Boolean getProbBool(double prob){
+    private Boolean getProbBool(double prob) {
         return Math.random() <= prob;
     }
 
-    private List<int[]> initRepresentation (Instance instance) {
+    private List<int[]> initRepresentation(Instance instance) {
         // TO DO !!!
 
         long numClasses = this.getNumClasses(instance);
@@ -83,13 +86,10 @@ public class SimulatedAnnealing {
             representation.add(classAssignment);
 
         }
-
-
-
         return representation;
     }
 
-    private List<List<int[]>> getNeighborhood(List<int[]> representation_0){
+    private List<List<int[]>> getNeighborhood(List<int[]> representation_0) {
         // TO DO !!!
         // implement Neighborhood of element representation_0 ...
         List<List<int[]>> neighborhood = new ArrayList<>();
@@ -97,7 +97,7 @@ public class SimulatedAnnealing {
         return neighborhood;
     }
 
-    private List<int[]> getRandomNeighbor(List<int[]> representation_0){
+    private List<int[]> getRandomNeighbor(List<int[]> representation_0) {
         // get random neighbor of element representation_0 ...
         // using uniform distribution ...
         List<List<int[]>> neighborhood = this.getNeighborhood(representation_0);
@@ -106,13 +106,16 @@ public class SimulatedAnnealing {
         return neighborhood.get(index);
     }
 
-    private double cost (List<int[]> representation){
+    private double cost(List<int[]> representation) {
         // TO DO !!!
         // implement cost of a representation ...
+        for (Distribution distribution : this.instance.distributions) {
+            distribution.validate(instance, representation);
+        }
         return 0.0;
     }
 
-    private List<int[]> optimize (List<int[]> representation){
+    private List<int[]> optimize(List<int[]> representation) {
         // TO DO !!!
         // implementation of simulated annealing ...
         // searching for minimum of cost function ...
@@ -123,7 +126,7 @@ public class SimulatedAnnealing {
             List<int[]> neighbor = this.getRandomNeighbor(representation);
             double neighbor_cost = this.cost(representation);
             double prob = Math.min(1.0, Math.exp(-(neighbor_cost - representation_cost) / this.temperature));
-            if (this.getProbBool(prob)){
+            if (this.getProbBool(prob)) {
                 representation = this.makeDeepCopy(neighbor);
                 representation_cost = neighbor_cost;
             }
@@ -131,7 +134,7 @@ public class SimulatedAnnealing {
             // adjustment of temperature:
 
             // break condition:
-            if (true){
+            if (true) {
                 break;
             }
         }
@@ -150,7 +153,7 @@ public class SimulatedAnnealing {
         try {
             parser = new InstanceParser("lums-sum17.xml");
             instance = parser.parse();
-            S = new SimulatedAnnealing(0.9);
+            S = new SimulatedAnnealing(0.9, instance);
             representation = S.initRepresentation(instance);
             solution = S.optimize(representation);
 
