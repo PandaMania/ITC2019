@@ -15,6 +15,8 @@ public class MaxDayLoad extends Distribution {
 
     @Override
     public boolean validate(Instance instance, Solution solution) {
+
+
         return false;
     }
 }

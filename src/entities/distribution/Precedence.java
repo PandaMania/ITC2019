@@ -10,4 +10,6 @@ public class Precedence extends Distribution {
     public boolean validate(Instance instance, Solution solution) {
         return false;
     }
+
+
 }
