@@ -96,4 +96,13 @@ public abstract class Distribution {
     protected List<SolutionClass> getClassInDistribution(Solution solution) {
         return solution.classes.stream().filter(this::inDistribution).collect(Collectors.toList());
     }
+
+    public static long convert(BitSet bits) {
+        long value = 0L;
+        for (int i = 0; i < bits.length(); ++i) {
+            value += bits.get(i) ? (1L << i) : 0L;
+        }
+        return value;
+    }
+
 }
