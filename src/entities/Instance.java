@@ -8,6 +8,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public class Instance {
@@ -22,5 +23,13 @@ public class Instance {
                 .flatMap(course -> course.configs.stream())
                 .flatMap(courseConfiguration -> courseConfiguration.subparts.stream())
                 .flatMap(subPart -> subPart.classes.stream());
+    }
+
+    List<CourseClass> flattened = null;
+    public CourseClass getClassForId(int id){
+        if (flattened == null) {
+            flattened = getClasses().collect(Collectors.toList());
+        }
+        return flattened.get(id);
     }
 }

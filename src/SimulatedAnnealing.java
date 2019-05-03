@@ -46,11 +46,8 @@ public class SimulatedAnnealing {
         return end - start;
     }
 
-    private List<int[]> makeDeepCopy(List<int[]> representation) {
-        List<int[]> deepcopy = new ArrayList<>();
-        for (int[] item : representation) {
-            deepcopy.add(item.clone());
-        }
+    private Solution makeDeepCopy(Solution representation) {
+        Solution deepcopy = new Solution(representation);
         return deepcopy;
     }
 
@@ -58,7 +55,7 @@ public class SimulatedAnnealing {
         return Math.random() <= prob;
     }
 
-    private List<int[]> initRepresentation(Instance instance) {
+    private Solution initRepresentation(Instance instance) {
         // TO DO !!!
 
         long numClasses = this.getNumClasses(instance);
@@ -78,35 +75,37 @@ public class SimulatedAnnealing {
 
         Stream<CourseClass> allCourses = instance.getClasses();
 
-        List<int[]> representation = new ArrayList<>();
+        Solution representation = new Solution();
         for (Iterator<CourseClass> it = allCourses.iterator(); it.hasNext(); ) {
+
             CourseClass Class = it.next();
-            int[] classAssignment = new int[3 + numDays + numWeeks + numStudents];
-            classAssignment[0] = Integer.parseInt(Class.id);
-            representation.add(classAssignment);
+            SolutionClass classAssignment = new SolutionClass(numStudents, numWeeks, numDays);
+            // TODO Set fields
+            classAssignment.classId = Integer.parseInt(Class.id);
+            representation.classes.add(classAssignment);
 
         }
         return representation;
     }
 
-    private List<List<int[]>> getNeighborhood(List<int[]> representation_0) {
+    private List<Solution> getNeighborhood(Solution representation_0) {
         // TO DO !!!
         // implement Neighborhood of element representation_0 ...
-        List<List<int[]>> neighborhood = new ArrayList<>();
+        List<Solution> neighborhood = new ArrayList<>();
         //neighborhood.add(representation_0);
         return neighborhood;
     }
 
-    private List<int[]> getRandomNeighbor(List<int[]> representation_0) {
+    private Solution getRandomNeighbor(Solution representation_0) {
         // get random neighbor of element representation_0 ...
         // using uniform distribution ...
-        List<List<int[]>> neighborhood = this.getNeighborhood(representation_0);
+        List<Solution> neighborhood = this.getNeighborhood(representation_0);
         int size = neighborhood.size();
         int index = ThreadLocalRandom.current().nextInt(0, size);
         return neighborhood.get(index);
     }
 
-    private double cost(List<int[]> representation) {
+    private double cost(Solution representation) {
         // TO DO !!!
         // implement cost of a representation ...
         for (Distribution distribution : this.instance.distributions) {
@@ -115,7 +114,7 @@ public class SimulatedAnnealing {
         return 0.0;
     }
 
-    private List<int[]> optimize(List<int[]> representation) {
+    private Solution optimize(Solution representation) {
         // TO DO !!!
         // implementation of simulated annealing ...
         // searching for minimum of cost function ...
@@ -123,7 +122,7 @@ public class SimulatedAnnealing {
         double representation_cost = this.cost(representation);
 
         while (true) {
-            List<int[]> neighbor = this.getRandomNeighbor(representation);
+            Solution neighbor = this.getRandomNeighbor(representation);
             double neighbor_cost = this.cost(representation);
             double prob = Math.min(1.0, Math.exp(-(neighbor_cost - representation_cost) / this.temperature));
             if (this.getProbBool(prob)) {
@@ -147,8 +146,8 @@ public class SimulatedAnnealing {
         InstanceParser parser;
         Instance instance;
         SimulatedAnnealing S;
-        List<int[]> representation;
-        List<int[]> solution;
+        Solution representation;
+        Solution solution;
 
         try {
             parser = new InstanceParser("lums-sum17.xml");

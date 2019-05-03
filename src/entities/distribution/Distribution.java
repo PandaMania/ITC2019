@@ -1,11 +1,13 @@
 package entities.distribution;
 
 import entities.Instance;
+import entities.Solution;
+import entities.SolutionClass;
+import entities.course.CourseClass;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
+import java.util.function.BiFunction;
+import java.util.stream.Collectors;
 
 public abstract class Distribution {
     public String type;
@@ -45,6 +47,12 @@ public abstract class Distribution {
         throw new IllegalArgumentException("No Class for:" + type);
     }
 
+
+    /**
+     * Returns the correct Distribution subtype
+     * @param type String that maps to a Distribution subclass
+     * @return Instantiated Instance of the subclass
+     */
     public static Distribution get(String type){
         String[] split = type.split("(\\()|(\\))");
         String typeString = split[0];
@@ -61,5 +69,31 @@ public abstract class Distribution {
         }
     }
 
-    public abstract boolean validate(Instance instance, Collection<int[]> solution);
+    public abstract boolean validate(Instance instance, Solution solution);
+
+    protected boolean inDistribution(CourseClass c){
+        return idInDistribution.contains(c.id);
+    }
+
+    public boolean inDistribution(SolutionClass solutionClass) {
+        return idInDistribution.contains(solutionClass.classId);
+    }
+
+    protected <T> boolean forAny(List<T> items, BiFunction<T,T,Boolean> constraint){
+        for (int i = 0; i < items.size()-1; i++) {
+            T C_i = items.get(i);
+            for (int j = i+1; j < items.size(); j++) {
+                T C_j = items.get(j);
+                boolean holds = constraint.apply(C_i, C_j);
+                if(!holds){
+                    return false;
+                }
+            }
+        }
+        return true;
+    }
+
+    protected List<SolutionClass> getClassInDistribution(Solution solution) {
+        return solution.classes.stream().filter(this::inDistribution).collect(Collectors.toList());
+    }
 }
