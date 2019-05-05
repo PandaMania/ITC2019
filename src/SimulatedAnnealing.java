@@ -22,6 +22,7 @@ public class SimulatedAnnealing {
     private int bitFlipsStudents;
     private String instanceFileName;
     private String instanceName;
+    private double hardPenalty;
 
 
     // Constructor:
@@ -36,6 +37,7 @@ public class SimulatedAnnealing {
         this.bitFlipsDays = (int) Math.max(1.0, 0.2 * this.numDays);            // specify how many of the bits should be changed
         this.bitFlipsWeeks = (int) Math.max(1.0, 0.2 * this.numWeeks);          // specify how many of the bits should be changed
         this.bitFlipsStudents = (int) Math.max(1.0, 0.2 * this.numStudents);    // specify how many of the bits should be changed
+        this.hardPenalty = 100.0;
     }
 
     private long getNumClasses(Instance instance) {
@@ -76,6 +78,15 @@ public class SimulatedAnnealing {
 
         }
         return representation;
+    }
+
+    private Boolean isFeasible (Solution representation){
+        for (Distribution distribution : this.instance.distributions) {
+            if (distribution.required && !distribution.validate(this.instance, representation)){
+                return false;
+            }
+        }
+        return true;
     }
 
     private Solution getRandomNeighbor(Solution representation, int numChanges) {
@@ -125,15 +136,31 @@ public class SimulatedAnnealing {
                     break;
             }
         }
+
+        // optional part: only considering feasible solutions
+        // maybe add while loop or change numChanges, bitFlips
+        // ...
+
         return neighbor;
     }
 
     private double cost(Solution representation) {
+        double cost = 0.0;
         for (Distribution distribution : this.instance.distributions) {
-            distribution.validate(instance, representation);
-            System.out.println(distribution.validate(instance, representation));
+            //System.out.println(distribution.idInDistribution);
+            for (int id_1 : distribution.idInDistribution){
+                for (int id_2 : distribution.idInDistribution){
+                    if (id_1 < id_2){
+                        if (distribution.required){
+                            cost += this.hardPenalty;
+                        } else {
+                            cost += distribution.penalty;
+                        }
+                    }
+                }
+            }
         }
-        return 0.0;
+        return cost;
     }
 
     private double getTemperature(double startTemperature, double endTemperature, int numIteration, int numIterations){
@@ -160,7 +187,7 @@ public class SimulatedAnnealing {
                 representationCost = neighborCost;
             }
 
-            System.out.println("numIteration:   " + numIteration + "\tCost: " + representationCost + "\tTemperature: " + temperature);
+            System.out.println("numIteration:   " + numIteration + "\tFeasible: " + this.isFeasible(representation) + "\t\tCost: " + representationCost + "\tTemperature: " + temperature);
             numIteration++;
             // additional break condition !?
         }
@@ -177,12 +204,13 @@ public class SimulatedAnnealing {
         Solution solution;
 
         try {
-            String instanceFileName = "lums-sum17.xml";
+            String instanceFileName = "pu-c8-spr07.xml";
+            //String instanceFileName = "lums-sum17.xml";
             parser = new InstanceParser(instanceFileName);
             instance = parser.parse();
             S = new SimulatedAnnealing(instance);
             representation = S.initRepresentation(instance);
-            solution = S.optimize(representation, 50.0, 0.01, 10000, 3);
+            solution = S.optimize(representation, 50.0, 0.01, 10, 3);
 
         } catch (FileNotFoundException e) {
             e.printStackTrace();
