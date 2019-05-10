@@ -4,15 +4,16 @@ import entities.*;
 import entities.course.Course;
 import entities.distribution.Distribution;
 
+import javax.xml.namespace.QName;
 import javax.xml.stream.XMLEventReader;
 import javax.xml.stream.XMLInputFactory;
 import javax.xml.stream.XMLStreamException;
+import javax.xml.stream.events.Attribute;
 import javax.xml.stream.events.StartElement;
 import javax.xml.stream.events.XMLEvent;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Map;
 import java.util.function.BiConsumer;
 
@@ -31,6 +32,32 @@ public class InstanceParser {
         tagFunctions.put("student", this::handleStudent);
         tagFunctions.put("room", this::handleRoom);
         tagFunctions.put("distribution", this::handledistribution);
+        tagFunctions.put("problem", this::handleProblem);
+        tagFunctions.put("optimization", this::handeOptimization);
+    }
+
+    private void handleProblem(XMLEventReader xmlEventReader, StartElement startElement) {
+        Attribute nameAttr = startElement.getAttributeByName(QName.valueOf("name"));
+        instance.name =  nameAttr.getValue();
+        Attribute daysAttr = startElement.getAttributeByName(QName.valueOf("nrDays"));
+        instance.days = Integer.parseInt(daysAttr.getValue());
+        Attribute slotsAttr = startElement.getAttributeByName(QName.valueOf("slotsPerDay"));
+        instance.slotsPerDay = Integer.parseInt(slotsAttr.getValue());
+        Attribute weeksAttr = startElement.getAttributeByName(QName.valueOf("nrWeeks"));
+        instance.weeks = Integer.parseInt(weeksAttr.getValue());
+    }
+
+    private void handeOptimization(XMLEventReader xmlEventReader, StartElement startElement) {
+        Attribute timeAttr = startElement.getAttributeByName(QName.valueOf("time"));
+        Attribute roomAttr = startElement.getAttributeByName(QName.valueOf("room"));
+        Attribute distAttr = startElement.getAttributeByName(QName.valueOf("distribution"));
+        Attribute studentAttr = startElement.getAttributeByName(QName.valueOf("student"));
+
+        instance.optTime = Integer.parseInt(timeAttr.getValue());
+        instance.optRoom = Integer.parseInt(roomAttr.getValue());
+        instance.optDist = Integer.parseInt(distAttr.getValue());
+        instance.optStudent = Integer.parseInt(studentAttr.getValue());
+
     }
 
 
@@ -40,6 +67,9 @@ public class InstanceParser {
     }
 
     public Instance parse() {
+
+        /*<problem name="lums-sum17" nrDays="7" slotsPerDay="288" nrWeeks="9">
+            <optimization time="1" room="1" distribution="10" student="10"/>*/
         XMLInputFactory xmlInputFactory = XMLInputFactory.newInstance();
         try {
             XMLEventReader xmlEventReader = xmlInputFactory.createXMLEventReader(file);
