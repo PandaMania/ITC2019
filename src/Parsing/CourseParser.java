@@ -90,7 +90,7 @@ public class CourseParser {
 //                throw new IllegalArgumentException("Unexpected end element");
 //            }
 
-            event = reader.nextEvent();
+                event = reader.nextEvent();
 
         }
         return course;

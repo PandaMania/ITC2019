@@ -2,10 +2,18 @@
 
 package ILP;
 
+import Parsing.InstanceParser;
+import entities.Instance;
 import gurobi.*;
+
+import java.io.FileNotFoundException;
+import java.util.ArrayList;
+import java.util.Set;
+
 public class ILP {
     public static void main(String[] args){
         try{
+
             GRBEnv env = new GRBEnv(true);
             env.set("logFile", "mip1.log");
             env.start();
@@ -13,8 +21,132 @@ public class ILP {
             // Create empty model
             GRBModel  model = new GRBModel(env);
 
+
+            InstanceParser p;
+            try {
+                p = new InstanceParser(//"lums-sum17.xml");
+                        //            p.parse("pu-cs-fal07.xml");
+                        "lums-sum17.xml");
+                Instance x = p.parse();
+               // System.out.println(x);
+                System.out.println("Courses= " +x.courses.size());
+                System.out.println("Distributions= " +x.distributions.size());
+                System.out.println("Students= " +x.students.size());
+                System.out.println("rooms= " +x.rooms.size());
+                int curr;
+            // we have this horrible object so we can look into the different variables.
+                ArrayList< ArrayList<ArrayList<ArrayList<ArrayList<GRBVar>>>>> allVariables= new ArrayList<>();
+                GRBLinExpr objectiveFunc = new GRBLinExpr();
+                GRBLinExpr scheduledConstraint;
+
+                    for(int j=0; j<x.courses.size(); j++){
+                        // being able to look down into specific courses.
+                        ArrayList<  ArrayList<ArrayList<ArrayList<GRBVar>>>> outsideLoop= new ArrayList<>();
+                       for(int k=0; k<x.courses.get(j).configs.size();k++){
+                           // need now to look at the different configs
+                           ArrayList<    ArrayList<ArrayList<GRBVar>>> middleLoop= new ArrayList<>();
+                           for(int l=0; l<x.courses.get(j).configs.get(k).subparts.size(); l++){
+                               //inside there are subparts
+
+                               ArrayList<  ArrayList<GRBVar>> insideLoop= new ArrayList<>();
+                               for(int m=0; m<x.courses.get(j).configs.get(k).subparts.get(l).classes.size();m++){
+                                   // now to the actual part we have classes that have multiple options
+                                   ArrayList<GRBVar> timeLoop= new ArrayList<>();
+                                   scheduledConstraint = new GRBLinExpr();
+                                   for(int n=0; n<x.courses.get(j).configs.get(k).subparts.get(l).classes.get(m).times.size(); n++){
+                                       // here we have the various options, we only can select one of these
+                                       // i wanna replace the future lines with an id but for now i do it like this
+                                       timeLoop.add(  model.addVar(0.0, 1.0, 0.0, GRB.BINARY,
+                                               "time" + x.courses.get(j).id + "," +
+                                                       x.courses.get(j).configs.get(k).id + "," +
+                                                       x.courses.get(j).configs.get(k).subparts.get(l).id + "," +
+                                                       x.courses.get(j).configs.get(k).subparts.get(l).classes.get(m).id + "," +
+                                                       //from here i wanna change this last part to an id but for now we do it like this.
+                                                       x.courses.get(j).configs.get(k).subparts.get(l).classes.get(m).times.get(n).weeks+ "," +
+                                                       x.courses.get(j).configs.get(k).subparts.get(l).classes.get(m).times.get(n).days+ "," +
+                                                       x.courses.get(j).configs.get(k).subparts.get(l).classes.get(m).times.get(n).start+ "," +
+                                                       x.courses.get(j).configs.get(k).subparts.get(l).classes.get(m).times.get(n).length
+                                       ));
+                                       objectiveFunc.addTerm(x.courses.get(j).configs.get(k).subparts.get(l).classes.get(m).times.get(n).penalty,timeLoop.get(n));
+                                       scheduledConstraint.addTerm(1,timeLoop.get(n));
+
+                                   }
+                                   model.addConstr(scheduledConstraint, GRB.EQUAL, 1.0, "constraint" + x.courses.get(j).id + "," +
+                                           x.courses.get(j).configs.get(k).id + "," +
+                                           x.courses.get(j).configs.get(k).subparts.get(l).id + "," +
+                                           x.courses.get(j).configs.get(k).subparts.get(l).classes.get(m).id);
+
+                                   insideLoop.add(timeLoop);
+                                   ArrayList<GRBVar> roomLoop= new ArrayList<>();
+                                  Set<Integer> list= x.courses.get(j).configs.get(k).subparts.get(l).classes.get(m).roomPenalties.keySet();
+                                   Object[] finallist= list.toArray();
+                                   scheduledConstraint = new GRBLinExpr();
+                                   for(int n=0; n<list.size(); n++){
+                                       roomLoop.add(  model.addVar(0.0, 1.0, 0.0, GRB.BINARY,
+                                               "room" +x.courses.get(j).id + "," +
+                                                       x.courses.get(j).configs.get(k).id + "," +
+                                                       x.courses.get(j).configs.get(k).subparts.get(l).id + "," +
+                                                       x.courses.get(j).configs.get(k).subparts.get(l).classes.get(m).id + "," +
+                                                       finallist[n]));
+                                               //from here i wanna change this last part to an id but for now we do it like this.
+                                       objectiveFunc.addTerm(x.courses.get(j).configs.get(k).subparts.get(l).classes.get(m).roomPenalties.get(finallist[n]),roomLoop.get(n));
+                                       scheduledConstraint.addTerm(1,roomLoop.get(n));
+                                   }
+                                   model.addConstr(scheduledConstraint, GRB.EQUAL, 1.0, "constraint" + x.courses.get(j).id + "," +
+                                           x.courses.get(j).configs.get(k).id + "," +
+                                           x.courses.get(j).configs.get(k).subparts.get(l).id + "," +
+                                           x.courses.get(j).configs.get(k).subparts.get(l).classes.get(m).id);
+                                   insideLoop.add(roomLoop);
+
+
+
+                               }
+                               middleLoop.add(insideLoop);
+                           }
+                           outsideLoop.add(middleLoop);
+                             // insideLoop.add(now);
+                       }
+                      allVariables.add(outsideLoop);
+                    }
+                model.setObjective(objectiveFunc, GRB.MINIMIZE);
+                model.optimize();
+
+
+                for(int j=0; j<allVariables.size(); j++) {
+                    for (int k = 0; k < allVariables.get(j).size(); k++) {
+                        for (int l = 0; l < allVariables.get(j).get(k).size(); l++) {
+                            for (int m = 0; m < allVariables.get(j).get(k).get(l).size(); m++) {
+                                for (int n = 0; n <allVariables.get(j).get(k).get(l).get(m).size(); n++) {
+                                    System.out.println( allVariables.get(j).get(k).get(l).get(m).get(n).get(GRB.StringAttr.VarName) + " " + allVariables.get(j).get(k).get(l).get(m).get(n).get(GRB.DoubleAttr.X));
+                                }
+                            }
+                        }
+                    }
+                }
+
+
+              /*  System.out.println(x.get(GRB.StringAttr.VarName)
+                        + " " +x.get(GRB.DoubleAttr.X));
+                System.out.println(y.get(GRB.StringAttr.VarName)
+                        + " " +y.get(GRB.DoubleAttr.X));
+                System.out.println(z.get(GRB.StringAttr.VarName)
+                        + " " +z.get(GRB.DoubleAttr.X));
+*/
+                System.out.println("Obj: " + model.get(GRB.DoubleAttr.ObjVal));
+
+                // Dispose of model and environment
+                model.dispose();
+                env.dispose();
+
+
+
+
+            } catch (FileNotFoundException e) {
+                e.printStackTrace();
+            }
+
             // Create variables
-            GRBVar x = model.addVar(0.0, 1.0, 0.0, GRB.BINARY, "x");
+          /* GRBVar x = model.addVar(0.0, 1.0, 0.0, GRB.BINARY, "x");
             GRBVar y = model.addVar(0.0, 1.0, 0.0, GRB.BINARY, "y");
             GRBVar z = model.addVar(0.0, 1.0, 0.0, GRB.BINARY, "z");
 
@@ -25,7 +157,9 @@ public class ILP {
 
             // Add constraint: x + 2 y + 3 z <= 4
             expr = new GRBLinExpr();
-            expr.addTerm(1.0, x); expr.addTerm(2.0, y); expr.addTerm(3.0, z);
+            expr.addTerm(1.0, x);
+            expr.addTerm(2.0, y);
+            expr.addTerm(3.0, z);
             model.addConstr(expr, GRB.LESS_EQUAL, 4.0, "c0");
 
             // Add constraint: x + y >= 1
@@ -49,7 +183,7 @@ public class ILP {
             model.dispose();
             env.dispose();
 
-
+*/
 
 
         }catch (GRBException e) {
