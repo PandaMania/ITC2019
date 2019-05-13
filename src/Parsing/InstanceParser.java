@@ -58,7 +58,7 @@ public class InstanceParser {
         instance.optRoom = rooms;
         instance.optDist = Integer.parseInt(distAttr.getValue());
         instance.optStudent = Integer.parseInt(studentAttr.getValue());
-        instance.distances = new int[rooms][rooms];
+
 
     }
 
@@ -70,8 +70,6 @@ public class InstanceParser {
 
     public Instance parse() {
 
-        /*<problem name="lums-sum17" nrDays="7" slotsPerDay="288" nrWeeks="9">
-            <optimization time="1" room="1" distribution="10" student="10"/>*/
         XMLInputFactory xmlInputFactory = XMLInputFactory.newInstance();
         try {
             XMLEventReader xmlEventReader = xmlInputFactory.createXMLEventReader(file);
@@ -89,7 +87,20 @@ public class InstanceParser {
         } catch (XMLStreamException e) {
             e.printStackTrace();
         }
+
+        createDistanceMatrix();
         return instance;
+    }
+
+    private void createDistanceMatrix() {
+        int rooms = instance.rooms.size() + 1;
+        instance.distances = new int[rooms][rooms];
+        for (Room room : instance.rooms) {
+            for (Map.Entry<Integer, Integer> entry : room.distanceToRooms.entrySet()) {
+                instance.distances[room.id][entry.getKey()] = entry.getValue();
+                instance.distances[entry.getKey()][room.id] = entry.getValue();
+            }
+        }
     }
 
     private void handleRoom(XMLEventReader reader, StartElement el) {
@@ -100,9 +111,9 @@ public class InstanceParser {
         try {
             room = roomParser.parse(reader, el);
             instance.rooms.add(room);
-            for (Map.Entry<Integer, Integer> entry : room.distanceToRooms.entrySet()) {
-                instance.distances[room.id][entry.getKey()] = entry.getValue();
-            }
+//            for (Map.Entry<Integer, Integer> entry : room.distanceToRooms.entrySet()) {
+//                instance.distances[room.id][entry.getKey()] = entry.getValue();
+//            }
         } catch (XMLStreamException e) {
             System.out.println("Error while handling room");
             e.printStackTrace();
