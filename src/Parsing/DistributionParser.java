@@ -27,7 +27,7 @@ public class DistributionParser {
         if (required != null) {
             distribution.required = Boolean.parseBoolean(required.getValue());
         } else if (penalty != null) {
-            distribution.penalty = Integer.parseInt(penalty.getValue());
+            distribution.setPenalty( Integer.parseInt(penalty.getValue()));
         } else {
             throw new IllegalArgumentException("either penalty or required should be specified");
         }

@@ -154,7 +154,7 @@ public class SimulatedAnnealing {
                         if (distribution.required){
                             cost += this.hardPenalty;
                         } else {
-                            cost += distribution.penalty;
+                            cost += distribution.getPenalty();
                         }
                     }
                 }

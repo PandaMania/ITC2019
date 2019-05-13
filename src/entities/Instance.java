@@ -16,7 +16,7 @@ public class Instance {
     public List<Student> students = new ArrayList<>();
     public List<Room> rooms = new ArrayList<>();
     public List<Distribution> distributions = new ArrayList<>();
-    public HashMap<Set<Integer>, Integer> distances = new HashMap<>();
+    public int[][] distances;
     public String name;
     public int days;
     public int slotsPerDay;

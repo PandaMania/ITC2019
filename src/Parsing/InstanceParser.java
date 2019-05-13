@@ -54,9 +54,11 @@ public class InstanceParser {
         Attribute studentAttr = startElement.getAttributeByName(QName.valueOf("student"));
 
         instance.optTime = Integer.parseInt(timeAttr.getValue());
-        instance.optRoom = Integer.parseInt(roomAttr.getValue());
+        int rooms = Integer.parseInt(roomAttr.getValue());
+        instance.optRoom = rooms;
         instance.optDist = Integer.parseInt(distAttr.getValue());
         instance.optStudent = Integer.parseInt(studentAttr.getValue());
+        instance.distances = new int[rooms][rooms];
 
     }
 
@@ -98,12 +100,9 @@ public class InstanceParser {
         try {
             room = roomParser.parse(reader, el);
             instance.rooms.add(room);
-//            for (Map.Entry<Integer, Integer> entry : room.distanceToRooms.entrySet()) {
-//                HashSet<Integer> set = new HashSet<>();
-//                set.
-//            }
-//
-//            instance.distances.put()
+            for (Map.Entry<Integer, Integer> entry : room.distanceToRooms.entrySet()) {
+                instance.distances[room.id][entry.getKey()] = entry.getValue();
+            }
         } catch (XMLStreamException e) {
             System.out.println("Error while handling room");
             e.printStackTrace();
