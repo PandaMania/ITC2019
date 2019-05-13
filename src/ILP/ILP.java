@@ -38,6 +38,7 @@ public class ILP {
                 ArrayList< ArrayList<ArrayList<ArrayList<ArrayList<GRBVar>>>>> allVariables= new ArrayList<>();
                 GRBLinExpr objectiveFunc = new GRBLinExpr();
                 GRBLinExpr scheduledConstraint;
+                ArrayList<ArrayList<GRBVar>> roomsgrouped= new ArrayList<>();
 
                     for(int j=0; j<x.courses.size(); j++){
                         // being able to look down into specific courses.
@@ -57,15 +58,16 @@ public class ILP {
                                        // here we have the various options, we only can select one of these
                                        // i wanna replace the future lines with an id but for now i do it like this
                                        timeLoop.add(  model.addVar(0.0, 1.0, 0.0, GRB.BINARY,
-                                               "time" + x.courses.get(j).id + "," +
-                                                       x.courses.get(j).configs.get(k).id + "," +
-                                                       x.courses.get(j).configs.get(k).subparts.get(l).id + "," +
-                                                       x.courses.get(j).configs.get(k).subparts.get(l).classes.get(m).id + "," +
+                                               "time-- " +
+                                                       "course " + x.courses.get(j).id + "," +
+                                                       " config " + x.courses.get(j).configs.get(k).id + "," +
+                                                       " subpart " + x.courses.get(j).configs.get(k).subparts.get(l).id + "," +
+                                                       " class " + x.courses.get(j).configs.get(k).subparts.get(l).classes.get(m).id + "," +
                                                        //from here i wanna change this last part to an id but for now we do it like this.
-                                                       x.courses.get(j).configs.get(k).subparts.get(l).classes.get(m).times.get(n).weeks+ "," +
-                                                       x.courses.get(j).configs.get(k).subparts.get(l).classes.get(m).times.get(n).days+ "," +
-                                                       x.courses.get(j).configs.get(k).subparts.get(l).classes.get(m).times.get(n).start+ "," +
-                                                       x.courses.get(j).configs.get(k).subparts.get(l).classes.get(m).times.get(n).length
+                                                       " week " + x.courses.get(j).configs.get(k).subparts.get(l).classes.get(m).times.get(n).weeks+ "," +
+                                                       " day " + x.courses.get(j).configs.get(k).subparts.get(l).classes.get(m).times.get(n).days+ "," +
+                                                       " time " + x.courses.get(j).configs.get(k).subparts.get(l).classes.get(m).times.get(n).start+ "," +
+                                                       " length " +  x.courses.get(j).configs.get(k).subparts.get(l).classes.get(m).times.get(n).length + " value= "
                                        ));
                                        objectiveFunc.addTerm(x.courses.get(j).configs.get(k).subparts.get(l).classes.get(m).times.get(n).penalty,timeLoop.get(n));
                                        scheduledConstraint.addTerm(1,timeLoop.get(n));
@@ -83,10 +85,11 @@ public class ILP {
                                    scheduledConstraint = new GRBLinExpr();
                                    for(int n=0; n<list.size(); n++){
                                        roomLoop.add(  model.addVar(0.0, 1.0, 0.0, GRB.BINARY,
-                                               "room" +x.courses.get(j).id + "," +
-                                                       x.courses.get(j).configs.get(k).id + "," +
-                                                       x.courses.get(j).configs.get(k).subparts.get(l).id + "," +
-                                                       x.courses.get(j).configs.get(k).subparts.get(l).classes.get(m).id + "," +
+                                               "room" +
+                                                       "course " +x.courses.get(j).id + "," +
+                                                       " config " +x.courses.get(j).configs.get(k).id + "," +
+                                                       " subpart " + x.courses.get(j).configs.get(k).subparts.get(l).id + "," +
+                                                       " class " +x.courses.get(j).configs.get(k).subparts.get(l).classes.get(m).id + "," +
                                                        finallist[n]));
                                                //from here i wanna change this last part to an id but for now we do it like this.
                                        objectiveFunc.addTerm(x.courses.get(j).configs.get(k).subparts.get(l).classes.get(m).roomPenalties.get(finallist[n]),roomLoop.get(n));
@@ -108,6 +111,11 @@ public class ILP {
                        }
                       allVariables.add(outsideLoop);
                     }
+
+                //for all rooms, check that no times are the same that equal 1, we need subset of rooms, and inside that to check values of 1, and then check if they have overlapping times.
+
+
+
                 model.setObjective(objectiveFunc, GRB.MINIMIZE);
                 model.optimize();
 
@@ -190,6 +198,9 @@ public class ILP {
             System.out.println("Error code: " + e.getErrorCode() + ". " +
                     e.getMessage());
         }
+
+
+
 
 
 
