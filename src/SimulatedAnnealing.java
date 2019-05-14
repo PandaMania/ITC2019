@@ -34,11 +34,11 @@ public class SimulatedAnnealing {
         this.numWeeks = this.getNumWeeks(this.instance);                        // parser should read problem tag to instance class
         this.numStudents = this.instance.students.size();
         this.slotsPerDay = 288;                                                 // parser should read problem tag to instance class
-        this.bitFlipsDays = (int) Math.max(1.0, 0.5 * this.numDays);            // specify how many of the bits should be changed
-        this.bitFlipsWeeks = (int) Math.max(1.0, 0.5 * this.numWeeks);          // specify how many of the bits should be changed
-        this.bitFlipsStudents = (int) Math.max(1.0, 0.5 * this.numStudents);    // specify how many of the bits should be changed
+        this.bitFlipsDays = (int) Math.max(1.0, 0.75 * this.numDays);            // specify how many of the bits should be changed
+        this.bitFlipsWeeks = (int) Math.max(1.0, 0.75 * this.numWeeks);          // specify how many of the bits should be changed
+        this.bitFlipsStudents = (int) Math.max(1.0, 0.75 * this.numStudents);    // specify how many of the bits should be changed
         //this.hardPenalty = 100.0;
-        this.hardPenalty = 10.0 * this.getMaxPenalty(this.instance);
+        this.hardPenalty = 3.0 * this.getMaxPenalty(this.instance);
     }
 
     private long getNumClasses(Instance instance) {
@@ -192,19 +192,38 @@ public class SimulatedAnnealing {
 
         double reprCost = this.cost(repr);
         int numIteration = 0;
+        Boolean reachedFeasibility = this.isFeasible(repr);
 
         while (numIteration < numIterations) {
             Solution neighbor = this.getRandomNeighbor(repr, numChanges);
+
+            // optional: don't give up feasibility once reached
+            if (reachedFeasibility && !this.isFeasible(neighbor)){
+                continue;
+            }
+
             double neighborCost = this.cost(neighbor);
             double temperature = getTemperature(startTemperature, endTemperature, numIteration, numIterations);
             double prob = Math.min(1.0, Math.exp(-(neighborCost - reprCost) / temperature));
-            if (this.getProbBool(prob)) {
+            if (this.getNumInfeasible(neighbor) < this.getNumInfeasible(repr)) {
+                repr = this.makeDeepCopy(neighbor);
+                reprCost = neighborCost;
+            } else if (this.getProbBool(prob)) {
                 repr = this.makeDeepCopy(neighbor);
                 reprCost = neighborCost;
             }
 
-            System.out.println("numIteration:   " + numIteration + "\tFeasible: " + this.isFeasible(repr) + "\t\tCost: " + reprCost + "\tTemperature: " + String.format("%.4f", temperature) + "\tProbability: " + String.format("%.4f", prob) + "\tnumInfeasible: " + this.getNumInfeasible(repr) + " (" + this.hardPenalty + ")");
+            if (numIteration % 10000 == 0 || numIteration + 1 == numIterations){System.out.println("numIteration: " + numIteration + "\tFeasible: " + this.isFeasible(repr) +
+            "\tCost: " + reprCost + "\tTemperature: " + String.format("%.4f", temperature) + "\tProbability: " + String.format("%.4f", prob) +
+            "\tnumInfeasible: " + this.getNumInfeasible(repr) +
+            "   " + String.format("%.2f", (100 * this.getNumInfeasible(repr) * this.hardPenalty) / reprCost)  + "%");}
             numIteration++;
+
+            // optional: don't give up feasibility once reached
+            if (!reachedFeasibility && this.isFeasible(repr)){
+                reachedFeasibility = true;
+                System.out.println("Reached feasibility in iteration: " + numIteration);
+            }
 
             if (reprCost == 0.0) {break;}
         }
@@ -228,7 +247,9 @@ public class SimulatedAnnealing {
             instance = parser.parse();
             S = new SimulatedAnnealing(instance);
             repr = S.initRepresentation(instance);
-            solution = S.optimize(repr, 10.0, 0.01, 1000000, 1);
+            //solution = S.optimize(repr, 2.0, 0.01, 4000000, 4);
+            //solution = S.optimize(repr, 2.0, 0.1, 50000000, 1);
+            solution = S.optimize(repr, 2.0, 0.1, 100000, 1);
 
             //for (Distribution dist : instance.distributions) {System.out.println(dist.type + "\t\t" + dist.required);}
 
