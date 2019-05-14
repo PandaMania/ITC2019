@@ -34,9 +34,9 @@ public class SimulatedAnnealing {
         this.numWeeks = this.getNumWeeks(this.instance);                        // parser should read problem tag to instance class
         this.numStudents = this.instance.students.size();
         this.slotsPerDay = 288;                                                 // parser should read problem tag to instance class
-        this.bitFlipsDays = (int) Math.max(1.0, 0.2 * this.numDays);            // specify how many of the bits should be changed
-        this.bitFlipsWeeks = (int) Math.max(1.0, 0.2 * this.numWeeks);          // specify how many of the bits should be changed
-        this.bitFlipsStudents = (int) Math.max(1.0, 0.2 * this.numStudents);    // specify how many of the bits should be changed
+        this.bitFlipsDays = (int) Math.max(1.0, 0.5 * this.numDays);            // specify how many of the bits should be changed
+        this.bitFlipsWeeks = (int) Math.max(1.0, 0.5 * this.numWeeks);          // specify how many of the bits should be changed
+        this.bitFlipsStudents = (int) Math.max(1.0, 0.5 * this.numStudents);    // specify how many of the bits should be changed
         //this.hardPenalty = 100.0;
         this.hardPenalty = 10.0 * this.getMaxPenalty(this.instance);
     }
@@ -98,6 +98,16 @@ public class SimulatedAnnealing {
             }
         }
         return true;
+    }
+
+    private int getNumInfeasible (Solution representation){
+        int i = 0;
+        for (Distribution distribution : this.instance.distributions) {
+            if (distribution.required && !distribution.validate(this.instance, representation)){
+                i++;
+            }
+        }
+        return i;
     }
 
     private Solution getRandomNeighbor(Solution representation, int numChanges) {
@@ -171,10 +181,10 @@ public class SimulatedAnnealing {
 
     private double getTemperature(double startTemperature, double endTemperature, int numIteration, int numIterations){
         // linear:
-        return startTemperature - numIteration * startTemperature / numIterations;
+        //return startTemperature - numIteration * startTemperature / numIterations;
 
         // exponential:
-        //return startTemperature * Math.exp( (double) numIteration / (double) numIterations * Math.log(endTemperature / startTemperature));
+        return startTemperature * Math.exp( (double) numIteration / (double) numIterations * Math.log(endTemperature / startTemperature));
     }
 
 
@@ -193,9 +203,10 @@ public class SimulatedAnnealing {
                 reprCost = neighborCost;
             }
 
-            System.out.println("numIteration:   " + numIteration + "\tFeasible: " + this.isFeasible(repr) + "\t\tCost: " + reprCost + "\tTemperature: " + String.format("%.4f", temperature) + "\tProbability: " + String.format("%.4f", prob));
+            System.out.println("numIteration:   " + numIteration + "\tFeasible: " + this.isFeasible(repr) + "\t\tCost: " + reprCost + "\tTemperature: " + String.format("%.4f", temperature) + "\tProbability: " + String.format("%.4f", prob) + "\tnumInfeasible: " + this.getNumInfeasible(repr));
             numIteration++;
-            // additional break condition !?
+
+            if (reprCost == 0.0) {break;}
         }
         return repr;
     }
@@ -211,13 +222,13 @@ public class SimulatedAnnealing {
 
         try {
             String instanceFileName = "bet-sum18.xml";
-            //String instanceFileName = "lums-sum17.xml";
+            //String instanceFileName = "wbg-fal10.xml";
             //String instanceFileName = "pu-c8-spr07.xml";
             parser = new InstanceParser(instanceFileName);
             instance = parser.parse();
             S = new SimulatedAnnealing(instance);
             repr = S.initRepresentation(instance);
-            solution = S.optimize(repr, 10.0, 0.01, 1000000, 8);
+            solution = S.optimize(repr, 10.0, 0.01, 1000000, 1);
 
             //for (Distribution dist : instance.distributions) {System.out.println(dist.type + "\t\t" + dist.required);}
 
