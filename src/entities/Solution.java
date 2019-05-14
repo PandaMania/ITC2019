@@ -33,4 +33,15 @@ public class Solution {
     public ArrayList<SolutionClass> classes = new ArrayList<>();
 
 
+    public String serialize(){
+        StringBuilder stringBuilder = new StringBuilder();
+        stringBuilder.append("<solution name=\"Not implemented yet\">");
+        for (SolutionClass aClass : classes) {
+            stringBuilder.append("\t");
+            stringBuilder.append(aClass.serialize());
+            stringBuilder.append("\n");
+        }
+        stringBuilder.append("</solution>");
+        return stringBuilder.toString();
+    }
 }

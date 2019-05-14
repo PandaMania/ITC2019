@@ -1,5 +1,7 @@
 package entities;
 
+import util.BitSets;
+
 import java.util.ArrayList;
 import java.util.BitSet;
 
@@ -29,5 +31,15 @@ public class SolutionClass {
         this.classId = aClass.classId;
         this.roomId = aClass.roomId;
         this.start = aClass.start;
+    }
+
+    // <class id="1" days="1010100" start="90" weeks="1111111111111" room="1">
+    //		<student id="1"/>
+    //		<student id="3"/>
+    //	</class>
+    public String serialize(){
+        // TODO: add student serialization
+        return String.format("<class id=\"%d\" days=\"%s\" start=\"%d\" weeks=\"%s\" room=\"%d\"></class>",
+                classId, BitSets.toBitString(days), start, BitSets.toBitString(weeks), roomId);
     }
 }

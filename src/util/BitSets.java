@@ -41,5 +41,18 @@ public class BitSets {
         }
         return bitSet;
     }
+
+    public static String toBitString(BitSet set) {
+        StringBuilder stringBuilder = new StringBuilder();
+        for (int i = 0; i < set.length(); i++) {
+            if(set.get(i)){
+                stringBuilder.append("1");
+            }
+            else {
+                stringBuilder.append("0");
+            }
+        }
+        return stringBuilder.toString();
+    }
 }
 
