@@ -1,5 +1,6 @@
 package util;
 
+import javax.swing.plaf.basic.BasicButtonUI;
 import java.util.BitSet;
 
 public class BitSets {
@@ -26,6 +27,19 @@ public class BitSets {
         BitSet result = (BitSet) set1.clone();
         result.andNot(set2);
         return result;
+    }
+
+    public static BitSet fromString(String val) {
+        BitSet bitSet = new BitSet(val.length());
+        for (int i = 0; i < val.length(); i++) {
+            char c = val.charAt(i);
+            if(c == '1'){
+                bitSet.set(i);
+            }else if(c!='0'){
+                throw new IllegalArgumentException("Input string contains character that is not a '1' or '0'");
+            }
+        }
+        return bitSet;
     }
 }
 
