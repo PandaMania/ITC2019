@@ -8,11 +8,9 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
-public class MaxDayLoad extends Distribution {
+public class MaxDayLoad extends ExceedableDistribution {
 
-    int S;
-    Integer timesViolated;
-
+    private int S;
     public MaxDayLoad(String s) {
         S = Integer.parseInt(s);
     }
@@ -21,17 +19,18 @@ public class MaxDayLoad extends Distribution {
     public boolean validate(Instance instance, Solution solution) {
         List<SolutionClass> classes = getClassInDistribution(solution);
         // TODO: Optimize to only use w and d that are actually assigned in the classes
-        int violated = 0;
+        exceededBy = 0;
+        nrWeeks = instance.weeks;
         for (int w = 0; w < instance.weeks; w++) {
             for (int d = 0; d < instance.days; d++) {
-                boolean holds = DayLoad(d, w, classes) <= S;
+                int load = DayLoad(d, w, classes);
+                boolean holds = load <= S;
                 if (!holds) {
-                    violated++;
+                    exceededBy += load - S;
                 }
             }
         }
-        timesViolated = violated;
-        return violated > 0;
+        return exceededBy == 0;
     }
 
     private int DayLoad(int d, int w, List<SolutionClass> classes) {
@@ -41,17 +40,6 @@ public class MaxDayLoad extends Distribution {
                 load += C.length;
             }
         }
-
         return load;
-    }
-
-
-    @Override
-    public int getPenalty() {
-        if (timesViolated == null) {
-            throw new IllegalStateException("Constraint not checked yet");
-        } else {
-            return timesViolated * penalty;
-        }
     }
 }

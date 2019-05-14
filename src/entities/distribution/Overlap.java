@@ -16,7 +16,6 @@ public class Overlap extends Distribution {
 
         return forAny(solutionClasses, (i,j)->
         {
-
             BitSet a = BitSets.and(i.days, j.days);
 
             BitSet b = BitSets.and(i.weeks, j.weeks);
@@ -33,11 +32,6 @@ public class Overlap extends Distribution {
             }else if(j_end<= i.start){
                 return false;
             }else return true;
-
-
-
-
-
         });
     }
 }
