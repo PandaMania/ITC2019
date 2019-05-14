@@ -36,4 +36,10 @@ public class GRBtimeObject {
     public void setTime(CourseTime time) {
         this.time = time;
     }
+
+    @Override
+    public String toString() {
+        String toprint= "weeks= " + time.weeks + " days= " + time.days + " start= " + time.start + " duration= " + time.length;
+        return toprint;
+    }
 }
