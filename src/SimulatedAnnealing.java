@@ -203,7 +203,7 @@ public class SimulatedAnnealing {
                 reprCost = neighborCost;
             }
 
-            System.out.println("numIteration:   " + numIteration + "\tFeasible: " + this.isFeasible(repr) + "\t\tCost: " + reprCost + "\tTemperature: " + String.format("%.4f", temperature) + "\tProbability: " + String.format("%.4f", prob) + "\tnumInfeasible: " + this.getNumInfeasible(repr));
+            System.out.println("numIteration:   " + numIteration + "\tFeasible: " + this.isFeasible(repr) + "\t\tCost: " + reprCost + "\tTemperature: " + String.format("%.4f", temperature) + "\tProbability: " + String.format("%.4f", prob) + "\tnumInfeasible: " + this.getNumInfeasible(repr) + " (" + this.hardPenalty + ")");
             numIteration++;
 
             if (reprCost == 0.0) {break;}
