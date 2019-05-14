@@ -13,7 +13,7 @@ public class Precedence extends Distribution {
     public boolean validate(Instance instance, Solution solution) {
         List<SolutionClass> solutionClasses = getClassInDistribution(solution);
 
-        for(int i=0; i<solutionClasses.size();i++){
+        for(int i=0; i<solutionClasses.size()-1;i++){
             if(!ordered(solutionClasses.get(i).weeks, solutionClasses.get(i+1).weeks)){
                 return false;
             }

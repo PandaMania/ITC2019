@@ -171,10 +171,7 @@ public class ILP {
 
                 //for all rooms, check that no times are the same that equal 1, we need subset of rooms, and inside that to check values of 1, and then check if they have overlapping times.
                 System.out.println("model size " +model.getConstrs().length);
-                  for(int i=0; i<model.getConstrs().length; i++){
 
-                        System.out.println("fuck" + model.getConstr(i));
-                  }
 
                 model.setObjective(objectiveFunc, GRB.MINIMIZE);
                 model.optimize();
@@ -211,7 +208,9 @@ public class ILP {
                         + " " +z.get(GRB.DoubleAttr.X));
 */
                 System.out.println("Obj: " + model.get(GRB.DoubleAttr.ObjVal));
+                System.out.println("num constraints= " + model.getConstrs().length);
 
+               System.out.println(model.getConstr(1000).get(GRB.StringAttr.ConstrName));
                 // Dispose of model and environment
                 model.dispose();
                 env.dispose();

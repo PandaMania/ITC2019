@@ -18,8 +18,8 @@ public class Overlaps {
                 if(times.get(j)!=null){
                     orderbystart(times.get(j).grBtimeObject);
                     for (int i = 0; i < times.get(j).grBtimeObject.size(); i++) {
-                        getforX(times.get(k).grBtimeObject, times.get(j).grBtimeObject.get(i), i+1, times.get(k).grBroomObject, times.get(j).grBroomObject.get(0).grbVar, model);
-                        getforX(times.get(j).grBtimeObject, times.get(j).grBtimeObject.get(i), i + 1);
+                        getforX(times.get(k).grBtimeObject, times.get(j).grBtimeObject.get(i), i+1, times.get(k).grBroomObject, times.get(j).grBroomObject.get(0), model);
+                     //   getforX(times.get(j).grBtimeObject, times.get(j).grBtimeObject.get(i), i + 1);
 
                     }
                 }
@@ -35,8 +35,94 @@ public class Overlaps {
     }
 
 
+
+
+    public ArrayList<OverlappingPair> getforX(ArrayList<GRBtimeObject> times, GRBtimeObject X, int positionY){
+        ArrayList<OverlappingPair> ListX= new ArrayList<OverlappingPair>();
+        Boolean keepSearch=true;
+        int StartX= X.time.start;
+        int endX= StartX+ X.time.length;
+        GRBLinExpr overlapConstraint;
+        while(keepSearch){
+            if(positionY>=times.size()-1){
+                break;
+            }
+            if(times.get(positionY).courseClass!=X.courseClass){
+                if(times.get(positionY).getTime().start < endX){
+                    overlapConstraint= new GRBLinExpr();
+                    overlapConstraint.addTerm(1, times.get(positionY).getGrbVar());
+                    overlapConstraint.addTerm(1,X.getGrbVar());
+
+                   // overlapConstraint.addTerm(1,);
+                    
+                    //ListX.add(new OverlappingPair(X, times.get(positionY)));
+                }else
+                    keepSearch=false;
+
+            }
+            positionY++;
+
+
+
+        }
+        return ListX;
+    }
+
+    public ArrayList<OverlappingPair> getforX(ArrayList<GRBtimeObject> times, GRBtimeObject X, int positionY, ArrayList<GRBroomObject> grBroomObject, GRBroomObject grbVar, GRBModel model){
+       // System.out.println(grBroomObject);
+        ArrayList<OverlappingPair> ListX= new ArrayList<OverlappingPair>();
+        Boolean keepSearch=true;
+        int StartX= X.time.start;
+        int endX= StartX+ X.time.length;
+        GRBLinExpr overlapConstraint;
+        while(keepSearch){
+            if(positionY>=times.size()-1){
+                break;
+            }
+            CourseTime i= times.get(positionY).time;
+            CourseTime j= X.time;
+          //  if(times.get(positionY).courseClass!=X.courseClass){
+            BitSet a= BitSet.valueOf(i.days.getBytes());
+            a.and(BitSet.valueOf(j.days.getBytes()));
+
+            BitSet b= BitSet.valueOf(i.weeks.getBytes());
+            b.and(BitSet.valueOf(j.weeks.getBytes()));
+            int i_end = i.start+i.length;
+            int j_end = j.start+j.length;
+
+            if(a.cardinality()!=0) {
+                if (b.cardinality() != 0) {
+                    if (i_end >= j.start) {
+                        if (j_end >= i.start) {
+                            overlapConstraint = new GRBLinExpr();
+                            overlapConstraint.addTerm(1, times.get(positionY).getGrbVar());
+                            overlapConstraint.addTerm(1, X.getGrbVar());
+                            overlapConstraint.addTerm(1, grbVar.getGrbVar());
+                            overlapConstraint.addTerm(1, grBroomObject.get(0).grbVar);
+                            try {
+                                model.addConstr(overlapConstraint, GRB.LESS_EQUAL, 3, "Overlap" + times.get(positionY).getTime().toString() +  X.getTime().toString() +grbVar.room +grBroomObject.get(0).room  );
+                            } catch (GRBException e) {
+                                System.out.println("Error code: " + e.getErrorCode() + ". " +
+                                        e.getMessage());
+                            }
+                        }
+                    }
+                }
+                                //ListX.add(new OverlappingPair(X, times.get(positionY)));
+            }else
+                    keepSearch=false;
+
+          //  }
+            positionY++;
+
+
+
+        }
+        return ListX;
+    }
+
     public ArrayList<GRBtimeObject> orderbystart(ArrayList<GRBtimeObject> whole){
-     //   ArrayList<GRBtimeObject> order= new ArrayList<GRBtimeObject>();
+        //   ArrayList<GRBtimeObject> order= new ArrayList<GRBtimeObject>();
         ArrayList<GRBtimeObject> left = new ArrayList<GRBtimeObject>();
         ArrayList<GRBtimeObject> right = new ArrayList<GRBtimeObject>();
         int center;
@@ -102,90 +188,5 @@ public class Overlaps {
             wholeIndex++;
         }
     }
-
-
-    public ArrayList<OverlappingPair> getforX(ArrayList<GRBtimeObject> times, GRBtimeObject X, int positionY){
-        ArrayList<OverlappingPair> ListX= new ArrayList<OverlappingPair>();
-        Boolean keepSearch=true;
-        int StartX= X.time.start;
-        int endX= StartX+ X.time.length;
-        GRBLinExpr overlapConstraint;
-        while(keepSearch){
-            if(positionY>=times.size()-1){
-                break;
-            }
-            if(times.get(positionY).courseClass!=X.courseClass){
-                if(times.get(positionY).getTime().start < endX){
-                    overlapConstraint= new GRBLinExpr();
-                    overlapConstraint.addTerm(1, times.get(positionY).getGrbVar());
-                    overlapConstraint.addTerm(1,X.getGrbVar());
-                   // overlapConstraint.addTerm(1,);
-                    
-                    //ListX.add(new OverlappingPair(X, times.get(positionY)));
-                }else
-                    keepSearch=false;
-
-            }
-            positionY++;
-
-
-
-        }
-        return ListX;
-    }
-
-    public ArrayList<OverlappingPair> getforX(ArrayList<GRBtimeObject> times, GRBtimeObject X, int positionY, ArrayList<GRBroomObject> grBroomObject, GRBVar grbVar, GRBModel model){
-       // System.out.println(grBroomObject);
-        ArrayList<OverlappingPair> ListX= new ArrayList<OverlappingPair>();
-        Boolean keepSearch=true;
-        int StartX= X.time.start;
-        int endX= StartX+ X.time.length;
-        GRBLinExpr overlapConstraint;
-        while(keepSearch){
-            if(positionY>=times.size()-1){
-                break;
-            }
-            CourseTime i= times.get(positionY).time;
-            CourseTime j= X.time;
-          //  if(times.get(positionY).courseClass!=X.courseClass){
-            BitSet a= BitSet.valueOf(i.days.getBytes());
-            a.and(BitSet.valueOf(j.days.getBytes()));
-
-            BitSet b= BitSet.valueOf(i.weeks.getBytes());
-            b.and(BitSet.valueOf(j.weeks.getBytes()));
-            int i_end = i.start+i.length;
-            int j_end = j.start+j.length;
-
-            if(a.cardinality()!=0) {
-                if (b.cardinality() != 0) {
-                    if (i_end >= j.start) {
-                        if (j_end >= i.start) {
-                            overlapConstraint = new GRBLinExpr();
-                            overlapConstraint.addTerm(1, times.get(positionY).getGrbVar());
-                            overlapConstraint.addTerm(1, X.getGrbVar());
-                            overlapConstraint.addTerm(1, grbVar);
-                            overlapConstraint.addTerm(1, grBroomObject.get(0).grbVar);
-                            try {
-                                model.addConstr(overlapConstraint, GRB.LESS_EQUAL, 3, "Overlap" + times.get(positionY).getGrbVar() +  X.getGrbVar() +grbVar +grBroomObject.get(0).grbVar  );
-                            } catch (GRBException e) {
-                                System.out.println("Error code: " + e.getErrorCode() + ". " +
-                                        e.getMessage());
-                            }
-                        }
-                    }
-                }
-                                //ListX.add(new OverlappingPair(X, times.get(positionY)));
-            }else
-                    keepSearch=false;
-
-          //  }
-            positionY++;
-
-
-
-        }
-        return ListX;
-    }
-
 
 }
