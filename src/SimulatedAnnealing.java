@@ -34,10 +34,11 @@ public class SimulatedAnnealing {
         this.numWeeks = this.getNumWeeks(this.instance);                        // parser should read problem tag to instance class
         this.numStudents = this.instance.students.size();
         this.slotsPerDay = 288;                                                 // parser should read problem tag to instance class
-        this.bitFlipsDays = (int) Math.max(1.0, 0.2 * this.numDays);            // specify how many of the bits should be changed
-        this.bitFlipsWeeks = (int) Math.max(1.0, 0.2 * this.numWeeks);          // specify how many of the bits should be changed
-        this.bitFlipsStudents = (int) Math.max(1.0, 0.2 * this.numStudents);    // specify how many of the bits should be changed
-        this.hardPenalty = 100.0;
+        this.bitFlipsDays = (int) Math.max(1.0, 0.5 * this.numDays);            // specify how many of the bits should be changed
+        this.bitFlipsWeeks = (int) Math.max(1.0, 0.5 * this.numWeeks);          // specify how many of the bits should be changed
+        this.bitFlipsStudents = (int) Math.max(1.0, 0.5 * this.numStudents);    // specify how many of the bits should be changed
+        //this.hardPenalty = 100.0;
+        this.hardPenalty = 10.0 * this.getMaxPenalty(this.instance);
     }
 
     private long getNumClasses(Instance instance) {
@@ -54,8 +55,18 @@ public class SimulatedAnnealing {
         return instance.courses.get(0).configs.get(0).subparts.get(0).classes.get(0).times.get(0).days.length();
     }
 
-    private Solution makeDeepCopy(Solution representation) {
-        Solution deepcopy = new Solution(representation);
+    private double getMaxPenalty (Instance instance){
+        int maxPenalty = 0;
+        for (Distribution dist : instance.distributions){
+            if (dist.getPenalty() > maxPenalty) {
+                maxPenalty = dist.getPenalty();
+            }
+        }
+        return (double) maxPenalty;
+    }
+
+    private Solution makeDeepCopy(Solution repr) {
+        Solution deepcopy = new Solution(repr);
         return deepcopy;
     }
 
@@ -89,11 +100,22 @@ public class SimulatedAnnealing {
         return true;
     }
 
+    private int getNumInfeasible (Solution representation){
+        int i = 0;
+        for (Distribution distribution : this.instance.distributions) {
+            if (distribution.required && !distribution.validate(this.instance, representation)){
+                i++;
+            }
+        }
+        return i;
+    }
+
     private Solution getRandomNeighbor(Solution representation, int numChanges) {
         Solution neighbor = this.makeDeepCopy(representation);
         for (int numChange = 0; numChange < numChanges; numChange++){
             int indexSolution = ThreadLocalRandom.current().nextInt(0, neighbor.classes.size());
-            int indexSolutionClass = ThreadLocalRandom.current().nextInt(0, 6);                     // change to (1, 6) if not to change class ids
+            //int indexSolutionClass = ThreadLocalRandom.current().nextInt(0, 6);                     // change to (1, 6) if not to change class ids
+            int indexSolutionClass = ThreadLocalRandom.current().nextInt(1, 6);
             switch (indexSolutionClass){
                 case 0:
                     // change classId
@@ -144,20 +166,14 @@ public class SimulatedAnnealing {
         return neighbor;
     }
 
-    private double cost(Solution representation) {
+    private double cost(Solution repr) {
         double cost = 0.0;
-        for (Distribution distribution : this.instance.distributions) {
-            //System.out.println(distribution.idInDistribution);
-            for (int id_1 : distribution.idInDistribution){
-                for (int id_2 : distribution.idInDistribution){
-                    if (id_1 < id_2){
-                        if (distribution.required){
-                            cost += this.hardPenalty;
-                        } else {
-                            cost += distribution.getPenalty();
-                        }
-                    }
-                }
+        for (Distribution dist : this.instance.distributions) {
+            Boolean reprValidate = dist.validate(this.instance, repr);
+            if (dist.required && !reprValidate){
+                cost += this.hardPenalty;
+            } else if (!reprValidate) {
+                cost += dist.getPenalty();
             }
         }
         return cost;
@@ -172,26 +188,27 @@ public class SimulatedAnnealing {
     }
 
 
-    private Solution optimize(Solution representation, double startTemperature, double endTemperature, int numIterations, int numChanges) {
+    private Solution optimize(Solution repr, double startTemperature, double endTemperature, int numIterations, int numChanges) {
 
-        double representationCost = this.cost(representation);
+        double reprCost = this.cost(repr);
         int numIteration = 0;
 
         while (numIteration < numIterations) {
-            Solution neighbor = this.getRandomNeighbor(representation, numChanges);
-            double neighborCost = this.cost(representation);
+            Solution neighbor = this.getRandomNeighbor(repr, numChanges);
+            double neighborCost = this.cost(neighbor);
             double temperature = getTemperature(startTemperature, endTemperature, numIteration, numIterations);
-            double prob = Math.min(1.0, Math.exp(-(neighborCost - representationCost) / temperature));
+            double prob = Math.min(1.0, Math.exp(-(neighborCost - reprCost) / temperature));
             if (this.getProbBool(prob)) {
-                representation = this.makeDeepCopy(neighbor);
-                representationCost = neighborCost;
+                repr = this.makeDeepCopy(neighbor);
+                reprCost = neighborCost;
             }
 
-            System.out.println("numIteration:   " + numIteration + "\tFeasible: " + this.isFeasible(representation) + "\t\tCost: " + representationCost + "\tTemperature: " + temperature);
+            System.out.println("numIteration:   " + numIteration + "\tFeasible: " + this.isFeasible(repr) + "\t\tCost: " + reprCost + "\tTemperature: " + String.format("%.4f", temperature) + "\tProbability: " + String.format("%.4f", prob) + "\tnumInfeasible: " + this.getNumInfeasible(repr) + " (" + this.hardPenalty + ")");
             numIteration++;
-            // additional break condition !?
+
+            if (reprCost == 0.0) {break;}
         }
-        return representation;
+        return repr;
     }
 
     // Main:
@@ -200,17 +217,20 @@ public class SimulatedAnnealing {
         InstanceParser parser;
         Instance instance;
         SimulatedAnnealing S;
-        Solution representation;
+        Solution repr;
         Solution solution;
 
         try {
-            String instanceFileName = "pu-c8-spr07.xml";
-            //String instanceFileName = "lums-sum17.xml";
+            String instanceFileName = "bet-sum18.xml";
+            //String instanceFileName = "wbg-fal10.xml";
+            //String instanceFileName = "pu-c8-spr07.xml";
             parser = new InstanceParser(instanceFileName);
             instance = parser.parse();
             S = new SimulatedAnnealing(instance);
-            representation = S.initRepresentation(instance);
-            solution = S.optimize(representation, 50.0, 0.01, 10, 3);
+            repr = S.initRepresentation(instance);
+            solution = S.optimize(repr, 10.0, 0.01, 1000000, 1);
+
+            //for (Distribution dist : instance.distributions) {System.out.println(dist.type + "\t\t" + dist.required);}
 
         } catch (FileNotFoundException e) {
             e.printStackTrace();
