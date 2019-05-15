@@ -30,8 +30,8 @@ public class SimulatedAnnealing {
         this.instance = instance;
         this.numClasses = this.getNumClasses(this.instance);
         this.numRooms = this.instance.rooms.size();
-        this.numDays = getNumDays(this.instance);                               // parser should read problem tag to instance class
-        this.numWeeks = this.getNumWeeks(this.instance);                        // parser should read problem tag to instance class
+        this.numDays = instance.days;                               // parser should read problem tag to instance class
+        this.numWeeks = instance.weeks;                        // parser should read problem tag to instance class
         this.numStudents = this.instance.students.size();
         this.slotsPerDay = 288;                                                 // parser should read problem tag to instance class
         this.bitFlipsDays = (int) Math.max(1.0, 0.75 * this.numDays);            // specify how many of the bits should be changed
@@ -45,14 +45,12 @@ public class SimulatedAnnealing {
         return instance.getClasses().count();
     }
 
-    private int getNumWeeks(Instance instance) {
-        // parser should read problem tag to instance class
-        return instance.courses.get(0).configs.get(0).subparts.get(0).classes.get(0).times.get(0).weeks.length();
+    public int getNumWeeks() {
+        return this.numWeeks;
     }
 
-    private int getNumDays(Instance instance) {
-        // parser should read problem tag to instance class
-        return instance.courses.get(0).configs.get(0).subparts.get(0).classes.get(0).times.get(0).days.length();
+    public int getNumDays() {
+        return this.numDays;
     }
 
     private double getMaxPenalty (Instance instance){
@@ -225,7 +223,7 @@ public class SimulatedAnnealing {
                 System.out.println("Reached feasibility in iteration: " + numIteration);
             }
 
-            if (reprCost == 0.0) {break;}
+            if (reprCost == 0.0 && this.isFeasible(repr)) {break;}
         }
         return repr;
     }
@@ -240,18 +238,15 @@ public class SimulatedAnnealing {
         Solution solution;
 
         try {
-            String instanceFileName = "bet-sum18.xml";
-            //String instanceFileName = "wbg-fal10.xml";
-            //String instanceFileName = "pu-c8-spr07.xml";
+            //String instanceFileName = "bet-sum18.xml";
+            String instanceFileName = "lums-sum17.xml";
             parser = new InstanceParser(instanceFileName);
             instance = parser.parse();
             S = new SimulatedAnnealing(instance);
             repr = S.initRepresentation(instance);
-            //solution = S.optimize(repr, 2.0, 0.01, 4000000, 4);
-            //solution = S.optimize(repr, 2.0, 0.1, 50000000, 1);
             solution = S.optimize(repr, 2.0, 0.1, 100000, 1);
-
-            //for (Distribution dist : instance.distributions) {System.out.println(dist.type + "\t\t" + dist.required);}
+            String solutionText = solution.serialize(S.getNumDays(), S.getNumWeeks());
+            System.out.println(solutionText);
 
         } catch (FileNotFoundException e) {
             e.printStackTrace();

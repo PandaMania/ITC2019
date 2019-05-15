@@ -35,20 +35,21 @@ public class Solution {
     public ArrayList<SolutionClass> classes = new ArrayList<>();
 
 
-    public String serialize(){
+    public String serialize(int numDays, int numWeeks){
         StringBuilder stringBuilder = new StringBuilder();
         stringBuilder.append("<solution name=\"Not implemented yet\">");
+        stringBuilder.append("\n");
         for (SolutionClass aClass : classes) {
             stringBuilder.append("\t");
-            stringBuilder.append(aClass.serialize());
+            stringBuilder.append(aClass.serialize(numDays, numWeeks));
             stringBuilder.append("\n");
         }
         stringBuilder.append("</solution>");
         return stringBuilder.toString();
     }
 
-    public void saveToFile(String filename){
-        String serialized = this.serialize();
+    public void saveToFile(String filename, int numDays, int numWeeks){
+        String serialized = this.serialize(numDays, numWeeks);
         try{
             FileWriter writer = new FileWriter(filename);
             writer.write(serialized);

@@ -37,9 +37,9 @@ public class SolutionClass {
     //		<student id="1"/>
     //		<student id="3"/>
     //	</class>
-    public String serialize(){
+    public String serialize(int numDays, int numWeeks){
         // TODO: add student serialization
         return String.format("<class id=\"%d\" days=\"%s\" start=\"%d\" weeks=\"%s\" room=\"%d\"></class>",
-                classId, BitSets.toBitString(days), start, BitSets.toBitString(weeks), roomId);
+                classId, BitSets.toBitString(days, numDays), start, BitSets.toBitString(weeks, numWeeks), roomId);
     }
 }
