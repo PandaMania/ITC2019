@@ -1,5 +1,7 @@
 package entities;
 
+import java.io.FileWriter;
+import java.io.IOException;
 import java.util.ArrayList;
 
 public class Solution {
@@ -43,5 +45,21 @@ public class Solution {
         }
         stringBuilder.append("</solution>");
         return stringBuilder.toString();
+    }
+
+    public void saveToFile(String filename){
+        String serialized = this.serialize();
+        try{
+            FileWriter writer = new FileWriter(filename);
+            writer.write(serialized);
+            writer.close();
+        }
+        catch (IOException e){
+            System.out.println("Error while writing solution to file");
+            e.printStackTrace();
+            System.out.println("Trying to write:");
+            System.out.println(serialized);
+        }
+
     }
 }
