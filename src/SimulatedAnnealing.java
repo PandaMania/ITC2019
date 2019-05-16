@@ -1,5 +1,6 @@
 import Parsing.*;
 import entities.*;
+import util.*;
 import entities.course.CourseClass;
 import entities.distribution.Distribution;
 
@@ -66,6 +67,7 @@ public class SimulatedAnnealing {
                                 item.add(this.instance.courses.get(i).configs.get(j).subparts.get(k).classes.get(l).times.get(m).days);
                                 item.add(this.instance.courses.get(i).configs.get(j).subparts.get(k).classes.get(l).times.get(m).weeks);
                                 item.add(Integer.toString(this.instance.courses.get(i).configs.get(j).subparts.get(k).classes.get(l).times.get(m).start));
+                                item.add(Integer.toString(this.instance.courses.get(i).configs.get(j).subparts.get(k).classes.get(l).times.get(m).penalty));
                                 result.get(idx).add(item);
                             }
                         }
@@ -204,6 +206,33 @@ public class SimulatedAnnealing {
         return result;
     }
 
+    private Boolean anyInBitSet(BitSet bitset){
+        return !bitset.isEmpty();
+    }
+
+    private Boolean isAvailableWeeks(ArrayList<String> unaivailableweeks, int newRoomIdx, Solution repr, int indexSolution){
+        for (String item:unaivailableweeks){
+            String days = item.substring(item.indexOf("days= ") + "days= ".length(),item.indexOf("days= ") + "days= ".length() + this.numDays);
+            String weeks = item.substring(item.indexOf("weeks= ") + "weeks= ".length(),item.indexOf("weeks= ") + "weeks= ".length() + this.numWeeks);
+            int length = Integer.parseInt(item.substring(item.indexOf("length= ") + "length= ".length(), item.indexOf(" ", item.indexOf("length= ") + "length= ".length())));
+            int start = Integer.parseInt(item.substring(item.indexOf("start= ") + "start= ".length(),item.indexOf(" ", item.indexOf("start= ") + "start= ".length())));
+            //System.out.println(start);
+            SolutionClass solClass = repr.classes.get(indexSolution);
+            BitSet daysBitSet = this.getBitSetFromString(days);
+            BitSet weeksBitSet = this.getBitSetFromString(weeks);
+            BitSet overlapDaysBitSet = BitSets.and(solClass.days, daysBitSet);
+            BitSet overlapWeeksBitSet = BitSets.and(solClass.weeks, weeksBitSet);
+            if (!overlapDaysBitSet.isEmpty() && !overlapWeeksBitSet.isEmpty()){
+                if (((start <= solClass.start) && (solClass.start < start + length))
+                || ((start <= solClass.start + solClass.length) && (solClass.start + solClass.length < start + length))
+                || ((solClass.start <= start) && (solClass.start + solClass.length >= start + length)) ){
+                    return false;
+                }
+            }
+        }
+        return true;
+    }
+
     private Solution getRandomNeighbor(Solution repr, int numChanges) {
         Solution neighbor = this.makeDeepCopy(repr);
         for (int numChange = 0; numChange < numChanges; numChange++){
@@ -211,12 +240,13 @@ public class SimulatedAnnealing {
             int indexSolutionPart = ThreadLocalRandom.current().nextInt(0, 3);
             switch (indexSolutionPart){
                 case 0:
-                    // change room (done):
+                    // change room (done) - add check for unaivailableweeks:
                     while (true){
                         int selectedCourseIdx = neighbor.classes.get(indexSolution).classId - 1;
-                        int newRoomIdx = ThreadLocalRandom.current().nextInt(1, this.numRooms + 1);
-                        if (this.courseClasses.get(selectedCourseIdx).roomPenalties.get(newRoomIdx) != null){
-                            neighbor.classes.get(indexSolution).roomId = newRoomIdx;
+                        int newRoomId = ThreadLocalRandom.current().nextInt(1, this.numRooms + 1);
+                        if (this.courseClasses.get(selectedCourseIdx).roomPenalties.get(newRoomId) != null
+                        && isAvailableWeeks(this.instance.rooms.get(newRoomId - 1).unaivailableweeks, newRoomId - 1, neighbor, indexSolution)){
+                            neighbor.classes.get(indexSolution).roomId = newRoomId;
                             break;
                         }
                     }
@@ -258,24 +288,43 @@ public class SimulatedAnnealing {
         for (SolutionClass solClass : repr.classes) {
             int classId = solClass.classId;
             int roomId = solClass.roomId;
-            Boolean found = false;
+            Boolean foundRoomPenalty = false;
             for(int i=0;i<this.instance.courses.size();i++){
                 for(int j=0;j<this.instance.courses.get(i).configs.size();j++){
                     for(int k=0;k<this.instance.courses.get(i).configs.get(j).subparts.size();k++){
                         for(int l=0;l<this.instance.courses.get(i).configs.get(j).subparts.get(k).classes.size();l++){
+                            // room penalty:
                             if (Integer.parseInt(this.instance.courses.get(i).configs.get(j).subparts.get(k).classes.get(l).id) == classId){
                                 try {
                                     cost += this.instance.courses.get(i).configs.get(j).subparts.get(k).classes.get(l).roomPenalties.get(roomId);
-                                    found = true;
+                                    foundRoomPenalty = true;
                                     break;
                                 } catch (NullPointerException e) {continue;}
                             }
                         }
-                        if (found){break;}
+                        if (foundRoomPenalty){break;}
                     }
-                    if (found){break;}
+                    if (foundRoomPenalty){break;}
                 }
-                if (found){break;}
+                if (foundRoomPenalty){break;}
+            }
+        }
+        // time penalty:
+        for (SolutionClass solClass : repr.classes) {
+            int classId = solClass.classId;
+            BitSet weeks = solClass.weeks;
+            BitSet days = solClass.days;
+            int start = solClass.start;
+            Boolean foundTimePenalty = false;
+            ArrayList<ArrayList<String>> item = this.courseTimes.get(solClass.classId - 1);
+            for (int i=0;i<item.size();i++){
+                //System.out.println(item.get(i).get(0) +" "+ BitSets.toBitString(solClass.days, this.numDays) + " " + item.get(i).get(0).equals(BitSets.toBitString(solClass.days, this.numDays)));
+                if (item.get(i).get(0).equals(BitSets.toBitString(solClass.days, this.numDays))
+                && item.get(i).get(1).equals(BitSets.toBitString(solClass.weeks, this.numWeeks))
+                && Integer.parseInt(item.get(i).get(2)) == solClass.start){
+                    cost += Integer.parseInt(item.get(i).get(3));
+                    break;
+                }
             }
         }
         return cost;
@@ -365,3 +414,41 @@ public class SimulatedAnnealing {
     }
 
 }
+
+
+
+
+/*
+
+for (SolutionClass solClass : repr.classes) {
+    int classId = solClass.classId;
+    int roomId = solClass.roomId;
+    Boolean foundRoomPenalty = false;
+    Boolean foundTimePenalty = false;
+    for(int i=0;i<this.instance.courses.size();i++){
+        for(int j=0;j<this.instance.courses.get(i).configs.size();j++){
+            for(int k=0;k<this.instance.courses.get(i).configs.get(j).subparts.size();k++){
+                for(int l=0;l<this.instance.courses.get(i).configs.get(j).subparts.get(k).classes.size();l++){
+                    // room penalty:
+                    if (Integer.parseInt(this.instance.courses.get(i).configs.get(j).subparts.get(k).classes.get(l).id) == classId){
+                        try {
+                            if (!foundRoomPenalty){
+                                cost += this.instance.courses.get(i).configs.get(j).subparts.get(k).classes.get(l).roomPenalties.get(roomId);
+                                foundRoomPenalty = true;
+                            }
+                        } catch (NullPointerException e) {continue;}
+                    }
+                    // time penalty:
+
+                    // break:
+                    if (foundRoomPenalty && foundTimePenalty){break;}
+                }
+                if (foundRoomPenalty && foundTimePenalty){break;}
+            }
+            if (foundRoomPenalty && foundTimePenalty){break;}
+        }
+        if (foundRoomPenalty && foundTimePenalty){break;}
+    }
+}
+
+*/
