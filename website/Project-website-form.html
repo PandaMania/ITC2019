@@ -105,8 +105,8 @@ but may be asked for to ensure that there was no cheating.
 
 This table shows some parameters of the different problem instances released so far by the competiiton.
 <figure style="display: inline-block;text-align: center;">
-	<img style="float: left; padding-left: 200px; vertical-align: top;" src="fig/Instances.png" alt="instances parameters" width="300" />
-	<figcaption style="padding-left: 200px;">Fig 3. - Some parameters of each instance</figcaption>
+	<img style="float: left; padding-left: 200px; vertical-align: top;" src="fig/Instances.png" alt="instances parameters" width="550" />
+	<figcaption style="padding-left: 200px;">Table 1. - Some parameters of each instance</figcaption>
 </figure>
 
 </p>
@@ -159,11 +159,11 @@ goal is then to try to maximize the scalar product
 <img src="https://latex.codecogs.com/gif.latex?c^\intercal&space;x" title="c^\intercal x" />, that corresponds to the penalty 
 due to the violation of the soft constraints [Shoham et al., 2010, p. 32]. 
 
-This approach would be implemented using the java version of the Gurobi Software\cite{gurobi}, which is 
+This approach would be implemented using the java version of the Gurobi Software [Gurobi, ], which is 
 a mathematical solving tool for linear programming, in order to obtain at least a feasible solution for 
 the problem. One usage of this technique would be to let the ILP run after attaining a feasible solution
 to find if a longer run time will yield a more optimal solution. Alternatively, it could be used to find 
-a feasible solution as a starting point for other techniques such as directed random search (see subsection \ref{DRS}).
+a feasible solution as a starting point for other techniques such as directed random search.
 
 <h5>4.2 Simulated Annealing</h5>
 This approach is a tested and tried method for solving combinatorial problems such as the travelling salesman 
@@ -203,7 +203,7 @@ A genetic algorithm belongs to the class of local search algorithms, that are us
 It is initialized with a population of 
 <img src="https://latex.codecogs.com/gif.latex?k" title="k" /> individuals, that will reproduce and compete against each
  with respect to some fitness measure based on 
-<img src="https://latex.codecogs.com/gif.latex?c^\intercal&space;x" title="c^\intercal x" /> (see subsection \ref{ILP}). 
+<img src="https://latex.codecogs.com/gif.latex?c^\intercal&space;x" title="c^\intercal x" /> . 
 The population follows a repeated generation 
 cycle of fitness evaluation, selection, reproduction, crossover, and mutation [Russell et al., 2010, p. 126-128].
 The vector 
@@ -216,6 +216,20 @@ perform a localized search in order to fine-tune the integer parameters
 to the penalty of the soft constraints can be achieved. In the literature, a genetic algorithm was used for the
  problem of scheduling physicians in an emergency room [Puente, 2009, p. 1232-1242]. 
 
+<figure style="display: inline-block;text-align: center;">
+	<img style="float: left; padding-left: 200px; vertical-align: top;" src="fig/gen_01.png" alt="instances parameters" width="350" />
+	<figcaption style="padding-left: 200px;">Fig 4. - Genetic parents</figcaption>
+</figure>
+
+<figure style="display: inline-block;text-align: center;">
+	<img style="float: left; padding-left: 200px; vertical-align: top;" src="fig/gen_02.png" alt="instances parameters" width="350" />
+	<figcaption style="padding-left: 200px;">Fig 5. - Generating offspring <br/> with constraint violation</figcaption>
+</figure>
+
+<figure style="display: inline-block;text-align: center;">
+	<img style="float: left; padding-left: 200px; vertical-align: top;" src="fig/gen_03.png" alt="instances parameters" width="350" />
+	<figcaption style="padding-left: 200px;">Fig 6. - Genetic repair</figcaption>
+</figure>
 
 </div>
 
@@ -228,8 +242,8 @@ Below is Gantt chart, that visualizes our time management and planning for this 
 
 <p style="clear: both;">
 <figure style="display: inline-block;text-align: center;">
-	<img style="float: left; padding-left: 20px; vertical-align: top;" src="fig/gantt_02.png" alt="intro timetabling" width="750" />
-	<figcaption style="padding-left: 20px;">Fig 3. - Gantt chart</figcaption>
+	<img style="float: left; padding-left: 20px; vertical-align: top;" src="fig/gantt_02.png" alt="intro timetabling" width="700" />
+	<figcaption style="padding-left: 20px;">Fig 7. - Gantt chart</figcaption>
 </figure>
 </p>
 
