@@ -172,7 +172,7 @@ dependent on its quality. However, this also
 means that a worse solution can be selected, but this is intended. Moving to a worse solution allows this method
 to escape local optima and search the solution space more thoroughly. The probability 
 <p align="center">
-	<img src="https://latex.codecogs.com/gif.latex?p=\left(\min1,&space;\left(-\frac{f(y)-f(x))}{T}&space;\right&space;)&space;\right&space;)" title="p=\left(\min1, \left(-\frac{f(y)-f(x))}{T} \right ) \right )" />
+	<img src="https://latex.codecogs.com/gif.latex?p=\min\left(1,\left(-\frac{f(y)-f(x))}{T}\right)\right)" title="p=\min\left(1,\left(-\frac{f(y)-f(x))}{T}\right)\right)" />
 </p>
 of accepting a solution that is worse than the current one decreases over time ensuring that the method converges to an optimum.
 In simulated annealing this is solved by reducing the temperature 
@@ -207,6 +207,7 @@ perform a localized search in order to fine-tune the integer parameters
 to the penalty of the soft constraints can be achieved. In the literature, a genetic algorithm was used for the
  problem of scheduling physicians in an emergency room \cite{PUENTE20091232}. 
 
+
 </div>
 
 
@@ -218,7 +219,7 @@ Below is Gantt chart, that visualizes our time management and planning for this 
 
 <p style="clear: both;">
 <figure style="display: inline-block;text-align: center;">
-	<img style="float: left; padding-left: 20px; vertical-align: top;" src="fig/gantt.png" alt="intro timetabling" width="750" />
+	<img style="float: left; padding-left: 20px; vertical-align: top;" src="fig/gantt_02.png" alt="intro timetabling" width="750" />
 	<figcaption style="padding-left: 20px;">Fig 3. - Gantt chart</figcaption>
 </figure>
 </p>
