@@ -31,7 +31,7 @@ and travel time between rooms. Consequently, a large amount of research has gone
 ways of automating the process. The Practice and Theory of Automated Timetabling (PATAT) conference started in 1995 and 
 deals with the problem of timetable generation, with advancements in the field mainly motivated through competitions.
 
-This project aims to participate in the 2019 International Timetabling Competition \cite{itc2019}. This will involve 
+This project aims to participate in the 2019 International Timetabling Competition [Muller et al., 2019]. This will involve 
 researching and implementing a variety of methods in order to produce timetables for simulated problems provided by 
 the competition with the goal of producing good timetable solutions that might rival other competing teams.
 </p>
@@ -141,7 +141,7 @@ In order to solve the scheduling problem, several approaches will be considered.
 
 <h5>4.1 Integer Linear Programming</h5>
 The approach of integer linear programming (ILP) was investigated for example in order to solve the 
-physician rostering problem \cite{patat03} and solving the music school timetabling problem\cite{patat18},
+physician rostering problem [Wickert et al., 2018] and solving the music school timetabling problem [Ásgeirsson et al., 2018],
 which shows many similarities to the university timetabling problem. All of them try to feasible solution
 as a starting point for other techniques like directed random search.
 
@@ -157,7 +157,7 @@ number of integer variables
 <img src="https://latex.codecogs.com/gif.latex?x_i\geq&space;0" title="x_i\geq 0" />. The optimization 
 goal is then to try to maximize the scalar product 
 <img src="https://latex.codecogs.com/gif.latex?c^\intercal&space;x" title="c^\intercal x" />, that corresponds to the penalty 
-due to the violation of the soft constraints\cite[~p.32]{multiagent}. 
+due to the violation of the soft constraints [Shoham et al., 2010, p. 32]. 
 
 This approach would be implemented using the java version of the Gurobi Software\cite{gurobi}, which is 
 a mathematical solving tool for linear programming, in order to obtain at least a feasible solution for 
@@ -167,7 +167,7 @@ a feasible solution as a starting point for other techniques such as directed ra
 
 <h5>4.2 Simulated Annealing</h5>
 This approach is a tested and tried method for solving combinatorial problems such as the travelling salesman 
-problem \cite{simulated}. These problems are similar to the problem of timetable scheduling as there is a finite 
+problem [Ceschia et al., 2018]. These problems are similar to the problem of timetable scheduling as there is a finite 
 set of feasible discrete solutions, the possible timetables. The space of these possible solutions is large enough
 that searching exhaustively for the global optimum becomes infeasible. 
 
@@ -193,7 +193,7 @@ or solutions, and a way for simulated annealing to find a solution that is close
 to be optimised can be defined in terms of the weight of constraints that are violated by a solution. A solution 
 that violates a lot of constraints will get a higher cost than a solution that satisfies them. Hard constraints 
 should have a high cost compared to the soft constraint to keep the solutions in the feasible region of the search space.
-Lastly, the method requires a way to transition from a solution to the next. Papers \cite{simulated} and \cite{mosa} 
+Lastly, the method requires a way to transition from a solution to the next. Papers [Ceschia et al., 2018] and [Akkan et al., 2018] 
 use various swap moves to transition between solutions. A swap is merely an exchange of some parts of the solution 
 with another. For example, two lectures can switch the periods in which they are taught. These methods can be eventually 
 be supplemented with new methods.
@@ -205,7 +205,7 @@ It is initialized with a population of
  with respect to some fitness measure based on 
 <img src="https://latex.codecogs.com/gif.latex?c^\intercal&space;x" title="c^\intercal x" /> (see subsection \ref{ILP}). 
 The population follows a repeated generation 
-cycle of fitness evaluation, selection, reproduction, crossover, and mutation \cite[~p.126-128]{russellnorvig}.
+cycle of fitness evaluation, selection, reproduction, crossover, and mutation [Russell et al., 2010, p. 126-128].
 The vector 
 <img src="https://latex.codecogs.com/gif.latex?x=(x_1,&space;..,&space;x_n)" title="x=(x_1, .., x_n)" /> of integer values 
 can be used for the genome representation in the genetic algorithm either
@@ -214,7 +214,7 @@ feasible solutions, which could be used for initialization of the genetic algori
 perform a localized search in order to fine-tune the integer parameters 
 <img src="https://latex.codecogs.com/gif.latex?x_i" title="x_i" /> so that an optimized solution with respect
 to the penalty of the soft constraints can be achieved. In the literature, a genetic algorithm was used for the
- problem of scheduling physicians in an emergency room \cite{PUENTE20091232}. 
+ problem of scheduling physicians in an emergency room [Puente, 2009, p. 1232-1242]. 
 
 
 </div>
@@ -257,10 +257,63 @@ Below is Gantt chart, that visualizes our time management and planning for this 
 
 
 
+
 <div style="width: 1000px;">
 <p style="clear: both; float: left;" >
 <h4>6 References</h4>
-Kitano, H., Asada, M., Kuniyoshi, Y., Noda, I., &amp; Osawa, E. (1997). Robocup: the robot world cup initiative. Proceedings of the first international conference on Autonomous agents, 340-347.
+<!--mark [cite]: authors. year. title. proceedings/journal. Vol/pages. sources_doi. sources_url. accessed.-->
+
+Muller, T.,Rudova, H., &amp; Mullerova, Z. (2019). University course timetabling and International Timetabling Competition 2019. The International Series of Conferences on the Practice and Theory of Automated Timetabling. https://www.itc2019.org/papers/itc2019-patat2018.pdf.
+</br></br>
+Puente, J., Gómez, A., Fernández, I., &amp; Priore, P. (2009). Medical doctor rostering problem in a hospital emergency department by means of genetic algorithms. Computers &amp; Industrial Engineering. Vol. 56, p. 1232-1242. https://doi.org/10.1016/j.cie.2008.07.016. http://www.sciencedirect.com/science/article/pii/S0360835208001460.
+</br></br>
+Ceschia, S. &amp; Schaerf, A. (2018). Solving the INRC-II Nurse Rostering Problem by Simulated Annealing based on Large Neighborhoods. Proceedings of the 12th International Conference on the Practice and Theory of Automated Timetabling. http://patatconference.org/patat2018/files/proceedings/paper46.pdf.
+</br></br>
+Akkan, C., &amp; Gülcü, A. (2018). A Bi-criteria Hybrid Genetic Algorithm with Robustness Objective for the Course Timetabling Problem. Proceedings of the 12th International Conference on the Practice and Theory of Automated Timetabling.
+</br></br>
+Wickert, T. I., Neto, A. F. K., &amp; Buriol, L. S. (2018). An integer programming approach for the physician rostering problem. Proceedings of the 12th International Conference on the Practice and Theory of Automated Timetabling. http://patatconference.org/patat2018/files/proceedings/paper3.pdf.
+</br></br>
+Ásgeirsson, E. I., &amp; Gunnarsdóttir, Þ. (2018). An Integer Programming Formulation for the Music School Timetabling Problem. Proceedings of the 12th International Conference on the Practice and Theory of Automated Timetabling. http://patatconference.org/patat2018/files/proceedings/paper18.pdf.
+</br></br>
+Shoham, Y., &amp; Leyton-Brown, K. (2010). Multiagent Systems: Algorithmic, Game-Theoretic, and Logical Foundations. Cambridge University Press.
+</br></br>
+Russell, S., &amp; Norvig, P. (2010). Artificial Intelligence: A Modern Approach. Prentice Hall.
+</br></br>
+Gurobi. Gurobi Optimization - The State-of-the-Art Mathematical Programming Solver. http://www.gurobi.com/. accessed: 18/03/2019.
+
+
+<!--
+###############
+
+@misc{CBS2017,
+title = "Over 600 billion kg of inbound goods in 2017",
+howpublished= "https://www.cbs.nl/en-gb/news/2019/04/over-600-billion-kg-of-inbound-goods-in-2017",
+note="accessed 17/03/2019"
+}
+
+@article{colouring,
+author = "E. K. Burke and D. G. Elliman and R. Weare",
+title = "A University Timetabling System Based on Graph Colouring and Constraint Manipulation",
+journal = "Journal of Research on Computing in Education",
+volume = "27",
+number = "1",
+pages = "1-18",
+year  = "1994",
+publisher = "Routledge",
+doi = "10.1080/08886504.1994.10782112",
+URL = "https://doi.org/10.1080/08886504.1994.10782112",
+eprint = "https://doi.org/10.1080/08886504.1994.10782112"
+}
+
+@proceedings{decomposition, 
+title="Decomposition of University Course Timetabling
+A Systematic Study of Subproblems and their Complexities",
+organization="Proceedings of the 12th International Conference on the Practice and Theory of Automated Timetabling",
+author="Britta Herres and Heinz Schmitz",
+ year="2018",
+ month="8",
+ url="http://patatconference.org/patat2018/files/proceedings/paper30.pdf"}
+ -->
 </p>
 </div>
 
