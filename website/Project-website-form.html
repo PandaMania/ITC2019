@@ -101,9 +101,16 @@ Once the final ranking is complete 5 finalists will be selected and will be invi
 2020 conference where the final standings will be revealed. Source code isn't required in the submission
 but may be asked for to ensure that there was no cheating. 
 
+<h5>2.5 Overview of problem instances</h5>
+
+This table shows some parameters of the different problem instances released so far by the competiiton.
+<figure style="display: inline-block;text-align: center;">
+	<img style="float: left; padding-left: 200px; vertical-align: top;" src="fig/Instances.png" alt="instances parameters" width="300" />
+	<figcaption style="padding-left: 200px;">Fig 3. - Some parameters of each instance</figcaption>
+</figure>
+
 </p>
 </div>
-
 
 
 <div style="width: 1000px;">
@@ -111,8 +118,10 @@ but may be asked for to ensure that there was no cheating.
 <h4>3 Research questions & hypotheses</h4>
 
 <ul>
-<li>???.</li>
-<li>???.</li>
+<li>Can the linear programming approach provide a solution (for each of the instances provided by the competition) that satisfies all the hard constraints of the problem? </li>
+<li>Will the simulated annealing be able to build adequately on top of the linear programming solutions to look for better solution of the remaining soft constraints? </li>
+<li>Will the genetic programmming be able to build adequately on top of the linear programming solutions to look for better solution of the remaining soft constraints? </li>
+<li>(EXTRA) Is there a complexity wall? I.e does there exist a point at which the problem (within our context) becomes untractable for our methods? How does ths vary for our methods? Furthermore, how does the solution search space differ for the genetic algorithm and the simulated annealing when building on top of the linear programming solution?</li>
 </ul>
 
 </p>
@@ -233,11 +242,16 @@ Below is Gantt chart, that visualizes our time management and planning for this 
 <p style="clear: both; float: left;" >
 <h4>5 Main outcomes</h4>
 
+*** [Is this supposed to be so far, or at the end?]*** //Does it conflict with Objectives?
+<h5>5.1 Progress so far</h5>
+***What section should this be in?***
 <ul>
-<li>???.</li>
-<li>???.</li>
+	<li>Java implementaio LP solver implemented and working with Gurobi</li>
+    <li>LP solver provides solution for most simple of test instances</li>
+	<li>LP solver provides needs xxxx to scale</li>
+    <li>Simulated annealing program waiting for a feasible solution from the LP to be tested</li>
+	<li>Genetic algorithm in development</li>
 </ul>
-
 </p>
 </div>
 
