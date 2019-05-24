@@ -170,8 +170,7 @@ This approach is a tested and tried method for solving combinatorial problems su
 problem [Ceschia et al., 2018]. These problems are similar to the problem of timetable scheduling as there is a finite
 set of feasible discrete solutions, the possible timetables. The space of these possible solutions is large enough
 that searching exhaustively for the global optimum becomes infeasible.
-
-<br/><br/>Simulated annealing starts solving a problem from an arbitrary initial solution
+Simulated annealing starts solving a problem from an arbitrary initial solution
 <img src="https://latex.codecogs.com/gif.latex?x" title="x" />  and tries to improve it. For this
 a new solution <img src="https://latex.codecogs.com/gif.latex?y" title="y" />  that is similar to the current solution
 is selected randomly from nearby solutions and its quality is determined by the cost function
@@ -186,7 +185,7 @@ In simulated annealing this is solved by reducing the temperature
 <img src="https://latex.codecogs.com/gif.latex?0" title="0" />.
 An approach for this project would be to use simulated annealing to optimise for the timetable scheduling problem.
 We will use the cost associated with vialoating a constraint as target function <img src="https://latex.codecogs.com/gif.latex?f" title="f" />.
-<br/><br/>Lastly, the method requires a way to transition from a solution to the next. Papers [Ceschia et al., 2018] and [Akkan et al., 2018]
+Lastly, the method requires a way to transition from a solution to the next. Papers [Ceschia et al., 2018] and [Akkan et al., 2018]
 use various swap moves to transition between solutions. A swap is merely an exchange of some parts of the solution
 with another. For example, two lectures can switch the periods in which they are taught. These methods can be eventually
 be supplemented with new methods.
