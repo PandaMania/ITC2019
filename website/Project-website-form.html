@@ -173,13 +173,13 @@ that searching exhaustively for the global optimum becomes infeasible.
 
 Simulated annealing starts solving a problem from an arbitrary initial solution
 <img src="https://latex.codecogs.com/gif.latex?x" title="x" />  and tries to improve it. For this
-a solution that is similar to the current solution
-<img src="https://latex.codecogs.com/gif.latex?y" title="y" /> is selected randomly in the local neighborhoood and its quality
- is determined by the cost function
+a new solution <img src="https://latex.codecogs.com/gif.latex?y" title="y" />  that is similar to the current solution
+is selected randomly from nearby solutions and its quality is determined by the cost function
 <img src="https://latex.codecogs.com/gif.latex?f" title="f" />. The new solution is chosen with some probability that is
 dependent on its quality. However, this also
 means that a worse solution can be selected, but this is intended. Moving to a worse solution allows this method
-to escape local optima and search the solution space more thoroughly. The probability
+to escape local optima and search the solution space more thoroughly. So if there is a timetable that is better than all timetables near to it,
+but much worse than other possible timetables, the search is able to escape its influence so it can find these better solutions. The probability
 <p align="center">
 	<img src="https://latex.codecogs.com/gif.latex?p=\min\left(1,\left(-\frac{f(y)-f(x))}{T}\right)\right)" title="p=\min\left(1,\left(-\frac{f(y)-f(x))}{T}\right)\right)" />
 </p>
