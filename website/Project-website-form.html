@@ -251,15 +251,13 @@ Below is Gantt chart, that visualizes our time management and planning for this 
 <div style="width: 1000px;">
 <p style="clear: both; float: left;" >
 <h4>6 Main outcomes</h4>
-
-*** [Is this supposed to be so far, or at the end?]*** //Does it conflict with Objectives?
 <h5>6.1 Progress so far</h5>
-***What section should this be in?***
 <ul>
-	<li>Java implementation LP solver implemented and working with Gurobi</li>
-    <li>LP solver provides solution for most simple of test instances</li>
+	<li>Developed a parser in java that extracts all the parameters and conditions from the XML file describing the problem (usually ranging from 5,000 to 200,000 lines). The parser creates a java object which the other methods can work with to search for a solution. </li>
+	<li>Developed a tool to create an ILP description of the Java object with the problem parameters. The tool uses the Gurobi package to look for a solution to the problem once it is in the right format.</li>
+    <li>Currently the ILP solver provides solution for most simple of test instances</li>
 	<li>LP solver provides needs xxxx to scale</li>
-    <li>Simulated annealing program waiting for a feasible solution from the LP to be tested</li>
+    <li>Developed a simulated annealing implementation in Java. We are waiting for a feasible solution from the ILP to the larger instances so that we can test it./li>
 	<li>Genetic algorithm near end of development, aimed to be ready in time for applying to feasible solution from the LP</li>
 </ul>
 </p>
