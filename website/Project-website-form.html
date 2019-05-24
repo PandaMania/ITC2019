@@ -121,7 +121,7 @@ This table shows some parameters of the different problem instances released so 
 <li>Can the linear programming approach provide a solution (for each of the instances provided by the competition) that satisfies all the hard constraints of the problem? </li>
 <li>Will the simulated annealing be able to build adequately on top of the linear programming solutions to look for better solution of the remaining soft constraints? </li>
 <li>Will the genetic programmming be able to build adequately on top of the linear programming solutions to look for better solution of the remaining soft constraints? </li>
-<li>Does there exist a point at which the problem (within our context) becomes untractable for our methods? How does ths vary for our methods? Furthermore, how does the solution search space differ for the genetic algorithm and the simulated annealing when building on top of the linear programming solution?</li>
+<li>Does there exist a point at which the problem (within our context) becomes untractable for our methods? How does this vary for our methods? Furthermore, how does the solution search space differ for the genetic algorithm and the simulated annealing when building on top of the linear programming solution?</li>
 </ul>
 
 </p>
@@ -255,9 +255,8 @@ Below is Gantt chart, that visualizes our time management and planning for this 
 <ul>
 	<li>Developed a parser in java that extracts all the parameters and conditions from the XML file describing the problem (usually ranging from 5,000 to 200,000 lines). The parser creates a java object which the other methods can work with to search for a solution. </li>
 	<li>Developed a tool to create an ILP description of the Java object with the problem parameters. The tool uses the Gurobi package to look for a solution to the problem once it is in the right format.</li>
-    <li>Currently the ILP solver provides solution for most simple of test instances</li>
-	<li>LP solver provides needs xxxx to scale</li>
-    <li>Developed a simulated annealing implementation in Java. We are waiting for a feasible solution from the ILP to the larger instances so that we can test it./li>
+    <li>Currently the ILP solver provides solution for most simple of test instances.</li>
+    <li>Developed a simulated annealing implementation in Java. We are waiting for a feasible solution from the ILP to the larger instances so that we can test it.</li>
 	<li>Genetic algorithm near end of development, aimed to be ready in time for applying to feasible solution from the LP</li>
 </ul>
 </p>
