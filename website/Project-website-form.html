@@ -22,17 +22,17 @@ Semester: 2018 - 2019<br/><br/>
 <div style="width: 1000px;">
 <p style="clear: both; float: left;" >
 <h4>1 Problem statement and motivation</h4>
-Creating timetables is a commonly encountered issue across the world in schools, universities and other establishments. 
-For a long time, timetables have been hand-crafted, but this is difficult to do for most problems and becomes impossible 
-when approaching a large number of courses and students like that in a university. Computer-aided timetable generation 
-is a complex problem typically involving very long computation times to produce. This is due to the large number of 
-constraints involved, such as students all taking different combinations of courses, courses having room requirements 
-and travel time between rooms. Consequently, a large amount of research has gone into finding effective and efficient 
-ways of automating the process. The Practice and Theory of Automated Timetabling (PATAT) conference started in 1995 and 
+Creating timetables is a commonly encountered issue across the world in schools, universities and other establishments.
+For a long time, timetables have been hand-crafted, but this is difficult to do for most problems and becomes impossible
+when approaching a large number of courses and students like that in a university. Computer-aided timetable generation
+is a complex problem typically involving very long computation times to produce. This is due to the large number of
+constraints involved, such as students all taking different combinations of courses, courses having room requirements
+and travel time between rooms. Consequently, a large amount of research has gone into finding effective and efficient
+ways of automating the process. The Practice and Theory of Automated Timetabling (PATAT) conference started in 1995 and
 deals with the problem of timetable generation, with advancements in the field mainly motivated through competitions.
 
-This project aims to participate in the 2019 International Timetabling Competition [Muller et al., 2019]. This will involve 
-researching and implementing a variety of methods in order to produce timetables for simulated problems provided by 
+This project aims to participate in the 2019 International Timetabling Competition [Muller et al., 2019]. This will involve
+researching and implementing a variety of methods in order to produce timetables for simulated problems provided by
 the competition with the goal of producing good timetable solutions that might rival other competing teams.
 </p>
 </div>
@@ -43,15 +43,15 @@ the competition with the goal of producing good timetable solutions that might r
 <p style="clear: both; float: left;" >
 <h4>2 Competition overview</h4>
 <h5>2.1 General rules</h5>
-The rules of the tournament highlight the importance of following the spirit of the rules and 
-not so much the letter of the rules. As such the organisers reserve the right to change them at 
-any time and may disqualify any team that doesn't follow the spirit of the competition. Participants 
+The rules of the tournament highlight the importance of following the spirit of the rules and
+not so much the letter of the rules. As such the organisers reserve the right to change them at
+any time and may disqualify any team that doesn't follow the spirit of the competition. Participants
 are asked to keep in mind that the goal of the tournament is to encourage research in the field.
 
 <h5>2.2 Solution generation</h5>
 The solutions generated must satisfy all hard constraints but will be scored on the number of soft
 constraints satisfied. February 1 and June 1 are milestone deadlines, November 18 is the final deadline for submissions.
-Teams must submit a short paper along with the solution on the last deadline. The algorithm must 
+Teams must submit a short paper along with the solution on the last deadline. The algorithm must
 not "know" the instance. It can analyse the problem and set parameters automatically but cannot
 "recognise" the specific instances. There are no time nor computational constraints on how solutions are generated.
 
@@ -69,9 +69,9 @@ Hard constraints (cannot be broken):
 
 Soft constraints (incur a penalty):
 <ul>
-	<li>Some of the rooms and set of time choices for a class have a penalty assigned as they are less 
+	<li>Some of the rooms and set of time choices for a class have a penalty assigned as they are less
         desirable, but this is not strictly a clash).</li>
-    <li>Student conflict: A student having two classes at overlapping times (including travel times). 
+    <li>Student conflict: A student having two classes at overlapping times (including travel times).
         This is penalised with a constant penalty no matter the length of the overlap.</li>
     <li>Distributions specified as soft.</li>
 </ul>
@@ -87,9 +87,9 @@ The penalties for the soft constraints are weighed together with parameters give
 
 <h5>2.4 Ranking</h5>
 Ranking is done by points assigned for the placement of the solution submitted for each individual
-instance. Therefore a first place gets you more points than second and so on. The exact points 
+instance. Therefore a first place gets you more points than second and so on. The exact points
 can be seen in Figure 3. Later submission rounds count for more overall points.
- 
+
 <p style="clear: both;">
 <figure style="display: inline-block;text-align: center;">
 	<img style="float: left; padding-left: 200px; vertical-align: top;" src="fig/Points.png" alt="intro timetabling" width="300" />
@@ -99,7 +99,7 @@ can be seen in Figure 3. Later submission rounds count for more overall points.
 
 Once the final ranking is complete 5 finalists will be selected and will be invited to attend the PATAT
 2020 conference where the final standings will be revealed. Source code isn't required in the submission
-but may be asked for to ensure that there was no cheating. 
+but may be asked for to ensure that there was no cheating.
 
 <h5>2.5 Overview of problem instances</h5>
 
@@ -134,87 +134,82 @@ This table shows some parameters of the different problem instances released so 
 <h4>4 Approaches</h4>
 The university timetable scheduling problem consists of deciding on a course layout, selecting a room
 and a time frame for the classes, which belong to their respective course layout and assigning students
-to the courses. This assignment of variables can be fully described by a vector of integer values. 
-The challenge is finding a vector of integer values that respect all the hard 
-constraints and minimizes the penalty received from the soft constraints of the problem instance. 
+to the courses. This assignment of variables can be fully described by a vector of integer values.
+The challenge is finding a vector of integer values that respect all the hard
+constraints and minimizes the penalty received from the soft constraints of the problem instance.
 In order to solve the scheduling problem, several approaches will be considered.
 
 <h5>4.1 Integer Linear Programming</h5>
-The approach of integer linear programming (ILP) was investigated for example in order to solve the 
+The approach of integer linear programming (ILP) was investigated for example in order to solve the
 physician rostering problem [Wickert et al., 2018] and solving the music school timetabling problem [Ásgeirsson et al., 2018],
 which shows many similarities to the university timetabling problem. All of them try to feasible solution
 as a starting point for other techniques like directed random search.
 
-The hard and soft constraints of the timetabling problem can be described as linear relationships 
+The hard and soft constraints of the timetabling problem can be described as linear relationships
 <img src="https://latex.codecogs.com/gif.latex?Ax\leq&space;b" title="Ax\leq b" />
-with matrix 
-<img src="https://latex.codecogs.com/gif.latex?A\in\mathbb{R}^{m\times&space;n}" title="A\in\mathbb{R}^{m\times n}" />, vector 
-<img src="https://latex.codecogs.com/gif.latex?b\in\mathbb{R}^m" title="b\in\mathbb{R}^m" />, 
-<img src="https://latex.codecogs.com/gif.latex?m" title="m" /> number of constraints and 
+with matrix
+<img src="https://latex.codecogs.com/gif.latex?A\in\mathbb{R}^{m\times&space;n}" title="A\in\mathbb{R}^{m\times n}" />, vector
+<img src="https://latex.codecogs.com/gif.latex?b\in\mathbb{R}^m" title="b\in\mathbb{R}^m" />,
+<img src="https://latex.codecogs.com/gif.latex?m" title="m" /> number of constraints and
 <img src="https://latex.codecogs.com/gif.latex?n" title="n" />
 
-number of integer variables 
-<img src="https://latex.codecogs.com/gif.latex?x_i\geq&space;0" title="x_i\geq 0" />. The optimization 
-goal is then to try to maximize the scalar product 
-<img src="https://latex.codecogs.com/gif.latex?c^\intercal&space;x" title="c^\intercal x" />, that corresponds to the penalty 
-due to the violation of the soft constraints [Shoham et al., 2010, p. 32]. 
+number of integer variables
+<img src="https://latex.codecogs.com/gif.latex?x_i\geq&space;0" title="x_i\geq 0" />. The optimization
+goal is then to try to maximize the scalar product
+<img src="https://latex.codecogs.com/gif.latex?c^\intercal&space;x" title="c^\intercal x" />, that corresponds to the penalty
+due to the violation of the soft constraints [Shoham et al., 2010, p. 32].
 
-This approach would be implemented using the java version of the Gurobi Software [Gurobi, ], which is 
-a mathematical solving tool for linear programming, in order to obtain at least a feasible solution for 
+This approach would be implemented using the java version of the Gurobi Software [Gurobi, ], which is
+a mathematical solving tool for linear programming, in order to obtain at least a feasible solution for
 the problem. One usage of this technique would be to let the ILP run after attaining a feasible solution
-to find if a longer run time will yield a more optimal solution. Alternatively, it could be used to find 
+to find if a longer run time will yield a more optimal solution. Alternatively, it could be used to find
 a feasible solution as a starting point for other techniques such as directed random search.
 
 <h5>4.2 Simulated Annealing</h5>
-This approach is a tested and tried method for solving combinatorial problems such as the travelling salesman 
-problem [Ceschia et al., 2018]. These problems are similar to the problem of timetable scheduling as there is a finite 
+This approach is a tested and tried method for solving combinatorial problems such as the travelling salesman
+problem [Ceschia et al., 2018]. These problems are similar to the problem of timetable scheduling as there is a finite
 set of feasible discrete solutions, the possible timetables. The space of these possible solutions is large enough
-that searching exhaustively for the global optimum becomes infeasible. 
+that searching exhaustively for the global optimum becomes infeasible.
 
 Simulated annealing starts solving a problem from an arbitrary initial solution
 <img src="https://latex.codecogs.com/gif.latex?x" title="x" />  and tries to improve it. For this
-a solution that is similar to the current solution 
+a solution that is similar to the current solution
 <img src="https://latex.codecogs.com/gif.latex?y" title="y" /> is selected randomly in the local neighborhoood and its quality
- is determined by the cost function 
-<img src="https://latex.codecogs.com/gif.latex?f" title="f" />. The new solution is chosen with some probability that is 
-dependent on its quality. However, this also 
+ is determined by the cost function
+<img src="https://latex.codecogs.com/gif.latex?f" title="f" />. The new solution is chosen with some probability that is
+dependent on its quality. However, this also
 means that a worse solution can be selected, but this is intended. Moving to a worse solution allows this method
-to escape local optima and search the solution space more thoroughly. The probability 
+to escape local optima and search the solution space more thoroughly. The probability
 <p align="center">
 	<img src="https://latex.codecogs.com/gif.latex?p=\min\left(1,\left(-\frac{f(y)-f(x))}{T}\right)\right)" title="p=\min\left(1,\left(-\frac{f(y)-f(x))}{T}\right)\right)" />
 </p>
 of accepting a solution that is worse than the current one decreases over time ensuring that the method converges to an optimum.
-In simulated annealing this is solved by reducing the temperature 
-<img src="https://latex.codecogs.com/gif.latex?T" title="T" /> monotonously to 
-<img src="https://latex.codecogs.com/gif.latex?0" title="0" />. 
-An approach for this project would be to use simulated annealing to optimise for the timetable scheduling problem. 
-For this a way must be found to represent this problem in terms of a function to be optimised and its parameters, 
-or solutions, and a way for simulated annealing to find a solution that is close to the current one. The function 
-to be optimised can be defined in terms of the weight of constraints that are violated by a solution. A solution 
-that violates a lot of constraints will get a higher cost than a solution that satisfies them. Hard constraints 
+In simulated annealing this is solved by reducing the temperature
+<img src="https://latex.codecogs.com/gif.latex?T" title="T" /> monotonously to
+<img src="https://latex.codecogs.com/gif.latex?0" title="0" />.
+An approach for this project would be to use simulated annealing to optimise for the timetable scheduling problem.
+For this a way must be found to represent this problem in terms of a function to be optimised and its parameters,
+or solutions, and a way for simulated annealing to find a solution that is close to the current one. The function
+to be optimised can be defined in terms of the weight of constraints that are violated by a solution. A solution
+that violates a lot of constraints will get a higher cost than a solution that satisfies them. Hard constraints
 should have a high cost compared to the soft constraint to keep the solutions in the feasible region of the search space.
-Lastly, the method requires a way to transition from a solution to the next. Papers [Ceschia et al., 2018] and [Akkan et al., 2018] 
-use various swap moves to transition between solutions. A swap is merely an exchange of some parts of the solution 
-with another. For example, two lectures can switch the periods in which they are taught. These methods can be eventually 
+Lastly, the method requires a way to transition from a solution to the next. Papers [Ceschia et al., 2018] and [Akkan et al., 2018]
+use various swap moves to transition between solutions. A swap is merely an exchange of some parts of the solution
+with another. For example, two lectures can switch the periods in which they are taught. These methods can be eventually
 be supplemented with new methods.
 
 <h5>4.3 Genetic Algorithms</h5>
-A genetic algorithm belongs to the class of local search algorithms, that are used to solve optimization problems. 
-It is initialized with a population of 
-<img src="https://latex.codecogs.com/gif.latex?k" title="k" /> individuals, that will reproduce and compete against each
- with respect to some fitness measure based on 
-<img src="https://latex.codecogs.com/gif.latex?c^\intercal&space;x" title="c^\intercal x" /> . 
-The population follows a repeated generation 
-cycle of fitness evaluation, selection, reproduction, crossover, and mutation [Russell et al., 2010, p. 126-128].
-The vector 
-<img src="https://latex.codecogs.com/gif.latex?x=(x_1,&space;..,&space;x_n)" title="x=(x_1, .., x_n)" /> of integer values 
-can be used for the genome representation in the genetic algorithm either
-in binary or real-valued form. This approach will be used in combination with an ILP, that would provide one or more 
-feasible solutions, which could be used for initialization of the genetic algorithm. The genetic algorithm would then 
-perform a localized search in order to fine-tune the integer parameters 
-<img src="https://latex.codecogs.com/gif.latex?x_i" title="x_i" /> so that an optimized solution with respect
-to the penalty of the soft constraints can be achieved. In the literature, a genetic algorithm was used for the
- problem of scheduling physicians in an emergency room [Puente, 2009, p. 1232-1242]. 
+A genetic algorithm is a type of directed randomised search that can be used to solve optimization problems such as improving a timetable.
+It works based on ideas taken from natural evolution and follows a cycle of fitness evaluation (competition), selection, crossover (breeding) and mutation [Russell et al., 2010, p. 126-128].
+It will start with a population of individuals. Each of these individuals will have some sort of genetic representation, or genome.
+In our problem, each individual is a schedule, and its genome is a representation of that schedule. The algorithm will pick the best individuals by competing them against each other.
+Our algorithm chooses which individuals are best by taking them in groups and seeing which produces the timetable with the least penalty. The winning individials will then be "bred" with other
+winning individuals using a process called crossover. This will make a new individual that is made up in part from the genome of both its parents. For example, the parent timetables in Fig 4
+may produce a child timetable as seen in Fig 5.The resulting children will then undergo mutation, where small random changes may be applied to there schedules with low probability.
+The algorithm will then have a new population of these children which it can use to repeat the process of evolution. One problem of creating schedules in this way is that the children made
+through crossover an mutation may have infeasible schedules. This is seen in Fig 5 where the orange and green course in the new timetable are overlapping. One successful method for fixing this
+problem is genetic repair [Puente, 2009, p. 1232-1242]. This will take the infeasible schedule, such as in Fig 5, and try to change it into a feasible one. This is done by moving the green class
+later in the day to produce the timetable seen in Fig 6. For our algorithm we used simulated annealing to find a similar feasible timetable to the inital one made by the genetic algo
 
 <figure style="display: inline-block;text-align: center;">
 	<img style="float: left; padding-left: 200px; vertical-align: top;" src="fig/gen_01.png" alt="instances parameters" width="350" />
@@ -319,7 +314,7 @@ URL = "https://doi.org/10.1080/08886504.1994.10782112",
 eprint = "https://doi.org/10.1080/08886504.1994.10782112"
 }
 
-@proceedings{decomposition, 
+@proceedings{decomposition,
 title="Decomposition of University Course Timetabling
 A Systematic Study of Subproblems and their Complexities",
 organization="Proceedings of the 12th International Conference on the Practice and Theory of Automated Timetabling",
