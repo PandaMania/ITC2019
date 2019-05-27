@@ -165,9 +165,23 @@ the problem. One usage of this technique would be to let the ILP run after attai
 to find if a longer run time will yield a more optimal solution. Alternatively, it could be used to find
 a feasible solution as a starting point for other techniques such as directed random search.
 
-<h5>4.2 Simulated Annealing</h5>
-This approach is a tested and tried method for solving combinatorial problems such as the travelling salesman
-problem [Ceschia et al., 2018]. These problems are similar to the problem of timetable scheduling as there is a finite
+<h5> 4.1 Integer Linear Programming (alt)</h5>
+	The first approach we look at is Integer Linear Programming (ILP). ILP is a technique that takes a linear function
+	and tries to either maximise or minimise it according to some constraints.One approach to the problem would be to
+	try to minimise all the penalties and satisfy every possible constraint. However this would take far too long
+	to compute. Instead we focus only on finding a feasible solution (a solution that satisfies the hard constraints)
+	so that another technique can look to improve upon it.
+	We use an academic licence for a commercial solver as it is faster than anything we ourselves could design and modelling
+	the problem on its own is difficult enough. We focus on the constraints that are hard, for example adding a constraint
+	to say that no two classes can occur in the same room at the same time. To do this we check which classes can occur in the same room
+	at the same time and add a constraint saying that the binary value assigned to class a at time t and room x (0 if it
+	doesn't occur here and 1 if it does) + the binary value assigned to class b at time t and room x is less than 2. I.e.
+	they both can't be scheduled at these times but one of them may. By applying rules such as these we are able to model it as an ILP
+	and as such can run the commercial solver on it to find feasible schedules.
+
+	<h5>4.2 Simulated Annealing</h5>
+This approach is a tested and tried method for solving combinatorial problems such as the travelling salesman 
+problem [Ceschia et al., 2018]. These problems are similar to the problem of timetable scheduling as there is a finite 
 set of feasible discrete solutions, the possible timetables. The space of these possible solutions is large enough
 that searching exhaustively for the global optimum becomes infeasible.
 

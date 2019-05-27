@@ -1,16 +1,26 @@
 package ILP;
 
+import Parsing.InstanceParser;
+import entities.Instance;
 import entities.course.Course;
 import entities.course.CourseTime;
+import entities.distribution.Distribution;
 import gurobi.*;
 
 
 import java.util.ArrayList;
 import java.util.BitSet;
+import java.util.HashMap;
+import java.util.List;
 
-public class Overlaps {
+public class addingConstraints {
 
-    public void computeAllOverlaps(ArrayList<roomTimePairs> times, GRBModel model){
+
+    FindSameAttendees findSameAttendees= new FindSameAttendees();
+
+
+
+    public void computeAllOverlaps(ArrayList<roomTimePairs> times, GRBModel model,ArrayList<ArrayList<Integer>> sameAttendance, Instance instance ){
     if(times!=null) {
 
         for(int j=0; j<times.size();j++) {
@@ -18,7 +28,7 @@ public class Overlaps {
                 if(times.get(j)!=null){
                     orderbystart(times.get(j).grBtimeObject);
                     for (int i = 0; i < times.get(j).grBtimeObject.size(); i++) {
-                        getforX(times.get(k).grBtimeObject, times.get(j).grBtimeObject.get(i), i+1, times.get(k).grBroomObject, times.get(j).grBroomObject.get(0), model);
+                        OverlapwithX(times.get(k).grBtimeObject, times.get(j).grBtimeObject.get(i), i+1, times.get(k).grBroomObject, times.get(j).grBroomObject.get(0), model, sameAttendance, instance);
                      //   getforX(times.get(j).grBtimeObject, times.get(j).grBtimeObject.get(i), i + 1);
 
                     }
@@ -37,38 +47,8 @@ public class Overlaps {
 
 
 
-    public ArrayList<OverlappingPair> getforX(ArrayList<GRBtimeObject> times, GRBtimeObject X, int positionY){
-        ArrayList<OverlappingPair> ListX= new ArrayList<OverlappingPair>();
-        Boolean keepSearch=true;
-        int StartX= X.time.start;
-        int endX= StartX+ X.time.length;
-        GRBLinExpr overlapConstraint;
-        while(keepSearch){
-            if(positionY>=times.size()-1){
-                break;
-            }
-            if(times.get(positionY).courseClass!=X.courseClass){
-                if(times.get(positionY).getTime().start < endX){
-                    overlapConstraint= new GRBLinExpr();
-                    overlapConstraint.addTerm(1, times.get(positionY).getGrbVar());
-                    overlapConstraint.addTerm(1,X.getGrbVar());
 
-                   // overlapConstraint.addTerm(1,);
-                    
-                    //ListX.add(new OverlappingPair(X, times.get(positionY)));
-                }else
-                    keepSearch=false;
-
-            }
-            positionY++;
-
-
-
-        }
-        return ListX;
-    }
-
-    public void getforX(ArrayList<GRBtimeObject> times, GRBtimeObject X, int positionY, ArrayList<GRBroomObject> grBroomObject, GRBroomObject grbVar, GRBModel model){
+    public void OverlapwithX(ArrayList<GRBtimeObject> times, GRBtimeObject X, int positionY, ArrayList<GRBroomObject> grBroomObject, GRBroomObject grbVar, GRBModel model, ArrayList<ArrayList<Integer>> sameAttendance, Instance instance){
        // System.out.println(grBroomObject);
         ArrayList<OverlappingPair> ListX= new ArrayList<OverlappingPair>();
         Boolean keepSearch=true;
@@ -116,8 +96,34 @@ public class Overlaps {
                             }
                         }
                     }
-                }else{
-                    System.out.println("fuck you");
+                    if(sameAttendance!=null){
+                        for(int x=0; x<sameAttendance.size(); x++){
+                            for(int y=0; y<sameAttendance.get(x).size(); y++){
+                                for(int k=0; k<sameAttendance.get(x).size(); k++){
+                                    if(times.get(positionY).courseClass.id.equals(sameAttendance.get(x).get(y)) && X.courseClass.id.equals(sameAttendance.get(x).get(y)) ){
+                                        // now do the checkif
+                                        if(i_end+ instance.distances[Integer.parseInt(times.get(positionY).courseClass.id)][Integer.parseInt(X.courseClass.id)]<=X.time.start ||
+                                                j_end + instance.distances[Integer.parseInt(X.courseClass.id)][Integer.parseInt(times.get(positionY).courseClass.id)]<= times.get(positionY).time.start
+                                                ){
+                                            overlapConstraint = new GRBLinExpr();
+                                            overlapConstraint.addTerm(1, times.get(positionY).grbVar);
+                                            overlapConstraint.addTerm(1, X.grbVar);
+                                            overlapConstraint.addTerm(1, grbVar.grbVar);
+                                            overlapConstraint.addTerm(1, grBroomObject.get(0).grbVar);
+                                            try {
+                                                model.addConstr(overlapConstraint, GRB.LESS_EQUAL, 3, "Overlap" +" first" + times.get(positionY).toString() + " second " +   X.toString() + " room "+ grbVar.room + " other room " +grBroomObject.get(0).room  );
+                                            } catch (GRBException e) {
+                                                System.out.println("Error code: " + e.getErrorCode() + ". " +
+                                                        e.getMessage());
+                                            }}
+
+                                    }
+                                }
+                            }
+                    }
+
+                    }
+
                 }
                                 //ListX.add(new OverlappingPair(X, times.get(positionY)));
             }
@@ -210,6 +216,36 @@ public class Overlaps {
             whole.set(wholeIndex, rest.get(i));
             wholeIndex++;
         }
+    }
+
+
+    public HashMap<String, ArrayList<ArrayList<Integer>>> dealwithDistributions(List<Distribution> distributions, Instance instance, String name){
+       HashMap<String, ArrayList<ArrayList<Integer>>> toreturn= new HashMap<>();
+        ArrayList<ArrayList<Integer>> workingwith= new ArrayList<>();
+        for(int i=0; i<instance.distributions.size();i++){
+            String current= instance.distributions.get(i).type;
+            if(current== name){
+                if(toreturn.containsKey(current)){
+                   workingwith= toreturn.get(current);
+                   workingwith.add(instance.distributions.get(i).idInDistribution);
+                   toreturn.replace(current,workingwith);
+                }else{
+                    workingwith.add( instance.distributions.get(i).idInDistribution);
+                    toreturn.put(current, workingwith);
+                }
+
+
+
+            }else if(current== "DifferentDays"){
+
+            }
+
+
+
+
+
+        }
+        return toreturn;
     }
 
 }
