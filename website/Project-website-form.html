@@ -105,8 +105,8 @@ but may be asked for to ensure that there was no cheating.
 
 This table shows some parameters of the different problem instances released so far by the competiiton.
 <figure style="display: inline-block;text-align: center;">
-	<img style="float: left; padding-left: 200px; vertical-align: top;" src="fig/Instances.png" alt="instances parameters" width="550" />
-	<figcaption style="padding-left: 200px;">Table 1. - Some parameters of each instance</figcaption>
+	<img style="float: left; padding-left: 150px; vertical-align: top;" src="fig/Instances.png" alt="instances parameters" width="550" />
+	<figcaption style="padding-left: 150px;">Table 1. - Some parameters of each instance</figcaption>
 </figure>
 
 </p>
@@ -121,7 +121,7 @@ This table shows some parameters of the different problem instances released so 
 <li>Can the linear programming approach provide a solution (for each of the instances provided by the competition) that satisfies all the hard constraints of the problem? </li>
 <li>Will the simulated annealing be able to build adequately on top of the linear programming solutions to look for better solution of the remaining soft constraints? </li>
 <li>Will the genetic programmming be able to build adequately on top of the linear programming solutions to look for better solution of the remaining soft constraints? </li>
-<li>Does there exist a point at which the problem (within our context) becomes untractable for our methods? How does ths vary for our methods? Furthermore, how does the solution search space differ for the genetic algorithm and the simulated annealing when building on top of the linear programming solution?</li>
+<li>Does there exist a point at which the problem (within our context) becomes untractable for our methods? How does this vary for our methods? Furthermore, how does the solution search space differ for the genetic algorithm and the simulated annealing when building on top of the linear programming solution?</li>
 </ul>
 
 </p>
@@ -159,7 +159,7 @@ goal is then to try to maximize the scalar product
 <img src="https://latex.codecogs.com/gif.latex?c^\intercal&space;x" title="c^\intercal x" />, that corresponds to the penalty
 due to the violation of the soft constraints [Shoham et al., 2010, p. 32].
 
-This approach would be implemented using the java version of the Gurobi Software [Gurobi, ], which is
+This approach would be implemented using the java version of the Gurobi Software [Gurobi, a], which is
 a mathematical solving tool for linear programming, in order to obtain at least a feasible solution for
 the problem. One usage of this technique would be to let the ILP run after attaining a feasible solution
 to find if a longer run time will yield a more optimal solution. Alternatively, it could be used to find
@@ -184,16 +184,12 @@ This approach is a tested and tried method for solving combinatorial problems su
 problem [Ceschia et al., 2018]. These problems are similar to the problem of timetable scheduling as there is a finite 
 set of feasible discrete solutions, the possible timetables. The space of these possible solutions is large enough
 that searching exhaustively for the global optimum becomes infeasible.
-
 Simulated annealing starts solving a problem from an arbitrary initial solution
 <img src="https://latex.codecogs.com/gif.latex?x" title="x" />  and tries to improve it. For this
 a new solution <img src="https://latex.codecogs.com/gif.latex?y" title="y" />  that is similar to the current solution
 is selected randomly from nearby solutions and its quality is determined by the cost function
 <img src="https://latex.codecogs.com/gif.latex?f" title="f" />. The new solution is chosen with some probability that is
-dependent on its quality. However, this also
-means that a worse solution can be selected, but this is intended. Moving to a worse solution allows this method
-to escape local optima and search the solution space more thoroughly. So if there is a timetable that is better than all timetables near to it,
-but much worse than other possible timetables, the search is able to escape its influence so it can find these better solutions. The probability
+dependent on its quality. The probability
 <p align="center">
 	<img src="https://latex.codecogs.com/gif.latex?p=\min\left(1,\left(-\frac{f(y)-f(x))}{T}\right)\right)" title="p=\min\left(1,\left(-\frac{f(y)-f(x))}{T}\right)\right)" />
 </p>
@@ -202,15 +198,20 @@ In simulated annealing this is solved by reducing the temperature
 <img src="https://latex.codecogs.com/gif.latex?T" title="T" /> monotonously to
 <img src="https://latex.codecogs.com/gif.latex?0" title="0" />.
 An approach for this project would be to use simulated annealing to optimise for the timetable scheduling problem.
-For this a way must be found to represent this problem in terms of a function to be optimised and its parameters,
-or solutions, and a way for simulated annealing to find a solution that is close to the current one. The function
-to be optimised can be defined in terms of the weight of constraints that are violated by a solution. A solution
-that violates a lot of constraints will get a higher cost than a solution that satisfies them. Hard constraints
-should have a high cost compared to the soft constraint to keep the solutions in the feasible region of the search space.
+We will use the cost associated with vialoating a constraint as target function <img src="https://latex.codecogs.com/gif.latex?f" title="f" />.
 Lastly, the method requires a way to transition from a solution to the next. Papers [Ceschia et al., 2018] and [Akkan et al., 2018]
 use various swap moves to transition between solutions. A swap is merely an exchange of some parts of the solution
 with another. For example, two lectures can switch the periods in which they are taught. These methods can be eventually
 be supplemented with new methods.
+
+<p style="clear: both;">
+<figure style="display: inline-block;text-align: center;">
+	<img style="float: left; padding-left: 200px; vertical-align: top;" src="fig/Simulated_Annealing.gif" alt="intro timetabling" width="500" />
+	<figcaption style="padding-left: 200px;">Fig 4. - Process of Simulated Annealing, <br/>
+	here maximizing target function [Wikipedia, 2013a]</figcaption>
+</figure>
+</p>
+
 
 <h5>4.3 Genetic Algorithms</h5>
 A genetic algorithm is a type of directed randomised search that can be used to solve optimization problems such as improving a timetable.
@@ -218,26 +219,26 @@ It works based on ideas taken from natural evolution and follows a cycle of fitn
 It will start with a population of individuals. Each of these individuals will have some sort of genetic representation, or genome.
 In our problem, each individual is a schedule, and its genome is a representation of that schedule. The algorithm will pick the best individuals by competing them against each other.
 Our algorithm chooses which individuals are best by taking them in groups and seeing which produces the timetable with the least penalty. The winning individials will then be "bred" with other
-winning individuals using a process called crossover. This will make a new individual that is made up in part from the genome of both its parents. For example, the parent timetables in Fig 4
-may produce a child timetable as seen in Fig 5.The resulting children will then undergo mutation, where small random changes may be applied to there schedules with low probability.
+winning individuals using a process called crossover. This will make a new individual that is made up in part from the genome of both its parents. For example, the parent timetables in Fig 5
+may produce a child timetable as seen in Fig 6.The resulting children will then undergo mutation, where small random changes may be applied to there schedules with low probability.
 The algorithm will then have a new population of these children which it can use to repeat the process of evolution. One problem of creating schedules in this way is that the children made
-through crossover an mutation may have infeasible schedules. This is seen in Fig 5 where the orange and green course in the new timetable are overlapping. One successful method for fixing this
-problem is genetic repair [Puente, 2009, p. 1232-1242]. This will take the infeasible schedule, such as in Fig 5, and try to change it into a feasible one. This is done by moving the green class
-later in the day to produce the timetable seen in Fig 6. For our algorithm we used simulated annealing to find a similar feasible timetable to the inital one made by the genetic algorithm.
-
+through crossover an mutation may have infeasible schedules. This is seen in Fig 6 where the orange and green course in the new timetable are overlapping. One successful method for fixing this
+problem is genetic repair [Puente, 2009, p. 1232-1242]. This will take the infeasible schedule, such as in Fig 6, and try to change it into a feasible one. This is done by moving the green class
+later in the day to produce the timetable seen in Fig 7. For our algorithm we used simulated annealing to find a similar feasible timetable to the inital one made by the genetic algorithm.
+<br/>
 <figure style="display: inline-block;text-align: center;">
 	<img style="float: left; padding-left: 200px; vertical-align: top;" src="fig/gen_01.png" alt="instances parameters" width="350" />
-	<figcaption style="padding-left: 200px;">Fig 4. - Genetic parents</figcaption>
+	<figcaption style="padding-left: 200px;">Fig 5. - Genetic parents</figcaption>
 </figure>
 
 <figure style="display: inline-block;text-align: center;">
 	<img style="float: left; padding-left: 200px; vertical-align: top;" src="fig/gen_02.png" alt="instances parameters" width="350" />
-	<figcaption style="padding-left: 200px;">Fig 5. - Generating offspring <br/> with constraint violation</figcaption>
+	<figcaption style="padding-left: 200px;">Fig 6. - Generating offspring <br/> with constraint violation</figcaption>
 </figure>
 
 <figure style="display: inline-block;text-align: center;">
 	<img style="float: left; padding-left: 200px; vertical-align: top;" src="fig/gen_03.png" alt="instances parameters" width="350" />
-	<figcaption style="padding-left: 200px;">Fig 6. - Genetic repair</figcaption>
+	<figcaption style="padding-left: 200px;">Fig 7. - Genetic repair</figcaption>
 </figure>
 
 </div>
@@ -251,8 +252,8 @@ Below is Gantt chart, that visualizes our time management and planning for this 
 
 <p style="clear: both;">
 <figure style="display: inline-block;text-align: center;">
-	<img style="float: left; padding-left: 20px; vertical-align: top;" src="fig/gantt_02.png" alt="intro timetabling" width="700" />
-	<figcaption style="padding-left: 20px;">Fig 7. - Gantt chart</figcaption>
+	<img style="float: left; padding-left: 40px; vertical-align: top;" src="fig/gantt_02.png" alt="intro timetabling" width="700" />
+	<figcaption style="padding-left: 40px;">Fig 8. - Gantt chart</figcaption>
 </figure>
 </p>
 
@@ -263,16 +264,13 @@ Below is Gantt chart, that visualizes our time management and planning for this 
 
 <div style="width: 1000px;">
 <p style="clear: both; float: left;" >
-<h4>5 Main outcomes</h4>
-
-*** [Is this supposed to be so far, or at the end?]*** //Does it conflict with Objectives?
-<h5>5.1 Progress so far</h5>
-***What section should this be in?***
+<h4>6 Main outcomes</h4>
+<h5>6.1 Progress so far</h5>
 <ul>
-	<li>Java implementation LP solver implemented and working with Gurobi</li>
-    <li>LP solver provides solution for most simple of test instances</li>
-	<li>LP solver provides needs xxxx to scale</li>
-    <li>Simulated annealing program waiting for a feasible solution from the LP to be tested</li>
+	<li>Developed a parser in java that extracts all the parameters and conditions from the XML file describing the problem (usually ranging from 5,000 to 200,000 lines). The parser creates a java object which the other methods can work with to search for a solution. </li>
+	<li>Developed a tool to create an ILP description of the Java object with the problem parameters. The tool uses the Gurobi package to look for a solution to the problem once it is in the right format.</li>
+    <li>Currently the ILP solver provides solution for most simple of test instances.</li>
+    <li>Developed a simulated annealing implementation in Java. We are waiting for a feasible solution from the ILP to the larger instances so that we can test it.</li>
 	<li>Genetic algorithm near end of development, aimed to be ready in time for applying to feasible solution from the LP</li>
 </ul>
 </p>
@@ -283,27 +281,28 @@ Below is Gantt chart, that visualizes our time management and planning for this 
 
 <div style="width: 1000px;">
 <p style="clear: both; float: left;" >
-<h4>6 References</h4>
+<h4>7 References</h4>
 <!--mark [cite]: authors. year. title. proceedings/journal. Vol/pages. sources_doi. sources_url. accessed.-->
 
-Muller, T.,Rudova, H., &amp; Mullerova, Z. (2019). University course timetabling and International Timetabling Competition 2019. The International Series of Conferences on the Practice and Theory of Automated Timetabling. https://www.itc2019.org/papers/itc2019-patat2018.pdf.
+[Muller et al., 2019] Muller, T.,Rudova, H., &amp; Mullerova, Z. (2019). University course timetabling and International Timetabling Competition 2019. The International Series of Conferences on the Practice and Theory of Automated Timetabling. https://www.itc2019.org/papers/itc2019-patat2018.pdf.
 </br></br>
-Puente, J., Gómez, A., Fernández, I., &amp; Priore, P. (2009). Medical doctor rostering problem in a hospital emergency department by means of genetic algorithms. Computers &amp; Industrial Engineering. Vol. 56, p. 1232-1242. https://doi.org/10.1016/j.cie.2008.07.016. http://www.sciencedirect.com/science/article/pii/S0360835208001460.
+[Puente, 2009, p. 1232-1242] Puente, J., Gómez, A., Fernández, I., &amp; Priore, P. (2009). Medical doctor rostering problem in a hospital emergency department by means of genetic algorithms. Computers &amp; Industrial Engineering. Vol. 56, p. 1232-1242. https://doi.org/10.1016/j.cie.2008.07.016. http://www.sciencedirect.com/science/article/pii/S0360835208001460.
 </br></br>
-Ceschia, S. &amp; Schaerf, A. (2018). Solving the INRC-II Nurse Rostering Problem by Simulated Annealing based on Large Neighborhoods. Proceedings of the 12th International Conference on the Practice and Theory of Automated Timetabling. http://patatconference.org/patat2018/files/proceedings/paper46.pdf.
+[Ceschia et al., 2018] Ceschia, S. &amp; Schaerf, A. (2018). Solving the INRC-II Nurse Rostering Problem by Simulated Annealing based on Large Neighborhoods. Proceedings of the 12th International Conference on the Practice and Theory of Automated Timetabling. http://patatconference.org/patat2018/files/proceedings/paper46.pdf.
 </br></br>
-Akkan, C., &amp; Gülcü, A. (2018). A Bi-criteria Hybrid Genetic Algorithm with Robustness Objective for the Course Timetabling Problem. Proceedings of the 12th International Conference on the Practice and Theory of Automated Timetabling.
+[Akkan et al., 2018] Akkan, C., &amp; Gülcü, A. (2018). A Bi-criteria Hybrid Genetic Algorithm with Robustness Objective for the Course Timetabling Problem. Proceedings of the 12th International Conference on the Practice and Theory of Automated Timetabling.
 </br></br>
-Wickert, T. I., Neto, A. F. K., &amp; Buriol, L. S. (2018). An integer programming approach for the physician rostering problem. Proceedings of the 12th International Conference on the Practice and Theory of Automated Timetabling. http://patatconference.org/patat2018/files/proceedings/paper3.pdf.
+[Wickert et al., 2018] Wickert, T. I., Neto, A. F. K., &amp; Buriol, L. S. (2018). An integer programming approach for the physician rostering problem. Proceedings of the 12th International Conference on the Practice and Theory of Automated Timetabling. http://patatconference.org/patat2018/files/proceedings/paper3.pdf.
 </br></br>
-Ásgeirsson, E. I., &amp; Gunnarsdóttir, Þ. (2018). An Integer Programming Formulation for the Music School Timetabling Problem. Proceedings of the 12th International Conference on the Practice and Theory of Automated Timetabling. http://patatconference.org/patat2018/files/proceedings/paper18.pdf.
+[Ásgeirsson et al., 2018] Ásgeirsson, E. I., &amp; Gunnarsdóttir, Þ. (2018). An Integer Programming Formulation for the Music School Timetabling Problem. Proceedings of the 12th International Conference on the Practice and Theory of Automated Timetabling. http://patatconference.org/patat2018/files/proceedings/paper18.pdf.
 </br></br>
-Shoham, Y., &amp; Leyton-Brown, K. (2010). Multiagent Systems: Algorithmic, Game-Theoretic, and Logical Foundations. Cambridge University Press.
+[Shoham et al., 2010] Shoham, Y., &amp; Leyton-Brown, K. (2010). Multiagent Systems: Algorithmic, Game-Theoretic, and Logical Foundations. Cambridge University Press.
 </br></br>
-Russell, S., &amp; Norvig, P. (2010). Artificial Intelligence: A Modern Approach. Prentice Hall.
+[Russell et al., 2010] Russell, S., &amp; Norvig, P. (2010). Artificial Intelligence: A Modern Approach. Prentice Hall.
 </br></br>
-Gurobi. Gurobi Optimization - The State-of-the-Art Mathematical Programming Solver. http://www.gurobi.com/. accessed: 18/03/2019.
-
+[Gurobi, a] Gurobi. Gurobi Optimization - The State-of-the-Art Mathematical Programming Solver. http://www.gurobi.com/. accessed: 18/03/2019.
+</br></br> 
+[Wikipedia, 2013a] Wikipedia. File:Hill Climbing with Simulated Annealing.gif - Wikipedia. (2013). https://en.wikipedia.org/wiki/File:Hill_Climbing_with_Simulated_Annealing.gif.
 
 <!--
 ###############
@@ -344,7 +343,7 @@ author="Britta Herres and Heinz Schmitz",
 
 <div style="width: 1000px;">
 <p style="clear: both; float: left;" >
-<h4>7 Downloads</h4>
+<h4>8 Downloads</h4>
 
 <ul>
 <li><a href=”???” target=”_blank”>Final report</a></li>
