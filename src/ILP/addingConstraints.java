@@ -123,22 +123,25 @@ public class addingConstraints {
                     }
 
                     }
+                    if(i.start== j.start ) {
+                        if(i.weeks== "111111111" && j.weeks=="111111111" && i.days =="1111000" && i.start==192 && i.length== 22 && j.days =="1111000" && j.start==192 && j.length== 22){
+                            System.out.println(" look here you piece of shit " + grbVar.room + " " + grBroomObject.get(0).room);
+                        }
+                        overlapConstraint = new GRBLinExpr();
+                        overlapConstraint.addTerm(1, times.get(positionY).grbVar);
+                        overlapConstraint.addTerm(1, X.grbVar);
+                        overlapConstraint.addTerm(1, grbVar.grbVar);
+                        overlapConstraint.addTerm(1, grBroomObject.get(0).grbVar);
+                        try {
+                            model.addConstr(overlapConstraint, GRB.LESS_EQUAL, 3, "Overlap" + " first" + times.get(positionY).toString() + " second " + X.toString() + " room " + grbVar.room + " other room " + grBroomObject.get(0).room);
+                        } catch (GRBException e) {
+                            System.out.println("Error code: " + e.getErrorCode() + ". " +
+                                    e.getMessage());
+                        }
+                    }
 
                 }
                                 //ListX.add(new OverlappingPair(X, times.get(positionY)));
-            }
-            if(i.start== j.start & i.length== j.length ) {
-                overlapConstraint = new GRBLinExpr();
-                overlapConstraint.addTerm(1, times.get(positionY).grbVar);
-                overlapConstraint.addTerm(1, X.grbVar);
-                overlapConstraint.addTerm(1, grbVar.grbVar);
-                overlapConstraint.addTerm(1, grBroomObject.get(0).grbVar);
-                try {
-                    model.addConstr(overlapConstraint, GRB.LESS_EQUAL, 3, "Overlap" + " first" + times.get(positionY).toString() + " second " + X.toString() + " room " + grbVar.room + " other room " + grBroomObject.get(0).room);
-                } catch (GRBException e) {
-                    System.out.println("Error code: " + e.getErrorCode() + ". " +
-                            e.getMessage());
-                }
             }
 
           //  }

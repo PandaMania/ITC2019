@@ -4,14 +4,13 @@ package ILP;
 
 import Parsing.InstanceParser;
 import entities.Instance;
+import entities.course.Course;
+import entities.course.CourseTime;
 import entities.distribution.Overlap;
 import gurobi.*;
 
 import java.io.FileNotFoundException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 public class ILP {
     public static void main(String[] args){
@@ -96,7 +95,7 @@ public class ILP {
                                        objectiveFunc.addTerm(x.courses.get(j).configs.get(k).subparts.get(l).classes.get(m).times.get(n).penalty,timeLoop.get(n).getGrbVar());
                                        scheduledConstraint.addTerm(1,timeLoop.get(n).getGrbVar());
                                        Set<Integer> list= x.courses.get(j).configs.get(k).subparts.get(l).classes.get(m).roomPenalties.keySet();
-                                       Object[] finallist= list.toArray();
+
 
                                      /*  for(int y=0; y<list.size(); y++){
 
@@ -138,13 +137,30 @@ public class ILP {
 
                                        for(int u=0; u<x.rooms.get(n).unaivailableweeks.size(); u++){
                                            for(int t=0; t<timeLoop.size(); t++){
+                                              /* CourseTime i= timeLoop.get(t).time;
+                                               String una= x.rooms.get(n).unaivailableweeks.get(u);
+                                               //  if(times.get(positionY).courseClass!=X.courseClass){
+                                               BitSet a= BitSet.valueOf(i.days.getBytes());
+
+                                               BitSet b= BitSet.valueOf(i.weeks.getBytes());
+                                               b.and(BitSet.valueOf(una.));
+                                               int i_end = i.start+i.length;
+
+
+
+                                               if(a.cardinality()!=0) {
+                                                   if (b.cardinality() != 0) {
+                                                       if (i_end >= j.start) {
+                                                           if (j_end >= i.start) {
                                                if(timeLoop.get(t).time.equals( x.rooms.get(n).unaivailableweeks.get(u))){
                                                    unavailableConstraint= new GRBLinExpr();
                                                    unavailableConstraint.addTerm(1, timeLoop.get(t).grbVar);
+
                                                    unavailableConstraint.addTerm(1, roomLoop.get(n).grbVar);
                                                    model.addConstr(unavailableConstraint, GRB.LESS_EQUAL,1,"time " + timeLoop.get(t).getTime().toString() + " room " + roomLoop.get(n).room );
                                                }
-                                           }
+                                           }}}
+                                           */}
 
                                        }
 
@@ -197,8 +213,11 @@ public class ILP {
                if(sameAttendance== null){
                    System.out.println("its null");
                }
-              //  System.out.println("same attendace size= " + sameAttendance.size() );
-                    for(int i=0; i<x.rooms.size(); i++){
+              //  System.out.println("same attendance size= " + sameAttendance.size() );
+                    for(int i=1; i<=x.rooms.size(); i++){
+                        if(overlapCheck.get(i)==null){
+                            System.out.println("overlapcheck room " + i );
+                        }
                         O.computeAllOverlaps(overlapCheck.get(i), model, sameAttendance, x);
                     }
 
