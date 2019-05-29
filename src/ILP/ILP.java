@@ -29,7 +29,7 @@ public class ILP {
             try {
                 p = new InstanceParser(//"lums-sum17.xml");
                         //            p.parse("pu-cs-fal07.xml");
-                        "lums-sum17.xml");
+                        "tg-fal17.xml");
                 Instance x = p.parse();
                // System.out.println(x);
                 System.out.println("Courses= " +x.courses.size());
@@ -215,9 +215,9 @@ public class ILP {
                }
               //  System.out.println("same attendance size= " + sameAttendance.size() );
                     for(int i=1; i<=x.rooms.size(); i++){
-                        if(overlapCheck.get(i)==null){
+
                             System.out.println("overlapcheck room " + i );
-                        }
+
                         O.computeAllOverlaps(overlapCheck.get(i), model, sameAttendance, x);
                     }
 
@@ -249,6 +249,7 @@ public class ILP {
 
                                             }
                                       }
+
                             }
                         }
                     }
