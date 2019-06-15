@@ -4,10 +4,12 @@ import util.BitSets;
 
 import java.util.ArrayList;
 import java.util.BitSet;
+import java.util.Collections;
+import java.util.stream.Collectors;
 
 public class SolutionClass {
 
-    public BitSet students;
+    public ArrayList<SolutionStudent> students;
     public BitSet weeks;
     public BitSet days;
     public int classId;
@@ -18,19 +20,30 @@ public class SolutionClass {
     public int length;
 
     public SolutionClass(int nStudents, int nWeeks, int nDays) {
-        this.students = new BitSet(nStudents);
+        this.students = new ArrayList<>(nStudents);
         this.weeks = new BitSet(nWeeks);
         this.days = new BitSet(nDays);
     }
 
+    public SolutionClass() {
+        this.students = new ArrayList<>();
+        this.weeks = new BitSet();
+        this.days = new BitSet();
+    }
+
     // Copy Constructor
     public SolutionClass(SolutionClass aClass) {
-        this.students = (BitSet) aClass.students.clone();
+        students = new ArrayList<>();
+        for (SolutionStudent oldStudent : aClass.students) {
+            SolutionStudent newStudent = new SolutionStudent(oldStudent);
+            students.add(newStudent);
+        }
         this.weeks = (BitSet) aClass.weeks.clone();
         this.days = (BitSet) aClass.days.clone();
         this.classId = aClass.classId;
         this.roomId = aClass.roomId;
         this.start = aClass.start;
+        this.length = aClass.length;
     }
 
     // <class id="1" days="1010100" start="90" weeks="1111111111111" room="1">

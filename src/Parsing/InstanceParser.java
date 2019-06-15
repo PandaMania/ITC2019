@@ -2,7 +2,7 @@ package Parsing;
 
 import entities.*;
 import entities.course.Course;
-import entities.distribution.Distribution;
+import entities.distribution.*;
 
 import javax.xml.namespace.QName;
 import javax.xml.stream.XMLEventReader;
@@ -13,6 +13,7 @@ import javax.xml.stream.events.StartElement;
 import javax.xml.stream.events.XMLEvent;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.function.BiConsumer;
@@ -89,7 +90,25 @@ public class InstanceParser {
         }
 
         createDistanceMatrix();
+        AddImplicitContraints();
         return instance;
+    }
+
+    private void AddImplicitContraints() {
+        // Adds the implicit constraints
+        Distribution[] dists = new Distribution[]{
+        new ImplicitRooms(),
+        new ImplicitTimes(),
+        new ImplicitAvailability(),
+        new ImplicitOverlap()};
+        // Add all classes to all the implicit constraints
+        instance.getClasses().forEach(C->{
+            int classId = Integer.parseInt(C.id);
+            for (Distribution dist : dists) {
+                dist.idInDistribution.add(classId);
+            }
+        });
+        instance.distributions.addAll(Arrays.asList(dists));
     }
 
     private void createDistanceMatrix() {
@@ -162,9 +181,9 @@ public class InstanceParser {
     public static void main(String[] args) {
         InstanceParser p;
         try {
-            p = new InstanceParser(//"lums-sum17.xml");
+            p = new InstanceParser("lums-sum17.xml");
             //            p.parse("pu-cs-fal07.xml");
-                        "iku-fal17.xml");
+//                        "iku-fal17.xml");
             Instance x = p.parse();
             System.out.println(x);
 

@@ -20,8 +20,17 @@ public class SameAttendees extends Distribution {
         List<SolutionClass> classes = getClassInDistribution(solution);
 
         return forAny(classes, (Ci, Cj) -> {
-            int travel_ij = instance.distances[Ci.roomId][Cj.roomId];
-            int travel_ji = instance.distances[Cj.roomId][Ci.roomId];
+            // TODO: check what to do when room is not needed...
+            int travel_ji=0;
+            int travel_ij=0;
+            if(!instance.getClassForId(Ci.classId).roomNeeded || !instance.getClassForId(Cj.classId).roomNeeded){
+                travel_ij = 0;
+                travel_ji = 0;
+            } else{
+                travel_ij = instance.distances[Ci.roomId][Cj.roomId];
+                travel_ji = instance.distances[Cj.roomId][Ci.roomId];
+            }
+
 
             return  (Ci.start + Ci.length + travel_ij <= Cj.start) ||
                     (Cj.start + Cj.length + travel_ji <= Ci.start) ||

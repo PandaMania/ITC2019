@@ -1,6 +1,7 @@
 package Parsing;
 
 import entities.course.*;
+import util.BitSets;
 
 import javax.xml.namespace.QName;
 import javax.xml.stream.XMLEventReader;
@@ -69,9 +70,9 @@ public class CourseParser {
                     //<time days="1111000" start="198" length="22" weeks="111111111" penalty="12"/>
                     CourseTime time = new CourseTime();
                     Attribute daysAttr = startElement.getAttributeByName(QName.valueOf("days"));
-                    time.days = daysAttr.getValue();
+                    time.days = BitSets.fromString(daysAttr.getValue());
                     Attribute weeksAttr = startElement.getAttributeByName(QName.valueOf("weeks"));
-                    time.weeks = weeksAttr.getValue();
+                    time.weeks = BitSets.fromString(weeksAttr.getValue());
 
                     Attribute lengthAttr = startElement.getAttributeByName(QName.valueOf("length"));
                     time.length = Integer.parseInt(lengthAttr.getValue());

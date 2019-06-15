@@ -1,10 +1,12 @@
 package entities.course;
 
 
+import java.util.BitSet;
+
 public class CourseTime {
-    public String days;
+    public BitSet days;
     public int start;
     public int length;
-    public String weeks;
+    public BitSet weeks;
     public int penalty;
 }

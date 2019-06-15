@@ -2,8 +2,10 @@ package entities.distribution;
 
 import entities.Instance;
 import entities.Solution;
+import entities.SolutionClass;
 
 import java.util.Collection;
+import java.util.List;
 
 public class MaxBlock extends Distribution {
 
@@ -18,6 +20,7 @@ public class MaxBlock extends Distribution {
 
     @Override
     public boolean validate(Instance instance, Solution solution) {
-        return false;
+        List<SolutionClass> classes = getClassInDistribution(solution);
+        return forAll(classes, C->{return false;});
     }
 }

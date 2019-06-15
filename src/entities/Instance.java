@@ -4,10 +4,7 @@ import entities.course.Course;
 import entities.course.CourseClass;
 import entities.distribution.Distribution;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -38,7 +35,7 @@ public class Instance {
         if (flattened == null) {
             flattened = getClasses().collect(Collectors.toList());
         }
-        return flattened.get(id);
+        return flattened.get(id-1);
     }
 
     @Override
@@ -49,5 +46,14 @@ public class Instance {
                 rooms.size() +          " rooms, " +
                 distributions.size() +  " distributions" +
                 '}';
+    }
+
+    // TODO: maybe we can optimize this by using the index as we are reading them in order.
+    public Room getRoom(int assignedRoom) {
+        Optional<Room> first = rooms.stream().filter(r -> r.id == assignedRoom).findFirst();
+        if (first.isPresent()) {
+            return first.get();
+        }
+        throw new IllegalArgumentException("No room for id: "+assignedRoom);
     }
 }
