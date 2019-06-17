@@ -111,7 +111,7 @@ public class combiOverlap {
                         //System.out.println("third");
                         start = true;
                     } else if (orderend < orderedByEnd.size() && (orderedByEnd.get(orderend).courseTime.start + orderedByEnd.get(orderend).courseTime.length) == timer && start) {
-                     //   addconstraint(current, model);
+                        addconstraint(current, model);
 
                         current.remove(orderedByEnd.get(orderend));
  //    System.out.println("after removing" + current.size());
@@ -138,7 +138,7 @@ public class combiOverlap {
 
             }
             if (current.size() > 0) {
-               // addconstraint(current, model);
+                //addconstraint(current, model);
             }
 
             //  System.out.println("current size" + current.size());
