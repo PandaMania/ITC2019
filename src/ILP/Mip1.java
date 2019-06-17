@@ -3,15 +3,20 @@ package ILP;
 
 import Parsing.InstanceParser;
 import entities.Instance;
+import entities.Solution;
+import entities.SolutionClass;
 import entities.course.Course;
 import entities.course.CourseTime;
 import entities.distribution.Overlap;
 import gurobi.*;
+import util.BitSets;
 
 import java.io.FileNotFoundException;
 import java.util.*;
 
 public class Mip1 {
+
+
     public static void main(String[] args) {
         try {
 
@@ -28,9 +33,9 @@ public class Mip1 {
             addingConstraints O= new addingConstraints();
             combiOverlap combi = new combiOverlap();
             try {
-                p = new InstanceParser(//"lums-sum17.xml");
+                p = new InstanceParser("lums-sum17.xml");
                         //            p.parse("pu-cs-fal07.xml");
-                        "tg-fal17.xml");
+                       // "tg-fal17.xml");
                 Instance x = p.parse();
                 // System.out.println(x);
                 System.out.println("Courses= " + x.courses.size());
@@ -73,6 +78,12 @@ public class Mip1 {
                                     for (int n = 0; n < x.courses.get(j).configs.get(k).subparts.get(l).classes.get(m).times.size(); n++) {
                                     //into the number of times
                                     //TODO need to ensure that the unavailable weeks is accounted for here. If its unavailable we just increment n.
+
+                                     //   System.out.println(x.rooms.get((Integer) finallist[o]).id + " ==== " + (Integer) finallist[o] );
+
+                                            if(combi.singlecheck(x.rooms.get(o).unaivailableweeks,x.courses.get(j).configs.get(k).subparts.get(l).classes.get(m).times.get(n)) ){
+                                                break;
+                                            }
 
                                         // we're now into the rooms too
                                         timeLoop.add(new GRBcombi(model.addVar(0, 1, 0, GRB.BINARY, "course " + x.courses.get(j).id + "," +

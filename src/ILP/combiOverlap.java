@@ -1,10 +1,13 @@
 package ILP;
 
 import entities.Instance;
+import entities.Unavailability;
+import entities.course.CourseTime;
 import gurobi.GRB;
 import gurobi.GRBException;
 import gurobi.GRBLinExpr;
 import gurobi.GRBModel;
+import util.BitSets;
 
 import java.util.ArrayList;
 import java.util.BitSet;
@@ -316,6 +319,37 @@ public class combiOverlap {
             whole.set(wholeIndex, rest.get(i));
             wholeIndex++;
         }
+    }
+    public boolean singlecheck(ArrayList<Unavailability> first, CourseTime second) {
+     boolean nooverlaps= true;
+        for(int i=0; i<first.size(); i++){
+
+            BitSet j_weeks= BitSet.valueOf(second.weeks.getBytes());
+
+
+            BitSet j_days= BitSet.valueOf(second.days.getBytes());
+
+
+            BitSet a = BitSets.and(first.get(i).days, j_days);
+
+            BitSet b = BitSets.and(first.get(i).weeks, j_weeks);
+
+            int i_end = first.get(i).start+first.get(i).length;
+            int j_end = second.start+second.length;
+
+            if(a.cardinality()==0){
+
+            }else if(b.cardinality()==0){
+
+            }else if(i_end<= first.get(i).start){
+
+            }else if(j_end<= second.start){
+
+            }else nooverlaps=false;
+        }
+        return nooverlaps;
+
+
     }
 
 }

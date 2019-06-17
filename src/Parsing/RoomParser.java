@@ -8,6 +8,7 @@ import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.events.Attribute;
 import javax.xml.stream.events.StartElement;
 import javax.xml.stream.events.XMLEvent;
+import java.util.BitSet;
 
 public class RoomParser {
 
@@ -46,7 +47,7 @@ public class RoomParser {
                 Attribute daysAttr= startElement.getAttributeByName(QName.valueOf("days"));
                 String   days= daysAttr.getValue();
 
-                room.unaivailableweeks.add("weeks= " +weeks + " ,length= "+ length + " ,start= " + start + " ,days= " + days);
+                room.unaivailableweeks.add(new Unavailability(BitSet.valueOf(weeks.getBytes()),BitSet.valueOf(days.getBytes()), Integer.parseInt(length),Integer.parseInt(start)));
 
             } else{
                 throw new IllegalArgumentException("Unexpected element encountered");

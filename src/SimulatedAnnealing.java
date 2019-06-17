@@ -11,7 +11,8 @@ import java.util.stream.Stream;
 import java.util.Collections;
 
 public class SimulatedAnnealing {
-
+}
+/*
     private final Instance instance;
     private int numClasses;
     private int numRooms;
