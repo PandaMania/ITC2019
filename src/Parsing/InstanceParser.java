@@ -181,9 +181,11 @@ public class InstanceParser {
     public static void main(String[] args) {
         InstanceParser p;
         try {
-            p = new InstanceParser("lums-sum17.xml");
-            //            p.parse("pu-cs-fal07.xml");
+            p = new InstanceParser(
+//                    "lums-sum17.xml");
+                        "pu-cs-fal07.xml");
 //                        "iku-fal17.xml");
+
             Instance x = p.parse();
             System.out.println(x);
 

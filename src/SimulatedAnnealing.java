@@ -6,6 +6,7 @@
 
 import Parsing.*;
 import entities.*;
+import entities.course.CourseTime;
 import entities.distribution.ImplicitAvailability;
 import util.*;
 import entities.course.CourseClass;
@@ -13,7 +14,10 @@ import entities.distribution.Distribution;
 
 import java.io.*;
 import java.util.*;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadLocalRandom;
+import java.util.concurrent.ThreadPoolExecutor;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
@@ -36,6 +40,7 @@ public class SimulatedAnnealing {
     private double hardPenalty;
     private ArrayList<CourseClass> courseClasses;
     private ArrayList<ArrayList<ArrayList<String>>> courseTimes;
+    private ExecutorService pool = Executors.newFixedThreadPool(4);;
 
     // Constructor:
     public SimulatedAnnealing(Instance instance) {
@@ -48,7 +53,7 @@ public class SimulatedAnnealing {
         this.bitFlipsStudents = (int) Math.max(1.0, 0.75 * this.numStudents);    // specify how many of the bits should be changed
         this.hardPenalty = 3.0 * this.getMaxPenalty(this.instance);
         this.courseClasses = this.getCourseClasses();
-        this.courseTimes = this.getCourseTimes();
+//        this.courseTimes = this.getCourseTimes();
     }
 
     private ArrayList<ArrayList<ArrayList<String>>> getCourseTimes() {
@@ -330,11 +335,18 @@ public class SimulatedAnnealing {
             case 1:
                 // change time (done):
                 // TODO: maybe change this to choose times that are available (like in the rooms)
-                int selectedCourseIdx = neighbor.classes.get(indexSolution).classId - 1;
-                int idxNewTime = ThreadLocalRandom.current().nextInt(0, this.courseTimes.get(selectedCourseIdx).size());
-                neighbor.classes.get(indexSolution).days = this.getBitSetFromString(this.courseTimes.get(selectedCourseIdx).get(idxNewTime).get(0));
-                neighbor.classes.get(indexSolution).weeks = this.getBitSetFromString(this.courseTimes.get(selectedCourseIdx).get(idxNewTime).get(1));
-                neighbor.classes.get(indexSolution).start = Integer.parseInt(this.courseTimes.get(selectedCourseIdx).get(idxNewTime).get(2));
+//                int selectedCourseIdx = neighbor.classes.get(indexSolution).classId - 1;
+//                int idxNewTime = ThreadLocalRandom.current().nextInt(0, this.courseTimes.get(selectedCourseIdx).size());
+//                neighbor.classes.get(indexSolution).days = this.getBitSetFromString(this.courseTimes.get(selectedCourseIdx).get(idxNewTime).get(0));
+//                neighbor.classes.get(indexSolution).weeks = this.getBitSetFromString(this.courseTimes.get(selectedCourseIdx).get(idxNewTime).get(1));
+//                neighbor.classes.get(indexSolution).start = Integer.parseInt(this.courseTimes.get(selectedCourseIdx).get(idxNewTime).get(2));
+                ArrayList<CourseTime> times = instance.getClassForId(neighbor.classes.get(indexSolution).classId).times;
+                int idxNewTime = ThreadLocalRandom.current().nextInt(0, times.size());
+                CourseTime newTime = times.get(idxNewTime);
+                neighbor.classes.get(indexSolution).days = newTime.days;
+                neighbor.classes.get(indexSolution).weeks = newTime.weeks;
+                neighbor.classes.get(indexSolution).start = newTime.start;
+                neighbor.classes.get(indexSolution).length = newTime.length;
                 break;
             case 2:
                 // change students:
@@ -381,9 +393,14 @@ public class SimulatedAnnealing {
 
     }
 
+
     private ValidationResult cost(Solution repr) {
+
         double cost = 0.0;
         int infeasibleViolated = 0;
+
+
+
         // constraint penalty:
         for (Distribution dist : this.instance.distributions) {
             boolean valid = dist.validate(this.instance, repr);
@@ -463,13 +480,23 @@ public class SimulatedAnnealing {
             BitSet days = solClass.days;
             int start = solClass.start;
             Boolean foundTimePenalty = false;
-            ArrayList<ArrayList<String>> item = this.courseTimes.get(solClass.classId - 1);
-            for (int i = 0; i < item.size(); i++) {
+//            ArrayList<ArrayList<String>> item = this.courseTimes.get(solClass.classId - 1);
+//            for (int i = 0; i < item.size(); i++) {
+//                //System.out.println(item.get(i).get(0) +" "+ BitSets.toBitString(solClass.days, this.numDays) + " " + item.get(i).get(0).equals(BitSets.toBitString(solClass.days, this.numDays)));
+//                if (item.get(i).get(0).equals(BitSets.toBitString(solClass.days, this.numDays))
+//                        && item.get(i).get(1).equals(BitSets.toBitString(solClass.weeks, this.numWeeks))
+//                        && Integer.parseInt(item.get(i).get(2)) == solClass.start) {
+//                    timePenalty += Integer.parseInt(item.get(i).get(3));
+//                    break;
+//                }
+//            }
+            ArrayList<CourseTime> items = instance.getClassForId(classId).times;
+            for (CourseTime item : items) {
                 //System.out.println(item.get(i).get(0) +" "+ BitSets.toBitString(solClass.days, this.numDays) + " " + item.get(i).get(0).equals(BitSets.toBitString(solClass.days, this.numDays)));
-                if (item.get(i).get(0).equals(BitSets.toBitString(solClass.days, this.numDays))
-                        && item.get(i).get(1).equals(BitSets.toBitString(solClass.weeks, this.numWeeks))
-                        && Integer.parseInt(item.get(i).get(2)) == solClass.start) {
-                    timePenalty += Integer.parseInt(item.get(i).get(3));
+                if (item.days == solClass.days
+                        && item.weeks == solClass.weeks
+                        && item.start == solClass.start) {
+                    timePenalty += item.penalty;
                     break;
                 }
             }
@@ -514,20 +541,25 @@ public class SimulatedAnnealing {
 
             int numInfeasible;
             boolean feasible;
-            if (resNeighbour.numInfeasible < resRepr.numInfeasible || this.getProbBool(prob)
-            // this.getNumInfeasible(neighbor) < this.getNumInfeasible(repr)
-            ) {
-                repr = this.makeDeepCopy(neighbor);
-                reprCost = neighborCost;
-                numInfeasible = resNeighbour.numInfeasible;
-                feasible = resNeighbour.isFeasible;
+
+            if(resNeighbour.cost == resRepr.cost && resNeighbour.numInfeasible != resRepr.numInfeasible){
+                System.out.println("something wrong");
             }
-//            else if (this.getProbBool(prob)) {
+//            if (resNeighbour.numInfeasible < resRepr.numInfeasible
+//            // this.getNumInfeasible(neighbor) < this.getNumInfeasible(repr)
+//            ) {
 //                repr = this.makeDeepCopy(neighbor);
 //                reprCost = neighborCost;
 //                numInfeasible = resNeighbour.numInfeasible;
 //                feasible = resNeighbour.isFeasible;
 //            }
+//            else
+            if (this.getProbBool(prob)) {
+                repr = this.makeDeepCopy(neighbor);
+                reprCost = neighborCost;
+                numInfeasible = resNeighbour.numInfeasible;
+                feasible = resNeighbour.isFeasible;
+            }
             else{
                 numInfeasible = resRepr.numInfeasible;
                 feasible = resRepr.isFeasible;
@@ -572,16 +604,17 @@ public class SimulatedAnnealing {
         try {
             //String instanceFileName = "bet-sum18.xml";
 //            ILP.ILP.main(null);
-            String instanceFileName = "lums-sum17.xml";
+//            String instanceFileName = "lums-sum17.xml";
 //            String instanceFileName = "tg-fal17.xml";
+            String instanceFileName = "pu-c8-spr07.xml";
+
             parser = new InstanceParser(instanceFileName);
             instance = parser.parse();
             S = new SimulatedAnnealing(instance);
 //            init = ILP.ILP.sol;
             init = S.initRepresentation(instance);
-            solution = S.optimize(init, 2.0, 0.1, 10000, 10);
+            solution = S.optimize(init, 2.0, 0.1, 40000, 10);
             String solutionText = solution.serialize(S.getNumDays(), S.getNumWeeks());
-            S.cost(solution);
             System.out.println(solutionText);
             System.out.print("Violated Constraints: ");
             for (Distribution dist : instance.distributions) {
@@ -590,6 +623,7 @@ public class SimulatedAnnealing {
                 }
             }
             System.out.println();
+            S.cost(solution);
             solution.saveToFile(String.format("solution-%d.xml", System.currentTimeMillis()), S.getNumDays(), S.getNumWeeks());
 
         } catch (FileNotFoundException e) {

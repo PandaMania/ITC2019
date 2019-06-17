@@ -4,6 +4,7 @@ import entities.Instance;
 import entities.Solution;
 import entities.SolutionClass;
 import entities.course.CourseClass;
+import util.Constants;
 
 import java.util.*;
 import java.util.function.BiFunction;
@@ -145,6 +146,9 @@ public abstract class Distribution {
     }
 
     public int getPenalty(){
+        if (required && penalty == 0){
+            return Constants.BIG_M;
+        }
         return penalty;
     }
 
