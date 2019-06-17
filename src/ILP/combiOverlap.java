@@ -23,6 +23,7 @@ public class combiOverlap {
             runThroughGeneral(orderedByStart, orderedByEnd, instance, model);
 
         }
+        System.out.println("counter= " + counter);
 
 
 
@@ -46,29 +47,30 @@ public class combiOverlap {
         boolean start = true;
         boolean increment=false;
         ArrayList<GRBcombi> current = new ArrayList<>();
+
         for(int i=0; i<orderedByStart.size(); i++){
             BitSet a= BitSet.valueOf(orderedByStart.get(i).courseTime.weeks.getBytes());
-            if(!a.get(i)){
+            if(!a.get(week)){
                 orderedByStart.remove(i);
             }
 
         }
         for(int i=0; i<orderedByStart.size(); i++){
             BitSet a= BitSet.valueOf(orderedByStart.get(i).courseTime.days.getBytes());
-            if(!a.get(i)){
+            if(!a.get(day)){
                 orderedByStart.remove(i);
             }
 
         }
         for(int i=0; i<orderedByEnd.size(); i++){
             BitSet a= BitSet.valueOf(orderedByEnd.get(i).courseTime.weeks.getBytes());
-            if(!a.get(i)){
+            if(!a.get(week)){
                 orderedByEnd.remove(i);
             }
 
         }for(int i=0; i<orderedByEnd.size(); i++){
             BitSet a= BitSet.valueOf(orderedByEnd.get(i).courseTime.days.getBytes());
-            if(!a.get(i)){
+            if(!a.get(day)){
                 orderedByEnd.remove(i);
             }
 
@@ -89,7 +91,7 @@ public class combiOverlap {
                 }
             }
 
-            while (timer < instance.slotsPerDay) {
+            while (timer <= instance.slotsPerDay) {
 
                 while (increment == false) {
 
@@ -102,35 +104,17 @@ public class combiOverlap {
                         orderend++;
                     } else if (orderstart < orderedByStart.size() && orderedByStart.get(orderstart).courseTime.start == timer && !start) {
 
-                        addconstraint(current, model);
+                      // addconstraint(current, model);
                         current.add(orderedByStart.get(orderstart));
                         orderstart++;
 
                         //System.out.println("third");
                         start = true;
                     } else if (orderend < orderedByEnd.size() && (orderedByEnd.get(orderend).courseTime.start + orderedByEnd.get(orderend).courseTime.length) == timer && start) {
-                        addconstraint(current, model);
-                   /* System.out.println("before removing " + current.size());
-                    for (int i= 0; i<current.size(); i++ ){
+                     //   addconstraint(current, model);
 
-                            System.out.println(current.get(i).getName());
-
-
-                    }
-                    System.out.println("after removing " + orderedByEnd.get(orderend).getName());
-                    */
                         current.remove(orderedByEnd.get(orderend));
-
-/*
-                    for (int i= 0; i<current.size(); i++ ){
-
-                            System.out.println(current.get(i).getName());
-
-                    }
-*/
-
-
-                        //    System.out.println("after removing" + current.size());
+ //    System.out.println("after removing" + current.size());
                         orderend++;
                         start = false;
 
@@ -154,7 +138,7 @@ public class combiOverlap {
 
             }
             if (current.size() > 0) {
-                addconstraint(current, model);
+               // addconstraint(current, model);
             }
 
             //  System.out.println("current size" + current.size());
@@ -165,9 +149,10 @@ public class combiOverlap {
     }
 
      public void addconstraint(ArrayList<GRBcombi> list,  GRBModel model){
+        counter++;
          GRBLinExpr overlapConstraint = new GRBLinExpr();
          for(int i=0; i<list.size(); i++){
-             overlapConstraint.addTerm(1, list.get(i).grbVar);
+             overlapConstraint.addTerm(1, list.get(i).getGrbVar());
 
          } try {
              model.addConstr(overlapConstraint, GRB.LESS_EQUAL, 1, "c" + counter );

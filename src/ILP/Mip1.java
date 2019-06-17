@@ -33,9 +33,9 @@ public class Mip1 {
             addingConstraints O= new addingConstraints();
             combiOverlap combi = new combiOverlap();
             try {
-                p = new InstanceParser("lums-sum17.xml");
+                p = new InstanceParser(//"lums-sum17.xml");
                         //            p.parse("pu-cs-fal07.xml");
-                       // "tg-fal17.xml");
+                        "tg-fal17.xml");
                 Instance x = p.parse();
                 // System.out.println(x);
                 System.out.println("Courses= " + x.courses.size());
@@ -49,8 +49,8 @@ public class Mip1 {
 
                 ArrayList<ArrayList<ArrayList<ArrayList<ArrayList<ArrayList<GRBcombi>>>>>> allvariables= new ArrayList<>();
                 GRBLinExpr objectiveFunc = new GRBLinExpr();
-                GRBLinExpr scheduledConstraint;
 
+                GRBLinExpr scheduledConstraint = new GRBLinExpr();
                 HashMap<Integer, ArrayList<GRBcombi>> overlapCheck= new HashMap<>();
 
 
@@ -72,19 +72,22 @@ public class Mip1 {
                                 Object[] finallist = list.toArray();
                                 ArrayList<ArrayList<GRBcombi>> roomLoop = new ArrayList<>();
 
-                                for (int o = 0; o < list.size(); o++) {
+                                for (int o = 0; o < finallist.length; o++) {
                                    ArrayList<GRBcombi> timeLoop = new ArrayList<>();
-
+                                    int numvariables=0;
                                     for (int n = 0; n < x.courses.get(j).configs.get(k).subparts.get(l).classes.get(m).times.size(); n++) {
                                     //into the number of times
                                     //TODO need to ensure that the unavailable weeks is accounted for here. If its unavailable we just increment n.
 
-                                     //   System.out.println(x.rooms.get((Integer) finallist[o]).id + " ==== " + (Integer) finallist[o] );
+                                       // System.out.println(x.rooms.get((Integer) finallist[o]).id + " ==== " + (Integer) finallist[o] );
 
-                                            if(combi.singlecheck(x.rooms.get(o).unaivailableweeks,x.courses.get(j).configs.get(k).subparts.get(l).classes.get(m).times.get(n)) ){
-                                                break;
+                                            while( n < x.courses.get(j).configs.get(k).subparts.get(l).classes.get(m).times.size()&& combi.singlecheck(x.rooms.get((Integer) finallist[o]-1).unaivailableweeks,x.courses.get(j).configs.get(k).subparts.get(l).classes.get(m).times.get(n))){
+                                                n++;
+
                                             }
-
+                                        if(n>= x.courses.get(j).configs.get(k).subparts.get(l).classes.get(m).times.size()){
+                                            break;
+                                        }
                                         // we're now into the rooms too
                                         timeLoop.add(new GRBcombi(model.addVar(0, 1, 0, GRB.BINARY, "course " + x.courses.get(j).id + "," +
                                                 " config " + x.courses.get(j).configs.get(k).id + "," +
@@ -97,23 +100,25 @@ public class Mip1 {
                                                 " length " + x.courses.get(j).configs.get(k).subparts.get(l).classes.get(m).times.get(n).length +
                                                 "room " + finallist[o] + " value= "
                                         ), (Integer) finallist[o], x.courses.get(j).configs.get(k).subparts.get(l).classes.get(m).times.get(n), x.courses.get(j).configs.get(k).subparts.get(l).classes.get(m)));
-                                        objectiveFunc.addTerm(x.courses.get(j).configs.get(k).subparts.get(l).classes.get(m).times.get(n).penalty +x.courses.get(j).configs.get(k).subparts.get(l).classes.get(m).roomPenalties.get(finallist[o]) ,timeLoop.get(n).getGrbVar());
-                                        scheduledConstraint.addTerm(1,timeLoop.get(n).getGrbVar());
+
+                                        objectiveFunc.addTerm((x.courses.get(j).configs.get(k).subparts.get(l).classes.get(m).times.get(n).penalty +x.courses.get(j).configs.get(k).subparts.get(l).classes.get(m).roomPenalties.get(finallist[o])) ,timeLoop.get(numvariables).getGrbVar());
+                                        scheduledConstraint.addTerm(1,timeLoop.get(timeLoop.size()-1).getGrbVar());
+
 
                                         if(overlapCheck.containsKey( finallist[o])){
-                                            ArrayList<GRBcombi> testing= new ArrayList<>();
+                                            ArrayList<GRBcombi> testing;
 
                                             testing=overlapCheck.get(finallist[o]);
-                                            testing.add(timeLoop.get(n));
+                                            testing.add(timeLoop.get(numvariables));
                                             overlapCheck.replace((Integer) finallist[o],testing);
                                         }else{
 
                                             ArrayList<GRBcombi> currentroom =new ArrayList<>();
-                                            currentroom.add(timeLoop.get(n));
+                                            currentroom.add(timeLoop.get(numvariables));
 
                                             overlapCheck.put((Integer) finallist[o], currentroom);
 
-                                        }
+                                        }numvariables++;
 
                                     }
 
@@ -169,7 +174,9 @@ public class Mip1 {
 
 
                 model.setObjective(objectiveFunc, GRB.MINIMIZE);
+              //  model.feasRelax(GRB.FEASRELAX_LINEAR, true, false, true);
                 Long timer= System.currentTimeMillis();
+
                 model.optimize();
                 Long endtime= System.currentTimeMillis();
                 System.out. println("time to get solution= " + (endtime-timer));
@@ -209,6 +216,8 @@ public class Mip1 {
 */
                 System.out.println("Obj: " + model.get(GRB.DoubleAttr.ObjVal));
                 System.out.println("num constraints= " + model.getConstrs().length);
+
+
 
                 // Dispose of model and environment
                 model.dispose();
