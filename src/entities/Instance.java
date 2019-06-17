@@ -31,11 +31,22 @@ public class Instance {
     }
 
     private List<CourseClass> flattened = null;
+    // id to index
+    private int[] indeces;
     public CourseClass getClassForId(int id){
         if (flattened == null) {
             flattened = getClasses().collect(Collectors.toList());
+            indeces =  new int[flattened.size()+1];
+            for (int i = 0; i < flattened.size(); i++) {
+                int idx = Integer.parseInt(flattened.get(i).id);
+                indeces[idx] =  i;
+            }
         }
-        return flattened.get(id-1);
+        CourseClass courseClass = flattened.get(indeces[id]);
+        if(Integer.parseInt(courseClass.id) != id){
+            throw new IllegalStateException("Id does not match!");
+        }
+        return courseClass;
     }
 
     @Override
