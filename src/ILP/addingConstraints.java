@@ -6,6 +6,7 @@ import entities.course.Course;
 import entities.course.CourseTime;
 import entities.distribution.Distribution;
 import gurobi.*;
+import util.BitSets;
 
 
 import java.util.ArrayList;
@@ -64,23 +65,27 @@ public class addingConstraints {
             }
             CourseTime i= times.get(positionY).time;
             CourseTime j= X.time;
-          //  if(times.get(positionY).courseClass!=X.courseClass){
-            BitSet a= BitSet.valueOf(i.days.getBytes());
-            a.and(BitSet.valueOf(j.days.getBytes()));
+//            if(times.get(positionY).courseClass!=X.courseClass){
+//            BitSet a= BitSet.valueOf(i.days.getBytes());
+//            a.and(BitSet.valueOf(j.days.getBytes()));
+            BitSet a = BitSets.and(i.days,j.days);
 
-            BitSet b= BitSet.valueOf(i.weeks.getBytes());
-            b.and(BitSet.valueOf(j.weeks.getBytes()));
+//            BitSet b= BitSet.valueOf(i.weeks.getBytes());
+//            b.and(BitSet.valueOf(j.weeks.getBytes()));
+            BitSet b = BitSets.and(i.weeks,j.weeks);
             int i_end = i.start+i.length;
             int j_end = j.start+j.length;
 
-
+//            if(i.start == j.start && i.start == 96){
+//                System.out.println("reached test case");
+//            }
             if(a.cardinality()!=0) {
                 if (b.cardinality() != 0) {
                     if (i_end >= j.start) {
                         if (j_end >= i.start) {
-                            if(i.weeks== "111111111" && j.weeks=="111111111" && i.days =="1111000" && i.start==192 && i.length== 22 && j.days =="1111000" && j.start==192 && j.length== 22){
-                                System.out.println(" look here you piece of shit " + grbVar.room + " " + grBroomObject.get(0).room);
-                            }
+//                            if(i.weeks== "111111111" && j.weeks=="111111111" && i.days =="1111000" && i.start==192 && i.length== 22 && j.days =="1111000" && j.start==192 && j.length== 22){
+//                                System.out.println(" look here you piece of shit " + grbVar.room + " " + grBroomObject.get(0).room);
+//                            }
                             curr++;
 
                             overlapConstraint = new GRBLinExpr();
@@ -124,9 +129,9 @@ public class addingConstraints {
 
                     }
                     if(i.start== j.start ) {
-                        if(i.weeks== "111111111" && j.weeks=="111111111" && i.days =="1111000" && i.start==192 && i.length== 22 && j.days =="1111000" && j.start==192 && j.length== 22){
-                            System.out.println(" look here you piece of shit " + grbVar.room + " " + grBroomObject.get(0).room);
-                        }
+//                        if(i.weeks== "111111111" && j.weeks=="111111111" && i.days =="1111000" && i.start==192 && i.length== 22 && j.days =="1111000" && j.start==192 && j.length== 22){
+//                            System.out.println(" look here you piece of shit " + grbVar.room + " " + grBroomObject.get(0).room);
+//                        }
                         overlapConstraint = new GRBLinExpr();
                         overlapConstraint.addTerm(1, times.get(positionY).grbVar);
                         overlapConstraint.addTerm(1, X.grbVar);

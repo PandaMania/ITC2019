@@ -6,6 +6,7 @@
 
 import Parsing.*;
 import entities.*;
+import entities.distribution.ImplicitAvailability;
 import util.*;
 import entities.course.CourseClass;
 import entities.distribution.Distribution;
@@ -13,6 +14,8 @@ import entities.distribution.Distribution;
 import java.io.*;
 import java.util.*;
 import java.util.concurrent.ThreadLocalRandom;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 import java.util.stream.Stream;
 import java.util.Collections;
 
@@ -90,10 +93,10 @@ public class SimulatedAnnealing {
             for (int j = 0; j < this.instance.courses.get(j).configs.size(); j++) {
                 for (int k = 0; k < this.instance.courses.get(i).configs.get(j).subparts.size(); k++) {
                     for (int l = 0; l < this.instance.courses.get(i).configs.get(j).subparts.get(k).classes.size(); l++) {
-                        Boolean found = false;
+                        boolean found = false;
                         for (CourseClass c : result) {
                             String id = this.instance.courses.get(i).configs.get(j).subparts.get(k).classes.get(l).id;
-                            if (id == c.id) {
+                            if (id.equals(c.id)) {
                                 found = true;
                                 break;
                             }
@@ -105,12 +108,7 @@ public class SimulatedAnnealing {
                 }
             }
         }
-        Collections.sort(result, new Comparator<CourseClass>() {
-            @Override
-            public int compare(CourseClass x1, CourseClass x2) {
-                return Integer.parseInt(x1.id) - Integer.parseInt(x2.id);
-            }
-        });
+        Collections.sort(result, Comparator.comparingInt(x -> Integer.parseInt(x.id)));
         return result;
     }
 
@@ -312,9 +310,8 @@ public class SimulatedAnnealing {
 //                    int newRoomId = availableRooms.get(ThreadLocalRandom.current().nextInt(availableRooms.size()));
 //                    changeClass.roomId = newRoomId;
 
-
                     // ##### random room #####
-
+                    // TODO: choose with a probability proportional to the penalty
 //                    SolutionClass changeClass = neighbor.classes.get(indexSolution);
 //                    CourseClass courseClass = instance.getClassForId(changeClass.classId);
 //                    if(courseClass.roomNeeded) {
@@ -322,9 +319,17 @@ public class SimulatedAnnealing {
 //                        int randIdx = ThreadLocalRandom.current().nextInt(rooms.size());
 //                        changeClass.roomId = rooms.get(randIdx);
 //                    }
+                    // #### penalty probability ####
+//                    SolutionClass changeClass = neighbor.classes.get(indexSolution);
+//                    CourseClass courseClass = instance.getClassForId(changeClass.classId);
+//                    if(courseClass.roomNeeded) {
+//                        int newRoom = selectRandomRoom(changeClass);
+//                        changeClass.roomId = newRoom;
+//                    }
                     break;
             case 1:
                 // change time (done):
+                // TODO: maybe change this to choose times that are available (like in the rooms)
                 int selectedCourseIdx = neighbor.classes.get(indexSolution).classId - 1;
                 int idxNewTime = ThreadLocalRandom.current().nextInt(0, this.courseTimes.get(selectedCourseIdx).size());
                 neighbor.classes.get(indexSolution).days = this.getBitSetFromString(this.courseTimes.get(selectedCourseIdx).get(idxNewTime).get(0));
@@ -346,13 +351,42 @@ public class SimulatedAnnealing {
         return neighbor;
 }
 
+    private int selectRandomRoom(SolutionClass changeClass) {
+        CourseClass courseClass = instance.getClassForId(changeClass.classId);
+
+        ArrayList<Integer> rooms = new ArrayList<>(courseClass.roomPenalties.keySet());
+        List<Integer> penalties = rooms.stream().mapToInt(r -> courseClass.roomPenalties.get(r)).boxed().collect(Collectors.toList());
+        final double sumPenalty = penalties.stream().mapToInt(r->r).sum();
+        final double maxPenalty = penalties.stream().mapToInt(r->r).max().getAsInt();
+        int k= 1;
+        int T = 1;
+        double boltzmannNormalization = penalties.stream()
+//                .mapToDouble(r -> (1 - (r/maxPenalty) ))
+                .mapToDouble(penalty -> Math.exp(-penalty / k * T)).sum();
+        List<Double> probs = penalties.stream()
+//                .mapToDouble(r -> (1 - (r/maxPenalty) ))
+                .mapToDouble(penalty->Math.exp(-penalty/k*T)/boltzmannNormalization)
+                .boxed().collect(Collectors.toList());
+        // invert and normalize
+
+        double p = Math.random();
+        double cumulativeProbability = 0.0;
+        for (int roomIdx = 0; roomIdx < rooms.size(); roomIdx++) {
+            cumulativeProbability += probs.get(roomIdx);
+            if (p <= cumulativeProbability) {
+                return rooms.get(roomIdx);
+            }
+        }
+        throw new IllegalStateException("Invalid probability distribution");
+
+    }
+
     private ValidationResult cost(Solution repr) {
         double cost = 0.0;
         int infeasibleViolated = 0;
-        // TODO move feasibility counting to here!!!
         // constraint penalty:
         for (Distribution dist : this.instance.distributions) {
-            Boolean valid = dist.validate(this.instance, repr);
+            boolean valid = dist.validate(this.instance, repr);
             if(!valid){
                 cost += dist.getPenalty();
                 if(dist.required){
@@ -360,14 +394,33 @@ public class SimulatedAnnealing {
                 }
             }
         }
-        // room penalty:
+        // room penalty:nt i = 0;
+//                    int classId = neighbor.classes.get(indexSolution).classId;
+//                    CourseClass courseClass = instance.getClassForId(classId);
+//                    if(courseClass.roomNeeded && courseClass.roomPenalties.size() > 1){
+//                        while (true) {
+//                            i++;
+//                            int selectedCourseIdx = neighbor.classes.get(indexSolution).classId - 1;
+//                            int newRoomId = ThreadLocalRandom.current().nextInt(1, this.numRooms + 1);
+//                            if (this.courseClasses.get(selectedCourseIdx).roomPenalties.get(newRoomId) != null
+//                                    && isAvailableWeeks(this.instance.rooms.get(newRoomId - 1).unaivailableweeks, newRoomId - 1, neighbor, indexSolution)) {
+//                                neighbor.classes.get(indexSolution).roomId = newRoomId;
+//                                break;
+//                            }
+//                            if(i > 10000){
+//                                break;
+//                            }
+//
+//                        }
+//                    }
+        int roomPenalty = 0;
         for (SolutionClass solClass : repr.classes) {
             int classId = solClass.classId;
             int roomId = solClass.roomId;
             CourseClass courseClass = instance.getClassForId(classId);
             if(courseClass.roomNeeded){
                 Integer penalty = courseClass.roomPenalties.get(roomId);
-                if(penalty!=null) cost+=penalty;
+                if(penalty!=null) roomPenalty+=penalty;
             }
 //            Boolean foundRoomPenalty = false;
 //            for (int i = 0; i < this.instance.courses.size(); i++) {
@@ -398,7 +451,10 @@ public class SimulatedAnnealing {
 //                }
 //            }
         }
+        cost += roomPenalty;
+
         // time penalty:
+        int timePenalty = 0;
         for (SolutionClass solClass : repr.classes) {
             int classId = solClass.classId;
             CourseClass courseClass = instance.getClassForId(classId);
@@ -413,11 +469,12 @@ public class SimulatedAnnealing {
                 if (item.get(i).get(0).equals(BitSets.toBitString(solClass.days, this.numDays))
                         && item.get(i).get(1).equals(BitSets.toBitString(solClass.weeks, this.numWeeks))
                         && Integer.parseInt(item.get(i).get(2)) == solClass.start) {
-                    cost += Integer.parseInt(item.get(i).get(3));
+                    timePenalty += Integer.parseInt(item.get(i).get(3));
                     break;
                 }
             }
         }
+        cost+= timePenalty;
         return new ValidationResult(cost, infeasibleViolated, infeasibleViolated == 0);
     }
 
@@ -437,7 +494,7 @@ public class SimulatedAnnealing {
         ValidationResult resRepr = this.cost(repr);
         double reprCost = resRepr.cost;
         int numIteration = 0;
-        Boolean reachedFeasibility = resRepr.isFeasible;
+        boolean reachedFeasibility = resRepr.isFeasible;
         //this.isFeasible(repr);
         //Boolean reachedValidStructure = this.hasValidStructure(repr);
 
@@ -457,19 +514,20 @@ public class SimulatedAnnealing {
 
             int numInfeasible;
             boolean feasible;
-            if (resNeighbour.numInfeasible < resRepr.numInfeasible
+            if (resNeighbour.numInfeasible < resRepr.numInfeasible || this.getProbBool(prob)
             // this.getNumInfeasible(neighbor) < this.getNumInfeasible(repr)
             ) {
                 repr = this.makeDeepCopy(neighbor);
                 reprCost = neighborCost;
                 numInfeasible = resNeighbour.numInfeasible;
                 feasible = resNeighbour.isFeasible;
-            } else if (this.getProbBool(prob)) {
-                repr = this.makeDeepCopy(neighbor);
-                reprCost = neighborCost;
-                numInfeasible = resNeighbour.numInfeasible;
-                feasible = resNeighbour.isFeasible;
             }
+//            else if (this.getProbBool(prob)) {
+//                repr = this.makeDeepCopy(neighbor);
+//                reprCost = neighborCost;
+//                numInfeasible = resNeighbour.numInfeasible;
+//                feasible = resNeighbour.isFeasible;
+//            }
             else{
                 numInfeasible = resRepr.numInfeasible;
                 feasible = resRepr.isFeasible;
@@ -523,6 +581,7 @@ public class SimulatedAnnealing {
             init = S.initRepresentation(instance);
             solution = S.optimize(init, 2.0, 0.1, 10000, 10);
             String solutionText = solution.serialize(S.getNumDays(), S.getNumWeeks());
+            S.cost(solution);
             System.out.println(solutionText);
             System.out.print("Violated Constraints: ");
             for (Distribution dist : instance.distributions) {
@@ -541,7 +600,7 @@ public class SimulatedAnnealing {
 
     class ValidationResult{
 
-        public ValidationResult(double cost, int numInfeasible, boolean isFeasible) {
+        ValidationResult(double cost, int numInfeasible, boolean isFeasible) {
             this.cost = cost;
             this.numInfeasible = numInfeasible;
             this.isFeasible = isFeasible;
