@@ -29,7 +29,7 @@ public class ILP {
             try {
                 p = new InstanceParser(//"lums-sum17.xml");
                         //            p.parse("pu-cs-fal07.xml");
-                        "tg-fal17.xml");
+                        "lums-sum17.xml");
                 Instance x = p.parse();
                // System.out.println(x);
                 System.out.println("Courses= " +x.courses.size());
@@ -113,10 +113,7 @@ public class ILP {
 
                                        }*/
                                    }
-                                   model.addConstr(scheduledConstraint, GRB.EQUAL, 1.0, "constraint" + x.courses.get(j).id + "," +
-                                           x.courses.get(j).configs.get(k).id + "," +
-                                           x.courses.get(j).configs.get(k).subparts.get(l).id + "," +
-                                           x.courses.get(j).configs.get(k).subparts.get(l).classes.get(m).id);
+                                   model.addConstr(scheduledConstraint, GRB.EQUAL, 1.0, "c");
 
                                    //insideLoop.add(timeLoop);
                                    ArrayList<GRBroomObject> roomLoop= new ArrayList<>();
@@ -187,10 +184,7 @@ public class ILP {
 
                                    }
 
-                                   model.addConstr(scheduledConstraint, GRB.EQUAL, 1.0, "constraint" + x.courses.get(j).id + "," +
-                                           x.courses.get(j).configs.get(k).id + "," +
-                                           x.courses.get(j).configs.get(k).subparts.get(l).id + "," +
-                                           x.courses.get(j).configs.get(k).subparts.get(l).classes.get(m).id);
+                                   model.addConstr(scheduledConstraint, GRB.EQUAL, 1.0, "c");
                                   // insideLoop.add(roomLoop);
 
 
@@ -229,7 +223,7 @@ public class ILP {
                 Long timer= System.currentTimeMillis();
                 model.optimize();
                 Long endtime= System.currentTimeMillis();
-                System.out.println("time to get solution= " + (endtime-timer));
+                System.out. println("time to get solution= " + (endtime-timer));
 
 
                 for(int j=0; j<allVariables.size(); j++) {

@@ -25,12 +25,14 @@ public class addingConstraints {
 
         for(int j=0; j<times.size();j++) {
             for(int k=0; k<times.size(); k++){
-                if(times.get(j)!=null){
-                    orderbystart(times.get(j).grBtimeObject);
-                    for (int i = 0; i < times.get(j).grBtimeObject.size(); i++) {
-                        OverlapwithX(times.get(k).grBtimeObject, times.get(j).grBtimeObject.get(i), i+1, times.get(k).grBroomObject, times.get(j).grBroomObject.get(0), model, sameAttendance, instance);
-                     //   getforX(times.get(j).grBtimeObject, times.get(j).grBtimeObject.get(i), i + 1);
+                if(k>j) {
+                    if (times.get(j) != null) {
+                        orderbystart(times.get(j).grBtimeObject);
+                        for (int i = 0; i < times.get(j).grBtimeObject.size(); i++) {
+                            OverlapwithX(times.get(k).grBtimeObject, times.get(j).grBtimeObject.get(i), i + 1, times.get(k).grBroomObject, times.get(j).grBroomObject.get(0), model, sameAttendance, instance);
+                            //   getforX(times.get(j).grBtimeObject, times.get(j).grBtimeObject.get(i), i + 1);
 
+                        }
                     }
                 }
             }
@@ -65,6 +67,7 @@ public class addingConstraints {
             CourseTime i= times.get(positionY).time;
             CourseTime j= X.time;
           //  if(times.get(positionY).courseClass!=X.courseClass){
+        //TODO COMMENTED HERE OUT DUE TO CHANGING COURSE TIME FROM AN INT TO A BITSET
             BitSet a= BitSet.valueOf(i.days.getBytes());
             a.and(BitSet.valueOf(j.days.getBytes()));
 
@@ -78,9 +81,7 @@ public class addingConstraints {
                 if (b.cardinality() != 0) {
                     if (i_end >= j.start) {
                         if (j_end >= i.start) {
-                            if(i.weeks== "111111111" && j.weeks=="111111111" && i.days =="1111000" && i.start==192 && i.length== 22 && j.days =="1111000" && j.start==192 && j.length== 22){
-                                System.out.println(" look here you piece of shit " + grbVar.room + " " + grBroomObject.get(0).room);
-                            }
+
                             curr++;
 
                             overlapConstraint = new GRBLinExpr();
