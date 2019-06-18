@@ -40,7 +40,7 @@ public class SimulatedAnnealing {
     private double hardPenalty;
     private ArrayList<CourseClass> courseClasses;
     private ArrayList<ArrayList<ArrayList<String>>> courseTimes;
-    private ExecutorService pool = Executors.newFixedThreadPool(4);;
+    private ExecutorService pool = Executors.newFixedThreadPool(4);
 
     // Constructor:
     public SimulatedAnnealing(Instance instance) {
@@ -51,9 +51,10 @@ public class SimulatedAnnealing {
         this.numStudents = this.instance.students.size();
         this.slotsPerDay = this.instance.slotsPerDay;
         this.bitFlipsStudents = (int) Math.max(1.0, 0.75 * this.numStudents);    // specify how many of the bits should be changed
-        this.hardPenalty = 3.0 * this.getMaxPenalty(this.instance);
+        this.hardPenalty = 1.0 * this.getMaxPenalty(this.instance);
         this.courseClasses = this.getCourseClasses();
 //        this.courseTimes = this.getCourseTimes();
+        System.out.println("soft constraints max penalty: " + this.getMaxPenalty(this.instance) + "\thard constraints penalty: " + this.hardPenalty);
     }
 
     private ArrayList<ArrayList<ArrayList<String>>> getCourseTimes() {
@@ -132,7 +133,7 @@ public class SimulatedAnnealing {
     private double getMaxPenalty(Instance instance) {
         int maxPenalty = 0;
         for (Distribution dist : instance.distributions) {
-            if (dist.getPenalty() > maxPenalty) {
+            if (dist.getPenalty() > maxPenalty && !dist.required) {
                 maxPenalty = dist.getPenalty();
             }
         }
@@ -282,9 +283,14 @@ public class SimulatedAnnealing {
                     if(courseClass.roomNeeded && courseClass.roomPenalties.size() > 1){
                         while (true) {
                             i++;
-                            int selectedCourseIdx = neighbor.classes.get(indexSolution).classId - 1;
+                            //int selectedCourseIdx = neighbor.classes.get(indexSolution).classId - 1;
+                            int selectedCourseId = neighbor.classes.get(indexSolution).classId;
                             int newRoomId = ThreadLocalRandom.current().nextInt(1, this.numRooms + 1);
-                            if (this.courseClasses.get(selectedCourseIdx).roomPenalties.get(newRoomId) != null
+
+                            //System.out.println(selectedCourseIdx + " " + newRoomId + " " + indexSolution);
+                            //if (this.courseClasses.get(selectedCourseIdx).roomPenalties.get(newRoomId) != null
+                            //System.out.println(selectedCourseIdx);
+                            if (this.instance.getClassForId(selectedCourseId).roomPenalties.get(newRoomId) != null
                                     && isAvailableWeeks(this.instance.rooms.get(newRoomId - 1).unaivailableweeks, newRoomId - 1, neighbor, indexSolution)) {
                                 neighbor.classes.get(indexSolution).roomId = newRoomId;
                                 break;
@@ -399,15 +405,17 @@ public class SimulatedAnnealing {
         double cost = 0.0;
         int infeasibleViolated = 0;
 
-
-
         // constraint penalty:
         for (Distribution dist : this.instance.distributions) {
             boolean valid = dist.validate(this.instance, repr);
             if(!valid){
-                cost += dist.getPenalty();
+                //System.out.println(this.getMaxPenalty(this.instance));
+
                 if(dist.required){
                     infeasibleViolated++;
+                    cost += this.hardPenalty;
+                } else {
+                    cost += dist.getPenalty();
                 }
             }
         }
@@ -527,14 +535,15 @@ public class SimulatedAnnealing {
 
         while (numIteration < numIterations) {
             Solution neighbor = this.getRandomNeighbor(repr, numChanges);
+            ValidationResult resNeighbour = this.cost(neighbor);
 
             // optional: don't give up feasibility or valid structure once reached
-            if (reachedFeasibility && !this.isFeasible(neighbor)) {
+            if (reachedFeasibility && !resNeighbour.isFeasible) {
                 continue;
             }
             //if (reachedValidStructure && !this.hasValidStructure(neighbor)){continue;}
 
-            ValidationResult resNeighbour = this.cost(neighbor);
+
             double neighborCost = resNeighbour.cost;
             double temperature = getTemperature(startTemperature, endTemperature, numIteration, numIterations);
             double prob = Math.min(1.0, Math.exp(-(neighborCost - reprCost) / temperature));
@@ -543,19 +552,24 @@ public class SimulatedAnnealing {
             boolean feasible;
 
             if(resNeighbour.cost == resRepr.cost && resNeighbour.numInfeasible != resRepr.numInfeasible){
-                System.out.println("something wrong");
+                System.out.println("\nsomething wrong");
+                System.out.println(resNeighbour.cost + " " + resRepr.cost + " " + this.hardPenalty);
+                System.out.println(resNeighbour.numInfeasible * this.hardPenalty + " " + resRepr.numInfeasible * this.hardPenalty);
+                System.out.println();
             }
-//            if (resNeighbour.numInfeasible < resRepr.numInfeasible
-//            // this.getNumInfeasible(neighbor) < this.getNumInfeasible(repr)
-//            ) {
-//                repr = this.makeDeepCopy(neighbor);
-//                reprCost = neighborCost;
-//                numInfeasible = resNeighbour.numInfeasible;
-//                feasible = resNeighbour.isFeasible;
-//            }
-//            else
+
+            //if (resNeighbour.numInfeasible < resRepr.numInfeasible
+            //// this.getNumInfeasible(neighbor) < this.getNumInfeasible(repr)
+            //) {
+            //    repr = this.makeDeepCopy(neighbor);
+            //    reprCost = neighborCost;
+            //    numInfeasible = resNeighbour.numInfeasible;
+            //    feasible = resNeighbour.isFeasible;
+            //}
+            //else
             if (this.getProbBool(prob)) {
                 repr = this.makeDeepCopy(neighbor);
+                resRepr = resNeighbour;
                 reprCost = neighborCost;
                 numInfeasible = resNeighbour.numInfeasible;
                 feasible = resNeighbour.isFeasible;
@@ -587,7 +601,7 @@ public class SimulatedAnnealing {
 
             //if (reprCost == 0.0 && this.isFeasible(repr)) {break;}
             //if (reprCost == 0.0 && this.isFeasible(repr) && this.hasValidStructure(repr)) {break;}
-
+            if (resRepr.cost == 0.0){break;}
         }
         return repr;
     }
@@ -602,24 +616,29 @@ public class SimulatedAnnealing {
         Solution solution;
 
         try {
-            //String instanceFileName = "bet-sum18.xml";
+            String instanceFileName = "bet-sum18.xml";
 //            ILP.ILP.main(null);
-//            String instanceFileName = "lums-sum17.xml";
+         //   String instanceFileName = "lums-sum17.xml";
 //            String instanceFileName = "tg-fal17.xml";
-            String instanceFileName = "pu-c8-spr07.xml";
+        //    String instanceFileName = "pu-c8-spr07.xml";
 
             parser = new InstanceParser(instanceFileName);
             instance = parser.parse();
             S = new SimulatedAnnealing(instance);
 //            init = ILP.ILP.sol;
             init = S.initRepresentation(instance);
-            solution = S.optimize(init, 2.0, 0.1, 40000, 10);
+            solution = S.optimize(init, 50.0, 0.1, 100000, 1);
+            //solution = S.optimize(init, 0.2, 0.1, 4000000, 1);
             String solutionText = solution.serialize(S.getNumDays(), S.getNumWeeks());
             System.out.println(solutionText);
             System.out.print("Violated Constraints: ");
             for (Distribution dist : instance.distributions) {
                 if (!dist.validate(instance, solution)) {
                     System.out.print(dist.type + ",");
+                    if (dist.required) {
+                        System.out.print("(req)");
+                    }
+                    System.out.print(",");
                 }
             }
             System.out.println();
