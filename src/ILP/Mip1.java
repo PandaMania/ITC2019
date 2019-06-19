@@ -33,9 +33,10 @@ public class Mip1 {
             addingConstraints O = new addingConstraints();
             combiOverlap combi = new combiOverlap();
             try {
-                p = new InstanceParser(//"lums-sum17.xml");
+                p = new InstanceParser(//"bet-sum18.xml");
                         //            p.parse("pu-cs-fal07.xml");
-                        "tg-fal17.xml");
+                        //"tg-fal17.xml");
+                "output4.xml");
                 Instance x = p.parse();
                 // System.out.println(x);
                 System.out.println("Courses= " + x.courses.size());
@@ -101,18 +102,20 @@ public class Mip1 {
 
 
                                     }
-                                    model.addConstr(scheduledConstraint, GRB.EQUAL, 1, "CONSTRAINT " + j + k + l + m);
+                                    model.addConstr(scheduledConstraint, GRB.EQUAL, 1, "fake CONSTRAINT= j=  " + x.courses.get(j).id + " k= " + k +" l= "+ l+ " m= " + m);
                                     roomLoop.add(faketimeLoop);
                                 }else {
 
 
 
                                     for (int o = 0; o < finallist.length; o++) {
+                                        int currRoom= (Integer) finallist[o];
 
                                         ArrayList<GRBcombi> timeLoop = new ArrayList<>();
                                         int numvariables = 0;
 
                                         for (int n = 0; n < x.courses.get(j).configs.get(k).subparts.get(l).classes.get(m).times.size(); n++) {
+
                                             //into the number of times
                                             //TODO need to ensure that the unavailable weeks is accounted for here. If its unavailable we just increment n.
 
@@ -120,9 +123,15 @@ public class Mip1 {
 
                                             while (n < x.courses.get(j).configs.get(k).subparts.get(l).classes.get(m).times.size() && combi.singlecheck(x.rooms.get((Integer) finallist[o] - 1).unaivailableweeks, x.courses.get(j).configs.get(k).subparts.get(l).classes.get(m).times.get(n))) {
                                                 n++;
+                                                if(x.courses.get(j).configs.get(k).subparts.get(l).classes.get(m).times.size()==1){
+                                                    System.out.println("size is 1 and class is = " + x.courses.get(j).configs.get(k).subparts.get(l).classes.get(m).id);
+                                                    System.out.println("number of rooms = " + x.courses.get(j).configs.get(k).subparts.get(l).classes.get(m).roomPenalties.size());
+                                                }
 
                                             }
-                                            if (n >= x.courses.get(j).configs.get(k).subparts.get(l).classes.get(m).times.size()) {
+
+                                            if (n >= x.courses.get(j).configs.get(k).subparts.get(l).classes.get(m).times.size() ) {
+                                               //|| ( x.courses.get(j).configs.get(k).subparts.get(l).classes.get(m).times.size()==1 && x.courses.get(j).configs.get(k).subparts.get(l).classes.get(m).roomPenalties.size()==1 )
                                                 break;
                                             }
                                             // we're now into the rooms too
@@ -135,25 +144,25 @@ public class Mip1 {
                                                     " day " + x.courses.get(j).configs.get(k).subparts.get(l).classes.get(m).times.get(n).days + "," +
                                                     " time " + x.courses.get(j).configs.get(k).subparts.get(l).classes.get(m).times.get(n).start + "," +
                                                     " length " + x.courses.get(j).configs.get(k).subparts.get(l).classes.get(m).times.get(n).length +
-                                                    "room " + finallist[o] + " value= "
-                                            ), (Integer) finallist[o], x.courses.get(j).configs.get(k).subparts.get(l).classes.get(m).times.get(n), x.courses.get(j).configs.get(k).subparts.get(l).classes.get(m)));
+                                                    "room " + currRoom + " value= "
+                                            ), currRoom, x.courses.get(j).configs.get(k).subparts.get(l).classes.get(m).times.get(n), x.courses.get(j).configs.get(k).subparts.get(l).classes.get(m)));
 
-                                            objectiveFunc.addTerm((x.courses.get(j).configs.get(k).subparts.get(l).classes.get(m).times.get(n).penalty + x.courses.get(j).configs.get(k).subparts.get(l).classes.get(m).roomPenalties.get(finallist[o])), timeLoop.get(timeLoop.size() - 1).getGrbVar());
-                                            scheduledConstraint.addTerm(1, timeLoop.get(timeLoop.size() - 1).getGrbVar());
+                                            objectiveFunc.addTerm((x.courses.get(j).configs.get(k).subparts.get(l).classes.get(m).times.get(n).penalty + x.courses.get(j).configs.get(k).subparts.get(l).classes.get(m).roomPenalties.get(currRoom)), timeLoop.get(timeLoop.size() - 1).grbVar);
+                                            scheduledConstraint.addTerm(1, timeLoop.get(timeLoop.size() - 1).grbVar);
 
 
-                                            if (overlapCheck.containsKey(finallist[o])) {
+                                            if (overlapCheck.containsKey(currRoom)) {
                                                 ArrayList<GRBcombi> testing;
 
-                                                testing = overlapCheck.get(finallist[o]);
-                                                testing.add(timeLoop.get(numvariables));
-                                                overlapCheck.replace((Integer) finallist[o], testing);
+                                                testing = overlapCheck.get(currRoom);
+                                                testing.add(timeLoop.get(timeLoop.size()-1));
+                                                overlapCheck.replace(currRoom, testing);
                                             } else {
 
                                                 ArrayList<GRBcombi> currentroom = new ArrayList<>();
-                                                currentroom.add(timeLoop.get(numvariables));
+                                                currentroom.add(timeLoop.get(timeLoop.size()-1));
 
-                                                overlapCheck.put((Integer) finallist[o], currentroom);
+                                                overlapCheck.put(currRoom, currentroom);
 
                                             }
                                             numvariables++;
@@ -163,10 +172,10 @@ public class Mip1 {
 
                                         roomLoop.add(timeLoop);
                                     }
-                                    model.addConstr(scheduledConstraint, GRB.EQUAL, 1, "CONSTRAINT " + j + k + l + m);
+                                    model.addConstr(scheduledConstraint, GRB.EQUAL, 1, "real CONSTRAINT j=  " +  x.courses.get(j).id + " k= " + k +" l= "+ l+ " m= " + m);
                                 }
 
-                                    //  model.addConstr(scheduledConstraint,GRB.GREATER_EQUAL,1, "b");
+                                 //     model.addConstr(scheduledConstraint,GRB.EQUAL,1, "b");
                                     insideLoop.add(roomLoop);
                                 }
                                 middleLoop.add(insideLoop);
@@ -189,15 +198,78 @@ public class Mip1 {
 
 
                     model.setObjective(objectiveFunc, GRB.MINIMIZE);
-                    // model.feasRelax(GRB.FEASRELAX_LINEAR, true, false, true);
+                    //model.feasRelax(GRB.FEASRELAX_LINEAR, true, false, true);
                     Long timer = System.currentTimeMillis();
 
                     model.optimize();
                     Long endtime = System.currentTimeMillis();
+
                     System.out.println("time to get solution= " + (endtime - timer));
 
+                int status = model.get(GRB.IntAttr.Status);
+                if (status == GRB.Status.UNBOUNDED) {
+                    System.out.println("The model cannot be solved "
+                            + "because it is unbounded");
+                    return;
+                }
+                if (status == GRB.Status.OPTIMAL) {
+                    System.out.println("The optimal objective is " +
+                            model.get(GRB.DoubleAttr.ObjVal));
+                    return;
+                }
+                if (status != GRB.Status.INF_OR_UNBD &&
+                        status != GRB.Status.INFEASIBLE    ) {
+                    System.out.println("Optimization was stopped with status " + status);
+                    return;
+                }
 
-                    for (int j = 0; j < allvariables.size(); j++) {
+                // Do IIS
+                System.out.println("The model is infeasible; computing IIS");
+                LinkedList<String> removed = new LinkedList<String>();
+
+                // Loop until we reduce to a model that can be solved
+                while (true) {
+                    model.computeIIS();
+                    System.out.println("\nThe following constraint cannot be satisfied:");
+                    for (GRBConstr c : model.getConstrs()) {
+                        if (c.get(GRB.IntAttr.IISConstr) == 1) {
+                            System.out.println(c.get(GRB.StringAttr.ConstrName));
+                            // Remove a single constraint from the model
+                            removed.add(c.get(GRB.StringAttr.ConstrName));
+                            model.remove(c);
+                            break;
+                        }
+                    }
+
+                    System.out.println();
+                    model.optimize();
+                    status = model.get(GRB.IntAttr.Status);
+
+                    if (status == GRB.Status.UNBOUNDED) {
+                        System.out.println("The model cannot be solved "
+                                + "because it is unbounded");
+                        return;
+                    }
+                    if (status == GRB.Status.OPTIMAL) {
+                        break;
+                    }
+                    if (status != GRB.Status.INF_OR_UNBD &&
+                            status != GRB.Status.INFEASIBLE    ) {
+                        System.out.println("Optimization was stopped with status " +
+                                status);
+                        return;
+                    }
+                }
+
+                System.out.println("\nThe following constraints were removed "
+                        + "to get a feasible LP:");
+                for (String s : removed) {
+                    System.out.print(s + " ");
+                }
+                System.out.println();
+
+
+                for (int j = 0; j < allvariables.size(); j++) {
                         for (int k = 0; k < allvariables.get(j).size(); k++) {
                             for (int l = 0; l < allvariables.get(j).get(k).size(); l++) {
                                 for (int m = 0; m < allvariables.get(j).get(k).get(l).size(); m++) {

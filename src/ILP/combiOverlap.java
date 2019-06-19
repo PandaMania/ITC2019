@@ -134,7 +134,7 @@ public class combiOverlap {
 
             }
             if (current.size() > 0) {
-                System.out.println("end of the line and stuff left");
+              //  System.out.println("end of the line and stuff left");
                 addconstraint(current, model);
               //  current= new ArrayList<GRBcombi>();
             }
