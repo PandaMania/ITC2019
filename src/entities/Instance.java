@@ -52,6 +52,7 @@ public class Instance {
     @Override
     public String toString() {
         return "Instance{" +
+                "name: " + name + " " +
                 courses.size() +        " courses, " +
                 students.size() +       " students, " +
                 rooms.size() +          " rooms, " +
@@ -59,7 +60,7 @@ public class Instance {
                 '}';
     }
 
-    // TODO: maybe we can optimize this by using the index as we are reading them in order.
+    // TODO: maybe we can optimize this by using the index as we are reading them in order(we are not!!!).
     public Room getRoom(int assignedRoom) {
         Optional<Room> first = rooms.stream().filter(r -> r.id == assignedRoom).findFirst();
         if (first.isPresent()) {

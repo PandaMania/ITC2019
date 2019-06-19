@@ -37,7 +37,7 @@ public class ImplicitOverlap extends ImplicitDistribution {
 
             if (Ci.roomId == Cj.roomId &&                                // Same room
                     BitSets.and(Ci.weeks, Cj.weeks).cardinality() > 0 &&  // overlapping weeks
-                    BitSets.and(Ci.days, Cj.weeks).cardinality() > 0) {   // Overapping days
+                    BitSets.and(Ci.days, Cj.days).cardinality() > 0) {   // Overapping days
                 if ((Ci.start + Ci.length <= Cj.start)) {
                     return true;
                 } else if ((Cj.start + Cj.length <= Ci.start)) {

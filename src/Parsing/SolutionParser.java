@@ -29,7 +29,7 @@ public class SolutionParser {
     }
 
     public Solution parse(){
-        Solution sol = new Solution();
+        Solution sol = new Solution(instance);
         XMLInputFactory xmlInputFactory = XMLInputFactory.newInstance();
         try {
             XMLEventReader xmlEventReader = xmlInputFactory.createXMLEventReader(file);
@@ -83,5 +83,15 @@ public class SolutionParser {
             e.printStackTrace();
         }
         return sol;
+    }
+
+    public static void main(String[] args) throws FileNotFoundException {
+//        InstanceParser ip = new InstanceParser("lums-sum17.xml");
+        InstanceParser ip = new InstanceParser("bet-sum18.xml");
+        Instance instance = ip.parse();
+        SolutionParser p = new SolutionParser("solution-1560887743789.xml", instance);
+        Solution parse = p.parse();
+        System.out.println(parse.serialize());
+        parse.saveToFile("bet-sum_solution.xml");
     }
 }

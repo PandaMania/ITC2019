@@ -12,8 +12,8 @@ public class SameRoom extends Distribution {
     public boolean validate(Instance instance, Solution solution) {
         List<SolutionClass> solutionClasses = getClassInDistribution(solution);
 
-        return forAny(solutionClasses, (i,j)->{
-            return i.roomId==j.roomId;
+        return forAny(solutionClasses, (Ci,Cj)->{
+            return Ci.roomId==Cj.roomId;
 
         });
     }

@@ -1,10 +1,14 @@
 package entities;
 
+import entities.course.CourseClass;
+
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.stream.Collectors;
 
 public class Solution {
+    private Instance instance;
 
 /*Format:
 <solution name="unique-instance-name"
@@ -17,13 +21,13 @@ public class Solution {
 </solution>
 	*/
 
-
-    public Solution() {
-
+    public Solution(Instance instance) {
+        this.instance = instance;
     }
 
     // Copy constructor
-    public Solution(Solution solution){
+    public Solution(Solution solution, Instance instance){
+        this.instance = instance;
         for (SolutionClass aClass : solution.classes) {
             SolutionClass classCopy = new SolutionClass(aClass);
             this.classes.add(classCopy);
@@ -35,21 +39,39 @@ public class Solution {
     public ArrayList<SolutionClass> classes = new ArrayList<>();
 
 
-    public String serialize(int numDays, int numWeeks){
+    public String serialize(){
+        int numDays = instance.days;
+        int numWeeks = instance.weeks;
         StringBuilder stringBuilder = new StringBuilder();
-        stringBuilder.append("<solution name=\"Not implemented yet\">");
+        stringBuilder.append(String.format("<solution name=\"%s\">", instance.name));
         stringBuilder.append("\n");
+//        for (CourseClass courseClass : instance.getClasses().collect(Collectors.toList())) {
         for (SolutionClass aClass : classes) {
-            stringBuilder.append("\t");
-            stringBuilder.append(aClass.serialize(numDays, numWeeks));
+//            SolutionClass aClass = getClassForId(Integer.parseInt(courseClass.id));
+//            stringBuilder.append("\t");
+//            if(aClass!= null){
+//            }else
+//            {
+//            stringBuilder.append(SolutionClass.serializeOther(courseClass, numDays, numWeeks));
+//            }
+                stringBuilder.append(aClass.serialize(numDays, numWeeks));
             stringBuilder.append("\n");
         }
         stringBuilder.append("</solution>");
         return stringBuilder.toString();
     }
 
-    public void saveToFile(String filename, int numDays, int numWeeks){
-        String serialized = this.serialize(numDays, numWeeks);
+    private SolutionClass getClassForId(int id) {
+        for (SolutionClass aClass : classes) {
+            if(aClass.classId == id){
+                return aClass;
+            }
+        }
+        return null;
+    }
+
+    public void saveToFile(String filename){
+        String serialized = this.serialize();
         try{
             FileWriter writer = new FileWriter(filename);
             writer.write(serialized);

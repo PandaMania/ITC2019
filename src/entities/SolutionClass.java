@@ -1,11 +1,10 @@
 package entities;
 
+import entities.course.CourseClass;
 import util.BitSets;
 
 import java.util.ArrayList;
 import java.util.BitSet;
-import java.util.Collections;
-import java.util.stream.Collectors;
 
 public class SolutionClass {
 
@@ -46,13 +45,30 @@ public class SolutionClass {
         this.length = aClass.length;
     }
 
+    public static String serializeOther(CourseClass courseClass, int numDays, int numWeeks) {
+        return String.format("<class id=\"%d\" days=\"%s\" start=\"%d\" weeks=\"%s\" room=\"%d\"></class>",
+                Integer.parseInt(courseClass.id), zeros(numDays),0, zeros(numWeeks),1);
+    }
+
+    private static String zeros(int n){
+        StringBuilder b = new StringBuilder(n);
+        for (int i = 0; i < n; i++) {
+            b.append('0');
+        }
+        return b.toString();
+    }
+
     // <class id="1" days="1010100" start="90" weeks="1111111111111" room="1">
     //		<student id="1"/>
     //		<student id="3"/>
     //	</class>
     public String serialize(int numDays, int numWeeks){
         // TODO: add student serialization
-        return String.format("<class id=\"%d\" days=\"%s\" start=\"%d\" weeks=\"%s\" room=\"%d\"></class>",
-                classId, BitSets.toBitString(days, numDays), start, BitSets.toBitString(weeks, numWeeks), roomId);
+        return String.format("<class id=\"%d\" days=\"%s\" start=\"%d\" weeks=\"%s\" %s></class>",
+                classId, BitSets.toBitString(days, numDays), start, BitSets.toBitString(weeks, numWeeks), getRoomId());
+    }
+
+    private String getRoomId() {
+        return roomId != -1 ? String.format("room=\"%s\"",Integer.toString(roomId)) : "";
     }
 }
