@@ -50,7 +50,7 @@ public class Mip1 {
                 ArrayList<ArrayList<ArrayList<ArrayList<ArrayList<ArrayList<GRBcombi>>>>>> allvariables = new ArrayList<>();
                 GRBLinExpr objectiveFunc = new GRBLinExpr();
 
-                GRBLinExpr scheduledConstraint = new GRBLinExpr();
+                GRBLinExpr scheduledConstraint;
                 HashMap<Integer, ArrayList<GRBcombi>> overlapCheck = new HashMap<>();
 
 
@@ -71,8 +71,7 @@ public class Mip1 {
                                 Object[] finallist = list.toArray();
                                 ArrayList<ArrayList<GRBcombi>> roomLoop = new ArrayList<>();
 
-
-                                if (finallist.length == 0) {
+                                if (finallist.length == 0 || x.courses.get(j).configs.get(k).subparts.get(l).classes.get(m).roomNeeded==false) {
                                     int fakelist = -1;
                                     ArrayList<GRBcombi> faketimeLoop = new ArrayList<>();
 
@@ -97,14 +96,16 @@ public class Mip1 {
                                                 "room " + fakelist + " value= "
                                         ), fakelist, x.courses.get(j).configs.get(k).subparts.get(l).classes.get(m).times.get(n), x.courses.get(j).configs.get(k).subparts.get(l).classes.get(m)));
 
-                                        objectiveFunc.addTerm((x.courses.get(j).configs.get(k).subparts.get(l).classes.get(m).times.get(n).penalty), faketimeLoop.get(faketimeLoop.size() - 1).getGrbVar());
-                                        scheduledConstraint.addTerm(1, faketimeLoop.get(faketimeLoop.size() - 1).getGrbVar());
+                                        objectiveFunc.addTerm((x.courses.get(j).configs.get(k).subparts.get(l).classes.get(m).times.get(n).penalty), faketimeLoop.get(faketimeLoop.size() - 1).grbVar);
+                                        scheduledConstraint.addTerm(1, faketimeLoop.get(faketimeLoop.size() - 1).grbVar);
 
 
                                     }
                                     model.addConstr(scheduledConstraint, GRB.EQUAL, 1, "CONSTRAINT " + j + k + l + m);
                                     roomLoop.add(faketimeLoop);
                                 }else {
+
+
 
                                     for (int o = 0; o < finallist.length; o++) {
 
@@ -158,10 +159,11 @@ public class Mip1 {
                                             numvariables++;
 
                                         }
-                                        model.addConstr(scheduledConstraint, GRB.EQUAL, 1, "CONSTRAINT " + j + k + l + m);
+
 
                                         roomLoop.add(timeLoop);
                                     }
+                                    model.addConstr(scheduledConstraint, GRB.EQUAL, 1, "CONSTRAINT " + j + k + l + m);
                                 }
 
                                     //  model.addConstr(scheduledConstraint,GRB.GREATER_EQUAL,1, "b");

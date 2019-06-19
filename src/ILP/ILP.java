@@ -29,7 +29,7 @@ public class ILP {
             try {
                 p = new InstanceParser(//"lums-sum17.xml");
                         //            p.parse("pu-cs-fal07.xml");
-                        "lums-sum17.xml");
+                        "tg-fal17.xml");
                 Instance x = p.parse();
                // System.out.println(x);
                 System.out.println("Courses= " +x.courses.size());
@@ -212,7 +212,7 @@ public class ILP {
 
                             System.out.println("overlapcheck room " + i );
 
-                        O.computeAllOverlaps(overlapCheck.get(i), model, sameAttendance, x);
+                       // O.computeAllOverlaps(overlapCheck.get(i), model, sameAttendance, x);
                     }
 
                 //for all rooms, check that no times are the same that equal 1, we need subset of rooms, and inside that to check values of 1, and then check if they have overlapping times.

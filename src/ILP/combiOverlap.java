@@ -84,12 +84,8 @@ public class combiOverlap {
             }
            // System.out.println(orderedByEnd.get(0).courseTime.weeks);
 
-            if (orderedByStart.get(0).room == 58) {
-                System.out.println("reached");
-                for (int i = 0; i < orderedByStart.size(); i++) {
-                    System.out.println(orderedByStart.get(i).name);
-                }
-            }
+
+
 
             while (timer <= instance.slotsPerDay) {
 
@@ -104,7 +100,7 @@ public class combiOverlap {
                         orderend++;
                     } else if (orderstart < orderedByStart.size() && orderedByStart.get(orderstart).courseTime.start == timer && !start) {
 
-                      // addconstraint(current, model);
+                       addconstraint(current, model);
                         current.add(orderedByStart.get(orderstart));
                         orderstart++;
 
@@ -138,7 +134,9 @@ public class combiOverlap {
 
             }
             if (current.size() > 0) {
-                //addconstraint(current, model);
+                System.out.println("end of the line and stuff left");
+                addconstraint(current, model);
+              //  current= new ArrayList<GRBcombi>();
             }
 
             //  System.out.println("current size" + current.size());
@@ -152,7 +150,7 @@ public class combiOverlap {
         counter++;
          GRBLinExpr overlapConstraint = new GRBLinExpr();
          for(int i=0; i<list.size(); i++){
-             overlapConstraint.addTerm(1, list.get(i).getGrbVar());
+             overlapConstraint.addTerm(1, list.get(i).grbVar);
 
          } try {
              model.addConstr(overlapConstraint, GRB.LESS_EQUAL, 1, "c" + counter );
