@@ -5,7 +5,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class CourseClass{
-    public String id;
+    public int id;
     public int limit;
     public boolean roomNeeded;
     // TODO: Maybe use entities.course.CourseClass instead

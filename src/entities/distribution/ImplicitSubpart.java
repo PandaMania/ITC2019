@@ -25,7 +25,7 @@ public class ImplicitSubpart extends ImplicitDistribution {
                         .flatMap(config -> config.subparts.stream()))
                 .collect(Collectors.toList());
         return forAll(subParts, s->{
-            List<Integer> idsInSubpart = s.classes.stream().map(c -> Integer.parseInt(c.id)).collect(Collectors.toList());
+            List<Integer> idsInSubpart = s.classes.stream().map(c -> c.id).collect(Collectors.toList());
 
             // Check if any of the classes in the subpart are scheduled
             if(solution.classes.stream().noneMatch(c->idsInSubpart.contains(c.classId))){

@@ -105,10 +105,10 @@ public class addingConstraints {
                         for(int x=0; x<sameAttendance.size(); x++){
                             for(int y=0; y<sameAttendance.get(x).size(); y++){
                                 for(int k=0; k<sameAttendance.get(x).size(); k++){
-                                    if(times.get(positionY).courseClass.id.equals(sameAttendance.get(x).get(y)) && X.courseClass.id.equals(sameAttendance.get(x).get(y)) ){
+                                    if(times.get(positionY).courseClass.id == (sameAttendance.get(x).get(y)) && X.courseClass.id==(sameAttendance.get(x).get(y)) ){
                                         // now do the checkif
-                                        if(i_end+ instance.distances[Integer.parseInt(times.get(positionY).courseClass.id)][Integer.parseInt(X.courseClass.id)]<=X.time.start ||
-                                                j_end + instance.distances[Integer.parseInt(X.courseClass.id)][Integer.parseInt(times.get(positionY).courseClass.id)]<= times.get(positionY).time.start
+                                        if(i_end+ instance.distances[times.get(positionY).courseClass.id][X.courseClass.id]<=X.time.start ||
+                                                j_end + instance.distances[X.courseClass.id][times.get(positionY).courseClass.id]<= times.get(positionY).time.start
                                                 ){
                                             overlapConstraint = new GRBLinExpr();
                                             overlapConstraint.addTerm(1, times.get(positionY).grbVar);

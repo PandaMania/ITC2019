@@ -105,7 +105,7 @@ public class InstanceParser {
         new ImplicitSubpart()};
         // Add all classes to all the implicit constraints
         instance.getClasses().forEach(C->{
-            int classId = Integer.parseInt(C.id);
+            int classId = C.id;
             for (Distribution dist : dists) {
                 dist.idInDistribution.add(classId);
             }

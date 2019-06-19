@@ -67,7 +67,7 @@ public class SimulatedAnnealing {
                 for (int k = 0; k < this.instance.courses.get(i).configs.get(j).subparts.size(); k++) {
                     for (int l = 0; l < this.instance.courses.get(i).configs.get(j).subparts.get(k).classes.size(); l++) {
                         for (int m = 0; m < this.instance.courses.get(i).configs.get(j).subparts.get(k).classes.get(l).times.size(); m++) {
-                            int idx = Integer.parseInt(this.instance.courses.get(i).configs.get(j).subparts.get(k).classes.get(l).id) - 1;
+                            int idx = this.instance.courses.get(i).configs.get(j).subparts.get(k).classes.get(l).id - 1;
                             Boolean found = false;
                             for (int n = 0; n < result.get(idx).size(); n++) {
                                 if (this.instance.courses.get(i).configs.get(j).subparts.get(k).classes.get(l).times.get(m).days == BitSets.fromString(result.get(idx).get(n).get(0))
@@ -101,7 +101,7 @@ public class SimulatedAnnealing {
                     for (int l = 0; l < this.instance.courses.get(i).configs.get(j).subparts.get(k).classes.size(); l++) {
                         boolean found = false;
                         for (CourseClass c : result) {
-                            String id = this.instance.courses.get(i).configs.get(j).subparts.get(k).classes.get(l).id;
+                            Integer id = this.instance.courses.get(i).configs.get(j).subparts.get(k).classes.get(l).id;
                             if (id.equals(c.id)) {
                                 found = true;
                                 break;
@@ -114,7 +114,7 @@ public class SimulatedAnnealing {
                 }
             }
         }
-        Collections.sort(result, Comparator.comparingInt(x -> Integer.parseInt(x.id)));
+        Collections.sort(result, Comparator.comparingInt(x -> x.id));
         return result;
     }
 
@@ -204,7 +204,7 @@ public class SimulatedAnnealing {
             classAssignment.days = C.times.get(timeIndex).days;
             classAssignment.weeks = C.times.get(timeIndex).weeks;
 
-            classAssignment.classId = Integer.parseInt(C.id);
+            classAssignment.classId = C.id;
             representation.classes.add(classAssignment);
 
         }

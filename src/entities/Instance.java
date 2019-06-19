@@ -39,16 +39,16 @@ public class Instance {
             flattened = getClasses().collect(Collectors.toList());
             int maxId = -1;
             for (CourseClass C : flattened){
-                if (Integer.parseInt(C.id) > maxId){maxId = Integer.parseInt(C.id);}
+                if (C.id > maxId){maxId = C.id;}
             }
             indeces =  new int[maxId + 1];
             for (int i = 0; i < flattened.size(); i++) {
-                int idx = Integer.parseInt(flattened.get(i).id);
+                int idx = flattened.get(i).id;
                 indeces[idx] =  i;
             }
         }
         CourseClass courseClass = flattened.get(indeces[id]);
-        if(Integer.parseInt(courseClass.id) != id){
+        if(courseClass.id != id){
             throw new IllegalStateException("Id does not match!");
         }
         return courseClass;

@@ -47,7 +47,7 @@ public class SolutionClass {
 
     public static String serializeOther(CourseClass courseClass, int numDays, int numWeeks) {
         return String.format("<class id=\"%d\" days=\"%s\" start=\"%d\" weeks=\"%s\" room=\"%d\"></class>",
-                Integer.parseInt(courseClass.id), zeros(numDays),0, zeros(numWeeks),1);
+                courseClass.id, zeros(numDays),0, zeros(numWeeks),1);
     }
 
     private static String zeros(int n){

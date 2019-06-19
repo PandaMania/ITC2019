@@ -49,7 +49,7 @@ public class CourseParser {
                 else if(name.equals("class")){
                     CourseClass cclass = new CourseClass();
                     Attribute idAttribute = startElement.getAttributeByName(QName.valueOf("id"));
-                    cclass.id = idAttribute.getValue();
+                    cclass.id = Integer.parseInt(idAttribute.getValue());
                     Attribute limitAttr = startElement.getAttributeByName(QName.valueOf("limit"));
                     cclass.limit = Integer.parseInt(limitAttr.getValue());
                     Attribute roomAttr = startElement.getAttributeByName(QName.valueOf("room"));
