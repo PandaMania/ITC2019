@@ -35,14 +35,15 @@ public class Mip1 {
             try {
                 p = new InstanceParser(//"bet-sum18.xml");
                         //            p.parse("pu-cs-fal07.xml");
-                        //"tg-fal17.xml");
-                "output4.xml");
+                        "tg-fal17.xml");
+               // "output4.xml");
                 Instance x = p.parse();
                 // System.out.println(x);
                 System.out.println("Courses= " + x.courses.size());
                 System.out.println("Distributions= " + x.distributions.size());
                 System.out.println("Students= " + x.students.size());
                 System.out.println("rooms= " + x.rooms.size());
+                System.out.println(x.weeks);
 
                 int curr = 0;
 
@@ -53,6 +54,14 @@ public class Mip1 {
 
                 GRBLinExpr scheduledConstraint;
                 HashMap<Integer, ArrayList<GRBcombi>> overlapCheck = new HashMap<>();
+
+                int week= 5;
+                    BitSet a= BitSet.valueOf(x.courses.get(0).configs.get(0).subparts.get(0).classes.get(0).times.get(0).days.getBytes());
+                    if(!a.get(week)){
+                        System.out.println("fuck yeah");
+                    }
+
+
 
 
                 for (int j = 0; j < x.courses.size(); j++) {

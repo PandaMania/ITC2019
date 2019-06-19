@@ -32,8 +32,9 @@ public class combiOverlap {
     public void runThroughGeneral(ArrayList<GRBcombi> orderedByStart, ArrayList<GRBcombi> orderedByEnd, Instance instance, GRBModel model ){
         // we need to run this for every week and every day
         // first loop weeks
-        for(int i=0; i< instance.weeks; i++){
-            for(int j=0; j<instance.days; j++){
+
+        for(int i=1; i<= instance.weeks; i++){
+            for(int j=1; j<=instance.days; j++){
                 runThroughInd(orderedByStart,orderedByEnd,instance, j, i, model );
             }
         }
@@ -49,27 +50,27 @@ public class combiOverlap {
         ArrayList<GRBcombi> current = new ArrayList<>();
 
         for(int i=0; i<orderedByStart.size(); i++){
-            BitSet a= BitSet.valueOf(orderedByStart.get(i).courseTime.weeks.getBytes());
+            BitSet a= fromString(orderedByStart.get(i).courseTime.weeks);
             if(!a.get(week)){
                 orderedByStart.remove(i);
             }
 
         }
         for(int i=0; i<orderedByStart.size(); i++){
-            BitSet a= BitSet.valueOf(orderedByStart.get(i).courseTime.days.getBytes());
+            BitSet a= fromString(orderedByStart.get(i).courseTime.days);
             if(!a.get(day)){
                 orderedByStart.remove(i);
             }
 
         }
         for(int i=0; i<orderedByEnd.size(); i++){
-            BitSet a= BitSet.valueOf(orderedByEnd.get(i).courseTime.weeks.getBytes());
+            BitSet a= fromString(orderedByEnd.get(i).courseTime.weeks);
             if(!a.get(week)){
                 orderedByEnd.remove(i);
             }
 
         }for(int i=0; i<orderedByEnd.size(); i++){
-            BitSet a= BitSet.valueOf(orderedByEnd.get(i).courseTime.days.getBytes());
+            BitSet a= fromString(orderedByEnd.get(i).courseTime.days);
             if(!a.get(day)){
                 orderedByEnd.remove(i);
             }
@@ -333,6 +334,15 @@ public class combiOverlap {
         return nooverlaps;
 
 
+    }
+    private static BitSet fromString(String binary) {
+        BitSet bitset = new BitSet(binary.length());
+        for (int i = 0; i < binary.length(); i++) {
+            if (binary.charAt(i) == '1') {
+                bitset.set(i);
+            }
+        }
+        return bitset;
     }
 
 }
