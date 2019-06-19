@@ -33,10 +33,15 @@ public class Instance {
     private List<CourseClass> flattened = null;
     // id to index
     private int[] indeces;
+
     public CourseClass getClassForId(int id){
         if (flattened == null) {
             flattened = getClasses().collect(Collectors.toList());
-            indeces =  new int[flattened.size()+1];
+            int maxId = -1;
+            for (CourseClass C : flattened){
+                if (Integer.parseInt(C.id) > maxId){maxId = Integer.parseInt(C.id);}
+            }
+            indeces =  new int[maxId + 1];
             for (int i = 0; i < flattened.size(); i++) {
                 int idx = Integer.parseInt(flattened.get(i).id);
                 indeces[idx] =  i;
