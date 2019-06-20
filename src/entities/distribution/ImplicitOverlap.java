@@ -31,9 +31,13 @@ public class ImplicitOverlap extends ImplicitDistribution {
         exceededBy = 0;
         return forAny(solution.classes, (Ci, Cj) -> {
 
-            if (!instance.getClassForId(Ci.classId).roomNeeded || !instance.getClassForId(Cj.classId).roomNeeded) {
-                return true; // If either does not need a room, then no need to check
+            //Idea: Optimize by checking for room == -1 instead of using getClassForId
+            if(Ci.roomId == -1 || Cj.roomId == -1){
+                return true;
             }
+//            if (!instance.getClassForId(Ci.classId).roomNeeded || !instance.getClassForId(Cj.classId).roomNeeded) {
+//                return true; // If either does not need a room, then no need to check
+//            }
 
             if (Ci.roomId == Cj.roomId &&                                // Same room
                     BitSets.and(Ci.weeks, Cj.weeks).cardinality() > 0 &&  // overlapping weeks

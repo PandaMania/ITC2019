@@ -14,10 +14,7 @@ import entities.distribution.Distribution;
 
 import java.io.*;
 import java.util.*;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ThreadLocalRandom;
-import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.*;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
@@ -453,13 +450,33 @@ ArrayList<SolutionClass> removed;
         double cost = 0.0;
         int infeasibleViolated = 0;
 
+        Future<Boolean>[] futures = new Future[instance.distributions.size()];
+        List<Distribution> distributions = instance.distributions;
+        // Validating in reverse order as the implicit constraints are in the back of the array
+        for (int i = distributions.size() - 1; i >= 0; i--) {
+            Distribution distribution = distributions.get(i);
+            Future<Boolean> submit = pool.submit(new ValidationRunnable(distribution, instance, repr));
+            futures[i] = submit;
+        }
+
         // constraint penalty:
-        for (Distribution dist : this.instance.distributions) {
-            boolean valid = dist.validate(this.instance, repr);
-            if(!valid){
+        // Get the results in opposite order. This gives the Implicit constraints the most time
+        List<Distribution> distributionList = this.instance.distributions;
+        for (int i = 0; i < distributionList.size(); i++) {
+            Distribution dist = distributionList.get(i);
+//            boolean valid = dist.validate(this.instance, repr);
+            boolean valid = false;
+            try {
+                valid = futures[i].get();
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            } catch (ExecutionException e) {
+                e.printStackTrace();
+            }
+            if (!valid) {
                 //System.out.println(this.getMaxPenalty(this.instance));
 
-                if(dist.required){
+                if (dist.required) {
                     infeasibleViolated++;
                     cost += dist.getPenalty();//this.hardPenalty;
                 } else {
@@ -669,7 +686,7 @@ ArrayList<SolutionClass> removed;
 //            ILP.ILP.main(null);
 //            String instanceFileName = "lums-sum17.xml";
             String instanceFileName = "tg-fal17.xml";
-        //    String instanceFileName = "pu-c8-spr07.xml";
+//            String instanceFileName = "pu-c8-spr07.xml";
 
             parser = new InstanceParser(instanceFileName);
             instance = parser.parse();
@@ -677,7 +694,7 @@ ArrayList<SolutionClass> removed;
             S = new SimulatedAnnealing(instance);
 //            init = ILP.ILP.sol;
             init = S.initRepresentation(instance);
-            solution = S.optimize(init, 100.0, 0.1, 100000, 1);
+            solution = S.optimize(init, 4000.0, 0.1, 100000, 1);
             //solution = S.optimize(init, 0.2, 0.1, 4000000, 1);
             String solutionText = solution.serialize();
             System.out.println(solutionText);
@@ -712,6 +729,24 @@ ArrayList<SolutionClass> removed;
         double cost;
         int numInfeasible;
         boolean isFeasible;
+    }
+
+    class ValidationRunnable implements Callable<Boolean> {
+
+        private Distribution distribution;
+        private Instance instance;
+        private Solution repr;
+
+        public ValidationRunnable(Distribution distribution, Instance instance, Solution repr) {
+            this.distribution = distribution;
+            this.instance = instance;
+            this.repr = repr;
+        }
+
+        @Override
+        public Boolean call() {
+            return distribution.validate(instance, repr);
+        }
     }
 
 }

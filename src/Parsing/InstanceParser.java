@@ -100,9 +100,10 @@ public class InstanceParser {
         new ImplicitRooms(),
         new ImplicitTimes(),
         new ImplicitAvailability(),
-        new ImplicitOverlap(),
-        new ImplicitParentClass(),
-        new ImplicitSubpart()};
+        new ImplicitOverlap()
+//        ,new ImplicitParentClass(),
+//        new ImplicitSubpart()
+        };
         // Add all classes to all the implicit constraints
         instance.getClasses().forEach(C->{
             int classId = C.id;

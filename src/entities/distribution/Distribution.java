@@ -134,7 +134,20 @@ public abstract class Distribution {
     }
 
     protected List<SolutionClass> getClassInDistribution(Solution solution) {
-        return solution.classes.stream().filter(this::inDistribution).collect(Collectors.toList());
+//        return solution.classes.stream().filter(this::inDistribution).collect(Collectors.toList());
+        ArrayList<SolutionClass> solutionClasses = new ArrayList<>();
+        int needed = idInDistribution.size();
+        int found = 0;
+        for (SolutionClass aClass : solution.classes) {
+            if(this.idInDistribution.contains(aClass.classId )){
+                solutionClasses.add(aClass);
+                found++;
+            }
+            if(found == needed){
+                return solutionClasses;
+            }
+        }
+        return solutionClasses;
     }
 
     public static long convert(BitSet bits) {
