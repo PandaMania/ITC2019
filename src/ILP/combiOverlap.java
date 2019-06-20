@@ -51,27 +51,27 @@ public class combiOverlap {
 
         for(int i=0; i<orderedByStart.size(); i++){
             BitSet a= fromString(orderedByStart.get(i).courseTime.weeks);
-            if(!a.get(week)){
+            if(!a.get(week-1)){
                 orderedByStart.remove(i);
             }
 
         }
         for(int i=0; i<orderedByStart.size(); i++){
             BitSet a= fromString(orderedByStart.get(i).courseTime.days);
-            if(!a.get(day)){
+            if(!a.get(day-1)){
                 orderedByStart.remove(i);
             }
 
         }
         for(int i=0; i<orderedByEnd.size(); i++){
             BitSet a= fromString(orderedByEnd.get(i).courseTime.weeks);
-            if(!a.get(week)){
+            if(!a.get(week-1)){
                 orderedByEnd.remove(i);
             }
 
         }for(int i=0; i<orderedByEnd.size(); i++){
             BitSet a= fromString(orderedByEnd.get(i).courseTime.days);
-            if(!a.get(day)){
+            if(!a.get(day-1)){
                 orderedByEnd.remove(i);
             }
 
@@ -91,17 +91,19 @@ public class combiOverlap {
             while (timer <= instance.slotsPerDay) {
 
                 while (increment == false) {
-
-                    if (orderstart < orderedByStart.size() && orderedByStart.get(orderstart).courseTime.start == timer && start) {
+                    if (orderend < orderedByEnd.size() && (orderedByEnd.get(orderend).courseTime.start + orderedByEnd.get(orderend).courseTime.length) == timer && !start) {
+                        current.remove(orderedByEnd.get(orderend));
+                        orderend++;
+                    } else if (orderstart < orderedByStart.size() && orderedByStart.get(orderstart).courseTime.start == timer && start) {
                         current.add(orderedByStart.get(orderstart));
                         orderstart++;
                         //System.out.println("first");
-                    } else if (orderend < orderedByEnd.size() && (orderedByEnd.get(orderend).courseTime.start + orderedByEnd.get(orderend).courseTime.length) == timer && !start) {
-                        current.remove(orderedByEnd.get(orderend));
-                        orderend++;
-                    } else if (orderstart < orderedByStart.size() && orderedByStart.get(orderstart).courseTime.start == timer && !start) {
 
-                       addconstraint(current, model);
+
+
+                    } else    if (orderstart < orderedByStart.size() && orderedByStart.get(orderstart).courseTime.start == timer && !start) {
+
+                        addconstraint(current, model);
                         current.add(orderedByStart.get(orderstart));
                         orderstart++;
 
@@ -111,18 +113,21 @@ public class combiOverlap {
                         addconstraint(current, model);
 
                         current.remove(orderedByEnd.get(orderend));
- //    System.out.println("after removing" + current.size());
+                        //    System.out.println("after removing" + current.size());
                         orderend++;
                         start = false;
+
+
+
 
                         //System.out.println("fourth");
                     } else {
                         increment = true;
 
                     }
-                    if (timer == 168 && orderedByStart.get(0).room == 58) {
+                    if (timer == 168 && orderedByStart.get(0).room == 20) {
                         for (int i = 0; i < current.size(); i++) {
-                            //   System.out.println( current.get(i).getName());
+                               System.out.println( current.get(i).getName());
                         }
                     }
                 }
@@ -305,14 +310,22 @@ public class combiOverlap {
         }
     }
     public boolean singlecheck(ArrayList<Unavailability> first, CourseTime second) {
-     boolean nooverlaps= true;
+     boolean overlaps= false;
+        if(first.size()==0){
+            return overlaps;
+        }
+
+
+
+
         for(int i=0; i<first.size(); i++){
 
-            BitSet j_weeks= BitSet.valueOf(second.weeks.getBytes());
+            BitSet j_weeks;
+            j_weeks= fromString(second.weeks);
 
 
-            BitSet j_days= BitSet.valueOf(second.days.getBytes());
-
+            BitSet j_days;
+            j_days= fromString(second.days);
 
             BitSet a = BitSets.and(first.get(i).days, j_days);
 
@@ -321,17 +334,13 @@ public class combiOverlap {
             int i_end = first.get(i).start+first.get(i).length;
             int j_end = second.start+second.length;
 
-            if(a.cardinality()==0){
+            if(!(j_end<first.get(i).start || i_end< second.start || b.cardinality()==0 || a.cardinality()==0)){
+                overlaps=true;
+            }
 
-            }else if(b.cardinality()==0){
 
-            }else if(i_end<= first.get(i).start){
-
-            }else if(j_end<= second.start){
-
-            }else nooverlaps=false;
         }
-        return nooverlaps;
+        return overlaps;
 
 
     }

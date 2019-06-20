@@ -1,6 +1,7 @@
 package Parsing;
 
 import entities.*;
+import util.BitSets;
 
 import javax.xml.namespace.QName;
 import javax.xml.stream.XMLEventReader;
@@ -47,7 +48,7 @@ public class RoomParser {
                 Attribute daysAttr= startElement.getAttributeByName(QName.valueOf("days"));
                 String   days= daysAttr.getValue();
 
-                room.unaivailableweeks.add(new Unavailability(BitSet.valueOf(weeks.getBytes()),BitSet.valueOf(days.getBytes()), Integer.parseInt(length),Integer.parseInt(start)));
+                room.unaivailableweeks.add(new Unavailability(BitSets.fromString(weeks),BitSets.fromString(days), Integer.parseInt(length),Integer.parseInt(start)));
 
             } else{
                 throw new IllegalArgumentException("Unexpected element encountered");

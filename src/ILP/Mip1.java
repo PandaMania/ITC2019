@@ -19,7 +19,7 @@ public class Mip1 {
 
     public static void main(String[] args) {
         try {
-
+            int unavailable=0;
             // Create empty environment, set options, and start
             GRBEnv env = new GRBEnv(true);
             env.set("logFile", "mip1.log");
@@ -35,7 +35,7 @@ public class Mip1 {
             try {
                 p = new InstanceParser(//"bet-sum18.xml");
                         //            p.parse("pu-cs-fal07.xml");
-                        "tg-fal17.xml");
+                        "iku-fal17.xml");
                // "output4.xml");
                 Instance x = p.parse();
                 // System.out.println(x);
@@ -44,6 +44,8 @@ public class Mip1 {
                 System.out.println("Students= " + x.students.size());
                 System.out.println("rooms= " + x.rooms.size());
                 System.out.println(x.weeks);
+
+
 
                 int curr = 0;
 
@@ -130,11 +132,16 @@ public class Mip1 {
 
                                             // System.out.println(x.rooms.get((Integer) finallist[o]).id + " ==== " + (Integer) finallist[o] );
 
-                                            while (n < x.courses.get(j).configs.get(k).subparts.get(l).classes.get(m).times.size() && combi.singlecheck(x.rooms.get((Integer) finallist[o] - 1).unaivailableweeks, x.courses.get(j).configs.get(k).subparts.get(l).classes.get(m).times.get(n))) {
+                                            while (n < x.courses.get(j).configs.get(k).subparts.get(l).classes.get(m).times.size() && combi.singlecheck(x.rooms.get(currRoom-1).unaivailableweeks, x.courses.get(j).configs.get(k).subparts.get(l).classes.get(m).times.get(n))) {
+                                                if(x.courses.get(j).configs.get(k).subparts.get(l).classes.get(m).id.equals("634")){
+                                                    System.out.println("FUCK YOU");
+                                                    System.out.println(x.rooms.get(currRoom-1).unaivailableweeks.size());
+                                                }
+                                                unavailable++;
                                                 n++;
                                                 if(x.courses.get(j).configs.get(k).subparts.get(l).classes.get(m).times.size()==1){
-                                                    System.out.println("size is 1 and class is = " + x.courses.get(j).configs.get(k).subparts.get(l).classes.get(m).id);
-                                                    System.out.println("number of rooms = " + x.courses.get(j).configs.get(k).subparts.get(l).classes.get(m).roomPenalties.size());
+                                                 //   System.out.println("size is 1 and class is = " + x.courses.get(j).configs.get(k).subparts.get(l).classes.get(m).id);
+                                                   // System.out.println("number of rooms = " + x.courses.get(j).configs.get(k).subparts.get(l).classes.get(m).roomPenalties.size());
                                                 }
 
                                             }
@@ -181,7 +188,12 @@ public class Mip1 {
 
                                         roomLoop.add(timeLoop);
                                     }
-                                    model.addConstr(scheduledConstraint, GRB.EQUAL, 1, "real CONSTRAINT j=  " +  x.courses.get(j).id + " k= " + k +" l= "+ l+ " m= " + m);
+                                    if(scheduledConstraint.size()==0){
+
+                                        System.out.println("scheduled Constraint size= " + scheduledConstraint.size());
+                                        System.out.println("class = " + x.courses.get(j).configs.get(k).subparts.get(l).classes.get(m).id);
+                                    }
+                                    model.addConstr(scheduledConstraint, GRB.EQUAL, 1, "real CONSTRAINT j=  " +  x.courses.get(j).id + " class= " + x.courses.get(j).configs.get(k).subparts.get(l).classes.get(m).id);
                                 }
 
                                  //     model.addConstr(scheduledConstraint,GRB.EQUAL,1, "b");
@@ -214,8 +226,9 @@ public class Mip1 {
                     Long endtime = System.currentTimeMillis();
 
                     System.out.println("time to get solution= " + (endtime - timer));
+                 /* TODO COMMENT THIS BACK IN WHEN ITS INFEASIBLE
 
-                int status = model.get(GRB.IntAttr.Status);
+                    int status = model.get(GRB.IntAttr.Status);
                 if (status == GRB.Status.UNBOUNDED) {
                     System.out.println("The model cannot be solved "
                             + "because it is unbounded");
@@ -269,15 +282,18 @@ public class Mip1 {
                         return;
                     }
                 }
-
+                int counter=0;
                 System.out.println("\nThe following constraints were removed "
                         + "to get a feasible LP:");
                 for (String s : removed) {
-                    System.out.print(s + " ");
+                    counter++;
+                    System.out.println(s + " ");
                 }
                 System.out.println();
+                System.out.println("we removed " + counter + "constraints");
+                System.out.println("number of unavailable removals= " + unavailable);
 
-
+                 TODO  the other part to delete*/
                 for (int j = 0; j < allvariables.size(); j++) {
                         for (int k = 0; k < allvariables.get(j).size(); k++) {
                             for (int l = 0; l < allvariables.get(j).get(k).size(); l++) {
