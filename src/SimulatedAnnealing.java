@@ -359,6 +359,11 @@ public class SimulatedAnnealing {
         return true;
     }
 
+    private class roomCourseTime{
+        public int roomId;
+        public CourseTime ct;
+    }
+
     private Solution getRandomNeighbor(Solution repr, int numChanges) {
         Solution neighbor = this.makeDeepCopy(repr);
         removed = new ArrayList<>(reprRemoved);
@@ -609,23 +614,34 @@ public class SimulatedAnnealing {
                                             break;
                                         }
                                     }
-                                    ArrayList<CourseTime> times2 = new ArrayList<>();
+                                    ArrayList<roomCourseTime> roomtimes2 = new ArrayList<>();
                                     for (CourseTime time2 : instance.getClassForId(id2).times){
-                                        time2.start <= neighbor.classes.get(indexSolution).start;
-                                        this.instance.get
-                                        if ((neighbor.classes.get(indexSolution).start + neighbor.classes.get(indexSolution).length + this.instance.getRoom(neighbor.classes.get(indexSolution).roomId).distanceToRooms.get(neighbor.classes.get(indexSolution2).roomId) <= time2.start) ||
-                                                () ||
-                                                () ||
-                                                ()){
-                                            times2.add(time2);
+                                        for (int roomId : this.instance.getClassForId(id2).roomPenalties.keySet()){
+                                        //for (int roomId : this.instance.getRoom(neighbor.classes.get(indexSolution).roomId).distanceToRooms.keySet() ){
+                                            if (!this.instance.getRoom(roomId).distanceToRooms.keySet().contains(neighbor.classes.get(indexSolution).roomId)){
+                                                continue;
+                                            }
+
+                                            if ((neighbor.classes.get(indexSolution).start + neighbor.classes.get(indexSolution).length + this.instance.getRoom(neighbor.classes.get(indexSolution).roomId).distanceToRooms.get(roomId) <= time2.start) ||
+                                                    (time2.start + time2.length + this.instance.getRoom(roomId).distanceToRooms.get(neighbor.classes.get(indexSolution).roomId) <= neighbor.classes.get(indexSolution).start) ||
+                                                    (BitSets.and(neighbor.classes.get(indexSolution).days, time2.days).isEmpty()) ||
+                                                    (BitSets.and(neighbor.classes.get(indexSolution).weeks, time2.weeks).isEmpty())){
+                                                roomCourseTime roomtime2 = new roomCourseTime();
+                                                roomtime2.roomId = roomId;
+                                                roomtime2.ct = time2;
+                                                roomtimes2.add(roomtime2);
+                                            }
                                         }
                                     }
-                                    if(times2.size() == 0){
+                                    if(roomtimes2.size() == 0){
                                         repeat = true;
                                         continue;
                                     }
-                                    int idxNewTime2 = ThreadLocalRandom.current().nextInt(0, times2.size());
-                                    CourseTime newTime2 = times2.get(idxNewTime2);
+
+                                    int idxNewRoomTime2 = ThreadLocalRandom.current().nextInt(0, roomtimes2.size());
+                                    int roomId2 = roomtimes2.get(idxNewRoomTime2).roomId;
+                                    CourseTime newTime2 = roomtimes2.get(idxNewRoomTime2).ct;
+                                    neighbor.classes.get(indexSolution2).roomId = roomId2;
                                     neighbor.classes.get(indexSolution2).days = newTime2.days;
                                     neighbor.classes.get(indexSolution2).weeks = newTime2.weeks;
                                     neighbor.classes.get(indexSolution2).start = newTime2.start;
@@ -633,6 +649,7 @@ public class SimulatedAnnealing {
                                 }
                             }
                         }*/
+
                     }
 
                     break;
@@ -983,11 +1000,11 @@ ArrayList<SolutionClass> removed;
         Solution solution;
 
         try {
-            String instanceFileName = "bet-sum18.xml";
+//            String instanceFileName = "bet-sum18.xml";
 //            String instanceFileName = "pu-llr-spr07.xml";
 //            ILP.ILP.main(null);
 //            String instanceFileName = "lums-sum17.xml";
-//            String instanceFileName = "tg-fal17.xml";
+            String instanceFileName = "tg-fal17.xml";
 //            String instanceFileName = "pu-c8-spr07.xml";
 
             parser = new InstanceParser(instanceFileName);
