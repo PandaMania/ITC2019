@@ -35,21 +35,26 @@ public class Instance {
     private int[] indeces;
 
     public CourseClass getClassForId(int id){
-        if (flattened == null) {
-            flattened = getClasses().collect(Collectors.toList());
-            int maxId = -1;
-            for (CourseClass C : flattened){
-                if (C.id > maxId){maxId = C.id;}
-            }
-            indeces =  new int[maxId + 1];
-            for (int i = 0; i < flattened.size(); i++) {
-                int idx = flattened.get(i).id;
-                indeces[idx] =  i;
+
+        synchronized (this){
+            if (flattened == null) {
+
+                flattened = getClasses().collect(Collectors.toList());
+                int maxId = -1;
+                for (CourseClass C : flattened){
+                    if (C.id > maxId){maxId = C.id;}
+                }
+                indeces =  new int[maxId + 1];
+                for (int i = 0; i < flattened.size(); i++) {
+                    int idx = flattened.get(i).id;
+                    indeces[idx] =  i;
+                }
             }
         }
-        CourseClass courseClass = flattened.get(indeces[id]);
+        int idx = indeces[id];
+        CourseClass courseClass = flattened.get(idx);
         if(courseClass.id != id){
-            throw new IllegalStateException("Id does not match!");
+            throw new IllegalStateException(String.format("Id does not match! getting id %d. Got Id %d", id, courseClass.id));
         }
         return courseClass;
     }
@@ -72,5 +77,14 @@ public class Instance {
             return first.get();
         }
         throw new IllegalArgumentException("No room for id: "+assignedRoom);
+    }
+
+    public Course getCourseForId(Integer id) {
+        for (Course course : courses) {
+            if(course.id == id){
+                return course;
+            }
+        }
+        throw new IllegalArgumentException(String.format("Course with id %d does not exist!", id));
     }
 }

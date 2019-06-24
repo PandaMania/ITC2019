@@ -55,7 +55,7 @@ public class CourseParser {
                     Attribute roomAttr = startElement.getAttributeByName(QName.valueOf("room"));
                     cclass.roomNeeded = roomAttr == null || Boolean.getBoolean(roomAttr.getValue());
                     Attribute parentAttr = startElement.getAttributeByName(QName.valueOf("parent"));
-                    cclass.parentId = parentAttr == null? null: parentAttr.getValue();
+                    cclass.parentId = parentAttr == null? null: Integer.parseInt(parentAttr.getValue());
                     currentClass = cclass;
                     currentSubPart.classes.add(cclass);
                 }

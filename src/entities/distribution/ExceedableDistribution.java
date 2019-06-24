@@ -16,4 +16,8 @@ public abstract class ExceedableDistribution extends Distribution{
             return (penalty * exceededBy) / nrWeeks;
         }
     }
+
+    public Integer getExceededBy() {
+        return exceededBy;
+    }
 }

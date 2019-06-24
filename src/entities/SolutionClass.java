@@ -5,6 +5,7 @@ import util.BitSets;
 
 import java.util.ArrayList;
 import java.util.BitSet;
+import java.util.StringJoiner;
 
 public class SolutionClass {
 
@@ -14,6 +15,7 @@ public class SolutionClass {
     public int classId;
     public int roomId;
     public int start;
+    public int limit;
 
     // Needed for some of the constraint checking. Not actually needed in the solution!
     public int length;
@@ -43,6 +45,7 @@ public class SolutionClass {
         this.roomId = aClass.roomId;
         this.start = aClass.start;
         this.length = aClass.length;
+        this.limit = aClass.limit;
     }
 
     public static String serializeOther(CourseClass courseClass, int numDays, int numWeeks) {
@@ -64,8 +67,16 @@ public class SolutionClass {
     //	</class>
     public String serialize(int numDays, int numWeeks){
         // TODO: add student serialization
-        return String.format("<class id=\"%d\" days=\"%s\" start=\"%d\" weeks=\"%s\" %s></class>",
+        return String.format("<class id=\"%d\" days=\"%s\" start=\"%d\" weeks=\"%s\" %s>" + serializeStudents() + "</class>",
                 classId, BitSets.toBitString(days, numDays), start, BitSets.toBitString(weeks, numWeeks), getRoomId());
+    }
+
+    private String serializeStudents() {
+        StringJoiner b = new StringJoiner("\n", "\n", "");
+        for (SolutionStudent student : students) {
+            b.add(String.format("\t\t<student id=\"%d\"/>", student.id));
+        }
+        return b.toString();
     }
 
     private String getRoomId() {

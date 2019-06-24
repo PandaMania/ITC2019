@@ -9,7 +9,7 @@ public class CourseClass{
     public int limit;
     public boolean roomNeeded;
     // TODO: Maybe use entities.course.CourseClass instead
-    public String parentId;
+    public Integer parentId;
     // Room Id's to penalties
     // TODO: Maybe use Map<Room, Integer> instead?
     public Map<Integer, Integer> roomPenalties = new HashMap<>();
