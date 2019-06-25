@@ -68,7 +68,7 @@ public class SolutionClass {
                 classId, BitSets.toBitString(days, numDays), start, BitSets.toBitString(weeks, numWeeks), getRoomId());
     }
 
-    private String getRoomId() {
+    public String getRoomId() {
         return roomId != -1 ? String.format("room=\"%s\"",Integer.toString(roomId)) : "";
     }
 }
