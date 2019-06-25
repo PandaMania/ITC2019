@@ -61,13 +61,13 @@ public class Solution {
         return stringBuilder.toString();
     }
 
-    private SolutionClass getClassForId(int id) {
+    public SolutionClass getClassForId(int id) {
         for (SolutionClass aClass : classes) {
             if(aClass.classId == id){
                 return aClass;
             }
         }
-        return null;
+        throw new IllegalArgumentException(String.format("No class for id %d", id));
     }
 
     public void saveToFile(String filename){

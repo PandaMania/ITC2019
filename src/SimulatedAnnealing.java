@@ -6,10 +6,10 @@
 
 import Parsing.*;
 import entities.*;
-import entities.course.CourseTime;
+import entities.course.*;
 import entities.distribution.ImplicitAvailability;
+import entities.distribution.ImplicitDistribution;
 import util.*;
-import entities.course.CourseClass;
 import entities.distribution.Distribution;
 
 import java.io.*;
@@ -37,7 +37,16 @@ public class SimulatedAnnealing {
     private double hardPenalty;
     private ArrayList<CourseClass> courseClasses;
     private ArrayList<ArrayList<ArrayList<String>>> courseTimes;
-    private ExecutorService pool = Executors.newFixedThreadPool(4);
+    public ExecutorService pool = Executors.newFixedThreadPool(4);
+    private ArrayList<ArrayList<Integer>> classesSameDays;
+    private ArrayList<ArrayList<Integer>> classesSameWeeks;
+    private ArrayList<ArrayList<Integer>> classesSameRoom;
+    private ArrayList<ArrayList<Integer>> classesSameStart;
+    private ArrayList<ArrayList<Integer>> classesSameTime;
+    private ArrayList<ArrayList<Integer>> classesSameAttendees;
+    private List<SolutionStudent> students;
+    public Random rand;
+
 
     // Constructor:
     public SimulatedAnnealing(Instance instance) {
@@ -52,6 +61,97 @@ public class SimulatedAnnealing {
         this.courseClasses = this.getCourseClasses();
 //        this.courseTimes = this.getCourseTimes();
         System.out.println("soft constraints max penalty: " + this.getMaxPenalty(this.instance) + "\thard constraints penalty: " + this.hardPenalty);
+        this.classesSameDays = this.getClassesSameAttribute("SameDays");
+        this.classesSameWeeks = this.getClassesSameAttribute("SameWeeks");
+        this.classesSameRoom = this.getClassesSameAttribute("SameRoom");
+        this.classesSameStart = this.getClassesSameAttribute("SameStart");
+        this.classesSameTime = this.getClassesSameAttribute("SameTime");
+        this.classesSameAttendees = this.getClassesSameAttribute("SameAttendees");
+        this.students = instance.students.stream().map(SolutionStudent::new).collect(Collectors.toList());
+        this.rand = new Random();
+    }
+
+    private ArrayList<ArrayList<Integer>> getClassesSameAttribute(String attribute){
+        ArrayList<ArrayList<Integer>> result = new ArrayList<>();
+        for (Distribution dist : this.instance.distributions){
+            if (dist.type.equals(attribute) && dist.required){
+                if (result.size() == 0){
+                    result.add(dist.idInDistribution);
+                } else {
+                    boolean addNewRow = true;
+                    for (int i=0;i<result.size();i++){
+                        if (result.get(i) == dist.idInDistribution){
+                            addNewRow = false;
+                            break;
+                        }
+                    }
+                    if (addNewRow){
+                        result.add(dist.idInDistribution);
+                    }
+                }
+            }
+        }
+        return result;
+    }
+
+    private class boolIntArray{
+        public boolean boolVal = false;
+        public ArrayList<Integer> intArray = new ArrayList<>();
+    }
+
+    private boolIntArray classIdInRequiredSameArrayForAttribute(int id, String attribute){
+        boolIntArray result = new boolIntArray();
+        ArrayList<Integer> emptyArray = new ArrayList<>();
+        if (attribute.equals("SameDays")){
+            for (int i=0;i<this.classesSameDays.size();i++){
+                if (this.classesSameDays.get(i).contains(id)){
+                    result.boolVal = true;
+                    result.intArray = this.classesSameDays.get(i);
+                    break;
+                }
+            }
+        } else if (attribute.equals("SameWeeks")){
+            for (int i=0;i<this.classesSameWeeks.size();i++){
+                if (this.classesSameWeeks.get(i).contains(id)){
+                    result.boolVal = true;
+                    result.intArray = this.classesSameWeeks.get(i);
+                    break;
+                }
+            }
+        } else if (attribute.equals("SameRoom")){
+            for (int i=0;i<this.classesSameRoom.size();i++){
+                if (this.classesSameRoom.get(i).contains(id)){
+                    result.boolVal = true;
+                    result.intArray = this.classesSameRoom.get(i);
+                    break;
+                }
+            }
+        } else if (attribute.equals("SameStart")){
+            for (int i=0;i<this.classesSameStart.size();i++){
+                if (this.classesSameStart.get(i).contains(id)){
+                    result.boolVal = true;
+                    result.intArray = this.classesSameStart.get(i);
+                    break;
+                }
+            }
+        } else if (attribute.equals("SameTime")){
+            for (int i=0;i<this.classesSameTime.size();i++){
+                if (this.classesSameTime.get(i).contains(id)){
+                    result.boolVal = true;
+                    result.intArray = this.classesSameTime.get(i);
+                    break;
+                }
+            }
+        } else if (attribute.equals("SameAttendees")){
+            for (int i=0;i<this.classesSameAttendees.size();i++){
+                if (this.classesSameAttendees.get(i).contains(id)){
+                    result.boolVal = true;
+                    result.intArray = this.classesSameAttendees.get(i);
+                    break;
+                }
+            }
+        }
+        return result;
     }
 
     private ArrayList<ArrayList<ArrayList<String>>> getCourseTimes() {
@@ -169,7 +269,7 @@ public class SimulatedAnnealing {
         return Math.random() <= prob;
     }
 
-    private Solution initRepresentation(Instance instance) {
+    public Solution initRepresentation(Instance instance) {
 
         Stream<CourseClass> allCourses = instance.getClasses();
 
@@ -184,7 +284,7 @@ public class SimulatedAnnealing {
                 classAssignment.roomId = C.roomPenalties.keySet().iterator().next();
             }else{
                 //set random room
-                int roomIdx = ThreadLocalRandom.current().nextInt(C.roomPenalties.size());
+                int roomIdx = this.rand.nextInt(C.roomPenalties.size());
                 Integer roomId = new ArrayList<>(C.roomPenalties.keySet()).get(roomIdx);
                 classAssignment.roomId = roomId;
             }
@@ -193,16 +293,36 @@ public class SimulatedAnnealing {
                 timeIndex=0;
             }
             else {
-                timeIndex = ThreadLocalRandom.current().nextInt(C.times.size());
+                timeIndex = this.rand.nextInt(C.times.size());
             }
 
+            // TODO: Just add the CourseClass to the solutionClass here?? (improve performance by skipping getClassForId calls)
             classAssignment.start = C.times.get(timeIndex).start;
             classAssignment.length = C.times.get(timeIndex).length;
             classAssignment.days = C.times.get(timeIndex).days;
             classAssignment.weeks = C.times.get(timeIndex).weeks;
+            classAssignment.limit = C.limit;
 
             classAssignment.classId = C.id;
             representation.classes.add(classAssignment);
+
+        }
+
+        for (Student student : instance.students) {
+            for (Integer courseId : student.courses) {
+                Course course = instance.getCourseForId(courseId);
+                CourseConfiguration config = getRandomFromList(course.configs);
+                for (SubPart subpart : config.subparts) {
+                    CourseClass courseClass = getRandomFromList(subpart.classes);
+                    SolutionClass solutionClass = representation.getClassForId(courseClass.id);
+                    solutionClass.students.add(new SolutionStudent(student));
+                }
+            }
+        }
+        // TODO: add preprocessing to remove rooms that never can be scheduled
+        for (Student student : instance.students) {
+            int nCourses = student.courses.size();
+            int i = this.rand.nextInt(nCourses);
 
         }
         return representation;
@@ -264,17 +384,27 @@ public class SimulatedAnnealing {
         return true;
     }
 
+    private class roomCourseTime{
+        public int roomId;
+        public CourseTime ct;
+    }
+
+    public <R> R  getRandomFromList(List<R> list){
+        int idx = this.rand.nextInt(list.size());
+        return list.get(idx);
+    }
+
     private Solution getRandomNeighbor(Solution repr, int numChanges) {
         Solution neighbor = this.makeDeepCopy(repr);
         removed = new ArrayList<>(reprRemoved);
         for (int numChange = 0; numChange < numChanges; numChange++) {
             // Determines the class to change
-            int indexSolution = ThreadLocalRandom.current().nextInt(0, neighbor.classes.size());
+            int indexSolution = this.rand.nextInt( neighbor.classes.size());
             // Determines what part of the solution to change
-            int indexSolutionPart = ThreadLocalRandom.current().nextInt(0, 3);
-            switch (indexSolutionPart) {
-                case 0:
-                    // change room (done) - add check for unaivailableweeks:
+            int indexSolutionPart = this.rand.nextInt( 3);
+            boolean repeat;
+            if (indexSolutionPart == 0) {
+                // change room (done) - add check for unaivailableweeks:
 //                    int i = 0;
 //                    int classId = neighbor.classes.get(indexSolution).classId;
 //                    CourseClass courseClass = instance.getClassForId(classId);
@@ -283,7 +413,7 @@ public class SimulatedAnnealing {
 //                            i++;
 //                            //int selectedCourseIdx = neighbor.classes.get(indexSolution).classId - 1;
 //                            int selectedCourseId = neighbor.classes.get(indexSolution).classId;
-//                            int newRoomId = ThreadLocalRandom.current().nextInt(1, this.numRooms + 1);
+//                            int newRoomId = this.rand.nextInt(1, this.numRooms + 1);
 //
 //                            //System.out.println(selectedCourseIdx + " " + newRoomId + " " + indexSolution);
 //                            //if (this.courseClasses.get(selectedCourseIdx).roomPenalties.get(newRoomId) != null
@@ -300,10 +430,12 @@ public class SimulatedAnnealing {
 //                        }
 //                    }
 //                  ###### Changed to randomly pick an available room instead of picking any room and checking whether it is available
-//                    SolutionClass changeClass = neighbor.classes.get(indexSolution);
-//                    CourseClass courseClass = instance.getClassForId(changeClass.classId);
+//                SolutionClass changeClass = neighbor.classes.get(indexSolution);
+//
+//                CourseClass courseClass = instance.getClassForId(changeClass.classId);
+//                if (courseClass.roomNeeded) {
 //                    // Loop over rooms for this class
-//                    ArrayList<Integer> availableRooms = new ArrayList<>();
+//                    ArrayList<Integer> availableRooms = new java.util.ArrayList<>();
 //                    for (Integer roomId : courseClass.roomPenalties.keySet()) {
 //                        changeClass.roomId = roomId;
 //                        for (Unavailability U : instance.getRoom(roomId).unaivailableweeks) {
@@ -313,98 +445,311 @@ public class SimulatedAnnealing {
 //                            }
 //                        }
 //                    }
+//                    int newRoomId;
 //                    if (availableRooms.size() == 0) {
-//                        System.out.println("No available rooms!!!");
+////                        System.out.println("No available rooms!!!");
+//                        newRoomId = getRandomFromList(new java.util.ArrayList<>(courseClass.roomPenalties.keySet()));
+//                    } else {
+//                        newRoomId = availableRooms.get(this.rand.nextInt(availableRooms.size()));
 //                    }
-//                    int newRoomId = availableRooms.get(ThreadLocalRandom.current().nextInt(availableRooms.size()));
 //                    changeClass.roomId = newRoomId;
+//                }
 
-                    // ##### random room #####
-                    // TODO: choose with a probability proportional to the penalty
+
+                // ##### random room #####
+                // TODO: choose with a probability proportional to the penalty
+
+//                    repeat = true;
+//                    while (repeat){
+//                        repeat = false;
+//                        SolutionClass changeClass = neighbor.classes.get(indexSolution);
+//                        CourseClass courseClass = instance.getClassForId(changeClass.classId);
+//                        if(courseClass.roomNeeded) {
+//                            ArrayList<Integer> rooms = new ArrayList<>(courseClass.roomPenalties.keySet());
+//                            int randIdx = this.rand.nextInt(rooms.size());
+//                            changeClass.roomId = rooms.get(randIdx);
+//
+//                            if (this.classIdInRequiredSameArrayForAttribute(neighbor.classes.get(indexSolution).classId, "SameRoom").boolVal) {
+//                                for (int id2:this.classIdInRequiredSameArrayForAttribute(neighbor.classes.get(indexSolution).classId, "SameRoom").intArray){
+//                                    if (id2 != neighbor.classes.get(indexSolution).classId){
+//                                        int indexSolution2 = -1;
+//                                        for (int index2=0;index2<neighbor.classes.size();index2++){
+//                                            if (neighbor.classes.get(index2).classId == id2){
+//                                                indexSolution2 = index2;
+//                                                break;
+//                                            }
+//                                        }
+//                                        if(!this.instance.getClassForId(neighbor.classes.get(indexSolution2).classId).roomPenalties.containsKey(changeClass.roomId)){
+//                                            repeat = true;
+//                                            continue;
+//                                        }
+//                                        neighbor.classes.get(indexSolution2).roomId = changeClass.roomId;
+//                                    }
+//                                }
+//                            }
+//
+//                        }
+//                    }
+                // #### penalty probability ####
                     SolutionClass changeClass = neighbor.classes.get(indexSolution);
                     CourseClass courseClass = instance.getClassForId(changeClass.classId);
                     if(courseClass.roomNeeded) {
-                        ArrayList<Integer> rooms = new ArrayList<>(courseClass.roomPenalties.keySet());
-                        int randIdx = ThreadLocalRandom.current().nextInt(rooms.size());
-                        changeClass.roomId = rooms.get(randIdx);
+                        int newRoom = selectRandomRoom(changeClass);
+                        changeClass.roomId = newRoom;
                     }
-                    // #### penalty probability ####
-//                    SolutionClass changeClass = neighbor.classes.get(indexSolution);
-//                    CourseClass courseClass = instance.getClassForId(changeClass.classId);
-//                    if(courseClass.roomNeeded) {
-//                        int newRoom = selectRandomRoom(changeClass);
-//                        changeClass.roomId = newRoom;
-//                    }
-                    break;
-            case 1:
+            } else if (indexSolutionPart == 1) {
                 // change time (done):
                 // TODO: maybe change this to choose times that are available (like in the rooms)
+                SolutionClass solutionClass = neighbor.classes.get(indexSolution);
+                CourseClass courseClass = instance.getClassForId(solutionClass.classId);
+                ArrayList<CourseTime> times = courseClass.times;
+                CourseTime newTime = getRandomFromList(times);
+                solutionClass.start = newTime.start;
+                solutionClass.length = newTime.length;
+                solutionClass.days = newTime.days;
+                solutionClass.weeks = newTime.weeks;
 //                int selectedCourseIdx = neighbor.classes.get(indexSolution).classId - 1;
-//                int idxNewTime = ThreadLocalRandom.current().nextInt(0, this.courseTimes.get(selectedCourseIdx).size());
+//                int idxNewTime = this.rand.nextInt(0, this.courseTimes.get(selectedCourseIdx).size());
 //                neighbor.classes.get(indexSolution).days = this.getBitSetFromString(this.courseTimes.get(selectedCourseIdx).get(idxNewTime).get(0));
 //                neighbor.classes.get(indexSolution).weeks = this.getBitSetFromString(this.courseTimes.get(selectedCourseIdx).get(idxNewTime).get(1));
 //                neighbor.classes.get(indexSolution).start = Integer.parseInt(this.courseTimes.get(selectedCourseIdx).get(idxNewTime).get(2));
-                    ArrayList<CourseTime> times = instance.getClassForId(neighbor.classes.get(indexSolution).classId).times;
-                    int idxNewTime = ThreadLocalRandom.current().nextInt(0, times.size());
-                    CourseTime newTime = times.get(idxNewTime);
-                    neighbor.classes.get(indexSolution).days = newTime.days;
-                    neighbor.classes.get(indexSolution).weeks = newTime.weeks;
-                    neighbor.classes.get(indexSolution).start = newTime.start;
-                    neighbor.classes.get(indexSolution).length = newTime.length;
-                    break;
-                case 2:
-                    // change students:
-                    // TODO: update this to work on ArrayLists instead of BitSet
-                    if (this.numStudents != 0) {
-                        for (int bitFlip = 0; bitFlip < this.bitFlipsStudents; bitFlip++) {
-                            int flipIndex = ThreadLocalRandom.current().nextInt(0, this.numStudents);
-//                            neighbor.classes.get(indexSolution).students.flip(flipIndex);
+                    /*repeat = true;
+                    while (repeat){
+                        repeat = false;
+                        ArrayList<CourseTime> times = instance.getClassForId(neighbor.classes.get(indexSolution).classId).times;
+                        int idxNewTime = this.rand.nextInt(0, times.size());
+                        CourseTime newTime = times.get(idxNewTime);
+                        neighbor.classes.get(indexSolution).days = newTime.days;
+                        neighbor.classes.get(indexSolution).weeks = newTime.weeks;
+                        neighbor.classes.get(indexSolution).start = newTime.start;
+                        neighbor.classes.get(indexSolution).length = newTime.length;
+                        if (this.classIdInRequiredSameArrayForAttribute(neighbor.classes.get(indexSolution).classId, "SameDays").boolVal) {
+                            for (int id2:this.classIdInRequiredSameArrayForAttribute(neighbor.classes.get(indexSolution).classId, "SameDays").intArray){
+                                if (id2 != neighbor.classes.get(indexSolution).classId){
+                                    int indexSolution2 = -1;
+                                    for (int index2=0;index2<neighbor.classes.size();index2++){
+                                        if (neighbor.classes.get(index2).classId == id2){
+                                            indexSolution2 = index2;
+                                            break;
+                                        }
+                                    }
+                                    ArrayList<CourseTime> times2 = new ArrayList<>();
+                                    for (CourseTime time2 : instance.getClassForId(id2).times){
+                                        if ((BitSets.or(time2.days, neighbor.classes.get(indexSolution).days).equals(neighbor.classes.get(indexSolution).days)) ||
+                                                (BitSets.or(time2.days, neighbor.classes.get(indexSolution).days).equals(time2.days))){
+                                            times2.add(time2);
+                                        }
+                                    }
+                                    if(times2.size() == 0){
+                                        repeat = true;
+                                        continue;
+                                    }
+                                    int idxNewTime2 = this.rand.nextInt(0, times2.size());
+                                    CourseTime newTime2 = times2.get(idxNewTime2);
+                                    neighbor.classes.get(indexSolution2).days = newTime2.days;
+                                    neighbor.classes.get(indexSolution2).weeks = newTime2.weeks;
+                                    neighbor.classes.get(indexSolution2).start = newTime2.start;
+                                    neighbor.classes.get(indexSolution2).length = newTime2.length;
+                                }
+                            }
+                        }
+
+                        if (this.classIdInRequiredSameArrayForAttribute(neighbor.classes.get(indexSolution).classId, "SameWeeks").boolVal) {
+                            for (int id2:this.classIdInRequiredSameArrayForAttribute(neighbor.classes.get(indexSolution).classId, "SameWeeks").intArray){
+                                if (id2 != neighbor.classes.get(indexSolution).classId){
+                                    int indexSolution2 = -1;
+                                    for (int index2=0;index2<neighbor.classes.size();index2++){
+                                        if (neighbor.classes.get(index2).classId == id2){
+                                            indexSolution2 = index2;
+                                            break;
+                                        }
+                                    }
+                                    ArrayList<CourseTime> times2 = new ArrayList<>();
+                                    for (CourseTime time2 : instance.getClassForId(id2).times){
+                                        if ((BitSets.or(time2.weeks, neighbor.classes.get(indexSolution).weeks).equals(neighbor.classes.get(indexSolution).weeks)) ||
+                                                (BitSets.or(time2.weeks, neighbor.classes.get(indexSolution).weeks).equals(time2.weeks))){
+                                            times2.add(time2);
+                                        }
+                                    }
+                                    if(times2.size() == 0){
+                                        repeat = true;
+                                        continue;
+                                    }
+                                    int idxNewTime2 = this.rand.nextInt(0, times2.size());
+                                    CourseTime newTime2 = times2.get(idxNewTime2);
+                                    neighbor.classes.get(indexSolution2).days = newTime2.days;
+                                    neighbor.classes.get(indexSolution2).weeks = newTime2.weeks;
+                                    neighbor.classes.get(indexSolution2).start = newTime2.start;
+                                    neighbor.classes.get(indexSolution2).length = newTime2.length;
+                                }
+                            }
+                        }
+
+                        if (this.classIdInRequiredSameArrayForAttribute(neighbor.classes.get(indexSolution).classId, "SameStart").boolVal) {
+                            for (int id2:this.classIdInRequiredSameArrayForAttribute(neighbor.classes.get(indexSolution).classId, "SameStart").intArray){
+                                if (id2 != neighbor.classes.get(indexSolution).classId){
+                                    int indexSolution2 = -1;
+                                    for (int index2=0;index2<neighbor.classes.size();index2++){
+                                        if (neighbor.classes.get(index2).classId == id2){
+                                            indexSolution2 = index2;
+                                            break;
+                                        }
+                                    }
+                                    ArrayList<CourseTime> times2 = new ArrayList<>();
+                                    for (CourseTime time2 : instance.getClassForId(id2).times){
+                                        if (time2.start == neighbor.classes.get(indexSolution).start){
+                                            times2.add(time2);
+                                        }
+                                    }
+                                    if(times2.size() == 0){
+                                        repeat = true;
+                                        continue;
+                                    }
+                                    int idxNewTime2 = this.rand.nextInt(0, times2.size());
+                                    CourseTime newTime2 = times2.get(idxNewTime2);
+                                    neighbor.classes.get(indexSolution2).days = newTime2.days;
+                                    neighbor.classes.get(indexSolution2).weeks = newTime2.weeks;
+                                    neighbor.classes.get(indexSolution2).start = newTime2.start;
+                                    neighbor.classes.get(indexSolution2).length = newTime2.length;
+                                }
+                            }
+                        }
+
+                        if (this.classIdInRequiredSameArrayForAttribute(neighbor.classes.get(indexSolution).classId, "SameTime").boolVal) {
+                            for (int id2:this.classIdInRequiredSameArrayForAttribute(neighbor.classes.get(indexSolution).classId, "SameTime").intArray){
+                                if (id2 != neighbor.classes.get(indexSolution).classId){
+                                    int indexSolution2 = -1;
+                                    for (int index2=0;index2<neighbor.classes.size();index2++){
+                                        if (neighbor.classes.get(index2).classId == id2){
+                                            indexSolution2 = index2;
+                                            break;
+                                        }
+                                    }
+                                    ArrayList<CourseTime> times2 = new ArrayList<>();
+                                    for (CourseTime time2 : instance.getClassForId(id2).times){
+                                        if ((time2.start <= neighbor.classes.get(indexSolution).start &&
+                                                neighbor.classes.get(indexSolution).start + neighbor.classes.get(indexSolution).length <= time2.start + time2.length) ||
+                                                (neighbor.classes.get(indexSolution).start <= time2.start  &&
+                                                        time2.start + time2.length <= neighbor.classes.get(indexSolution).start + neighbor.classes.get(indexSolution).length)){
+                                            times2.add(time2);
+                                        }
+                                    }
+                                    if(times2.size() == 0){
+                                        repeat = true;
+                                        continue;
+                                    }
+                                    int idxNewTime2 = this.rand.nextInt(0, times2.size());
+                                    CourseTime newTime2 = times2.get(idxNewTime2);
+                                    neighbor.classes.get(indexSolution2).days = newTime2.days;
+                                    neighbor.classes.get(indexSolution2).weeks = newTime2.weeks;
+                                    neighbor.classes.get(indexSolution2).start = newTime2.start;
+                                    neighbor.classes.get(indexSolution2).length = newTime2.length;
+                                }
+                            }
+                        }
+
+                        /*if (this.classIdInRequiredSameArrayForAttribute(neighbor.classes.get(indexSolution).classId, "SameAttendees").boolVal) {
+                            for (int id2:this.classIdInRequiredSameArrayForAttribute(neighbor.classes.get(indexSolution).classId, "SameAttendees").intArray){
+                                if (id2 != neighbor.classes.get(indexSolution).classId){
+                                    int indexSolution2 = -1;
+                                    for (int index2=0;index2<neighbor.classes.size();index2++){
+                                        if (neighbor.classes.get(index2).classId == id2){
+                                            indexSolution2 = index2;
+                                            break;
+                                        }
+                                    }
+                                    ArrayList<roomCourseTime> roomtimes2 = new ArrayList<>();
+                                    for (CourseTime time2 : instance.getClassForId(id2).times){
+                                        for (int roomId : this.instance.getClassForId(id2).roomPenalties.keySet()){
+                                        //for (int roomId : this.instance.getRoom(neighbor.classes.get(indexSolution).roomId).distanceToRooms.keySet() ){
+                                            if (!this.instance.getRoom(roomId).distanceToRooms.keySet().contains(neighbor.classes.get(indexSolution).roomId)){
+                                                continue;
+                                            }
+
+                                            if ((neighbor.classes.get(indexSolution).start + neighbor.classes.get(indexSolution).length + this.instance.getRoom(neighbor.classes.get(indexSolution).roomId).distanceToRooms.get(roomId) <= time2.start) ||
+                                                    (time2.start + time2.length + this.instance.getRoom(roomId).distanceToRooms.get(neighbor.classes.get(indexSolution).roomId) <= neighbor.classes.get(indexSolution).start) ||
+                                                    (BitSets.and(neighbor.classes.get(indexSolution).days, time2.days).isEmpty()) ||
+                                                    (BitSets.and(neighbor.classes.get(indexSolution).weeks, time2.weeks).isEmpty())){
+                                                roomCourseTime roomtime2 = new roomCourseTime();
+                                                roomtime2.roomId = roomId;
+                                                roomtime2.ct = time2;
+                                                roomtimes2.add(roomtime2);
+                                            }
+                                        }
+                                    }
+                                    if(roomtimes2.size() == 0){
+                                        repeat = true;
+                                        continue;
+                                    }
+
+                                    int idxNewRoomTime2 = this.rand.nextInt(0, roomtimes2.size());
+                                    int roomId2 = roomtimes2.get(idxNewRoomTime2).roomId;
+                                    CourseTime newTime2 = roomtimes2.get(idxNewRoomTime2).ct;
+                                    neighbor.classes.get(indexSolution2).roomId = roomId2;
+                                    neighbor.classes.get(indexSolution2).days = newTime2.days;
+                                    neighbor.classes.get(indexSolution2).weeks = newTime2.weeks;
+                                    neighbor.classes.get(indexSolution2).start = newTime2.start;
+                                    neighbor.classes.get(indexSolution2).length = newTime2.length;
+                                }
+                            }
+                        }*/
+            }
+            else if(indexSolutionPart == 2) {
+                // change students:
+                // TODO: update this to work in a smarter way
+                // Switch configs, subparts, classes at once
+                if (this.numStudents != 0) {
+                    int i = this.rand.nextInt(instance.students.size());
+                    SolutionStudent student = students.get(i);
+                    //random course
+                    int courseIdx = this.rand.nextInt(student.courses.size());
+                    Integer courseId = student.courses.get(courseIdx);
+                    Course course = instance.getCourseForId(courseId);
+                    // random config
+                    int configIdx = this.rand.nextInt(course.configs.size());
+                    CourseConfiguration courseConfiguration = course.configs.get(configIdx);
+                    // random subpart
+                    int subpartIdx = this.rand.nextInt(courseConfiguration.subparts.size());
+                    SubPart subPart = courseConfiguration.subparts.get(subpartIdx);
+//                    // random class
+//                    int classIdx = this.rand.nextInt(subPart.classes.size());
+//                    CourseClass courseClass = subPart.classes.get(classIdx);
+                    // get class the student is currently in
+                    CourseClass courseClass = null;
+                    for (CourseClass aClass : subPart.classes) {
+                        SolutionClass solutionClass = neighbor.getClassForId(aClass.id);
+                        if (solutionClass.students.stream().anyMatch(s->s.id == student.id)) {
+                            courseClass = aClass;
                         }
                     }
-                    break;
-                case 3:
-                    // add or remove classes
-                    int origin;
-                    int bound;
-                    //only remove when there are more than 3 classes
-                    if(neighbor.classes.size() > 3){
-                        origin=0;
-                    }else origin=1;
-                    // only add when there are classes to add
-                    if(removed.size()>0){
-                        bound = 2;
-                    }else bound=1;
-                    int addOrRemove = ThreadLocalRandom.current().nextInt(origin, bound);
-                    if(addOrRemove == 0){
-                        // removing a random class
-//                        System.out.println("removing");
-                        int removeIdx = ThreadLocalRandom.current().nextInt(neighbor.classes.size());
-                        SolutionClass removeClass = neighbor.classes.get(removeIdx);
-                        // To make sure that we only add courses once to the list
-                        if(removed.stream().noneMatch(r->r.classId == removeClass.classId)){
-                            removed.add(removeClass);
-                        }
-                        neighbor.classes.remove(removeIdx);
-                    }else{
-                        boolean added = false;
-                        int tries = 0;
-                        while(!added) {
-                            // adding any class that has been removed before
-//                        System.out.println("adding");
-                            int addIdx = ThreadLocalRandom.current().nextInt(removed.size());
-                            SolutionClass addClass = removed.get(addIdx);
-                            if (neighbor.classes.stream().noneMatch(c -> c.classId == addClass.classId)) {
-                                neighbor.classes.add(addClass);
-                                removed.remove(addIdx);
-                                added=true;
-                            }
-                            if(tries > 10000){
-                                added=true;
-                            }
-                            tries++;
-                        }
+                    if (courseClass == null) {
+                        courseClass = getRandomFromList(subPart.classes);
                     }
-                    break;
+
+                    SolutionClass solutionClass = neighbor.getClassForId(courseClass.id);
+                    // Check if student is already in course. Remove if is the case, otherwise add
+                    if (solutionClass.students.stream().anyMatch(s -> s.id == student.id)) {
+                        solutionClass.students.removeIf(s -> s.id == student.id);
+                        CourseClass randomSubpartClass = getRandomFromList(subPart.classes);
+                        SolutionClass randomSolutionClass = neighbor.getClassForId(randomSubpartClass.id);
+                        if (!randomSolutionClass.students.stream().anyMatch(s -> s.id == student.id)) {
+                            randomSolutionClass.students.add(student);
+                        }
+                    } else {
+                        solutionClass.students.add(student);
+                        Integer parentId = courseClass.parentId;
+                        // Add student to the parent classes
+//                        while (parentId != null) {
+//                            SolutionClass parentClass = neighbor.getClassForId(parentId);
+//                            if (!parentClass.students.stream().anyMatch(s -> s.id == student.id)) {
+//                                parentClass.students.add(student);
+//                            }
+//                            CourseClass parentCourseClass = instance.getClassForId(parentClass.classId);
+//                            parentId = parentCourseClass.parentId;
+
+//                        }
+                    }
+                }
             }
         }
         return neighbor;
@@ -478,9 +823,9 @@ ArrayList<SolutionClass> removed;
 
                 if (dist.required) {
                     infeasibleViolated++;
-                    cost += dist.getPenalty();//this.hardPenalty;
+                    cost += this.instance.optDist * dist.getPenalty();      //this.hardPenalty;
                 } else {
-                    cost += dist.getPenalty();
+                    cost += this.instance.optDist *  dist.getPenalty();
                 }
             }
         }
@@ -491,7 +836,7 @@ ArrayList<SolutionClass> removed;
 //                        while (true) {
 //                            i++;
 //                            int selectedCourseIdx = neighbor.classes.get(indexSolution).classId - 1;
-//                            int newRoomId = ThreadLocalRandom.current().nextInt(1, this.numRooms + 1);
+//                            int newRoomId = this.rand.nextInt(1, this.numRooms + 1);
 //                            if (this.courseClasses.get(selectedCourseIdx).roomPenalties.get(newRoomId) != null
 //                                    && isAvailableWeeks(this.instance.rooms.get(newRoomId - 1).unaivailableweeks, newRoomId - 1, neighbor, indexSolution)) {
 //                                neighbor.classes.get(indexSolution).roomId = newRoomId;
@@ -541,7 +886,7 @@ ArrayList<SolutionClass> removed;
 //                }
 //            }
         }
-        cost += roomPenalty;
+        cost += this.instance.optRoom * roomPenalty;
 
         // time penalty:
         int timePenalty = 0;
@@ -574,7 +919,7 @@ ArrayList<SolutionClass> removed;
                 }
             }
         }
-        cost+= timePenalty;
+        cost+= this.instance.optTime * timePenalty;
         return new ValidationResult(cost, infeasibleViolated, infeasibleViolated == 0);
     }
 
@@ -586,20 +931,38 @@ ArrayList<SolutionClass> removed;
         return startTemperature * Math.exp((double) numIteration / (double) numIterations * Math.log(endTemperature / startTemperature));
     }
 
+    private int getNumChanges(int numChangesStart, int numIteration, int numIterations) {
+        double result;
+        // linear:
+        //result = (double) numChangesStart - (double) numIteration * (double) numChangesStart / (double) numIterations;
+
+        // exponential:
+        result =  (double) numChangesStart * Math.exp((double) numIteration / (double) numIterations * Math.log(1.0 / (double) numChangesStart));
+        return (int) Math.round(result);
+    }
     //private Boolean hasValidStructure(Solution repr){
     //    return false;
     //}
-
-    private Solution optimize(Solution repr, double startTemperature, double endTemperature, int numIterations, int numChanges) {
+public  double[] costs;
+    public Solution optimize(Solution repr, double startTemperature, double endTemperature, int numIterations, int numChangesStart, boolean useShrinking) {
         ValidationResult resRepr = this.cost(repr);
         double reprCost = resRepr.cost;
         int numIteration = 0;
         boolean reachedFeasibility = resRepr.isFeasible;
+        costs = new double[numIterations];
         //this.isFeasible(repr);
         //Boolean reachedValidStructure = this.hasValidStructure(repr);
 
         while (numIteration < numIterations) {
-            Solution neighbor = this.getRandomNeighbor(repr, numChanges);
+            Solution neighbor;
+            int numChanges = numChangesStart;
+            if (useShrinking){
+                numChanges = this.getNumChanges(numChangesStart, numIteration, numIterations);
+                neighbor = this.getRandomNeighbor(repr, numChanges);
+            } else {
+                neighbor = this.getRandomNeighbor(repr, numChanges);
+            }
+
             ValidationResult resNeighbour = this.cost(neighbor);
 
             // optional: don't give up feasibility or valid structure once reached
@@ -647,7 +1010,7 @@ ArrayList<SolutionClass> removed;
 
             if (numIteration % 100 == 0 || numIteration + 1 == numIterations) {
                 System.out.print("\r        \r");
-                System.out.println("numIteration: " + numIteration + "\tFeasible: " + /*this.isFeasible(repr)*/ feasible +
+                System.out.println("numIteration: " + numIteration+ "/" + numIterations + "\tFeasible: " + /*this.isFeasible(repr)*/ feasible +
                         "\tCost: " + reprCost + "\tTemperature: " + String.format("%.4f", temperature) + "\tProbability: " + String.format("%.4f", prob) +
                         "\tnumInfeasible: " + /*this.getNumInfeasible(repr)*/ numInfeasible
                         /*+"   " + String.format("%.2f", (100 * */ /*this.getNumInfeasible(repr)*/ /*numInfeasible * this.hardPenalty) / reprCost) + "%"*/);
@@ -656,6 +1019,7 @@ ArrayList<SolutionClass> removed;
                 System.out.print("\r        \r");
                 System.out.print(numIteration);
             }
+            costs[numIteration] = reprCost;
             numIteration++;
 
             // optional: don't give up feasibility or valid structure once reached
@@ -682,35 +1046,46 @@ ArrayList<SolutionClass> removed;
         Solution solution;
 
         try {
-//            String instanceFileName = "bet-sum18.xml";
+            String instanceFileName = "bet-sum18.xml";
 //            ILP.ILP.main(null);
 //            String instanceFileName = "lums-sum17.xml";
-            String instanceFileName = "tg-fal17.xml";
+//            String instanceFileName = "tg-fal17.xml";
+//            String instanceFileName = "pu-cs-fal07.xml";
+//            String instanceFileName = "iku-fal17.xml";
 //            String instanceFileName = "pu-c8-spr07.xml";
+//            String instanceFileName = "wbg-fal10.xml";
+//            String instanceFileName = "muni-fsps-spr17.xml";
 
             parser = new InstanceParser(instanceFileName);
             instance = parser.parse();
             System.out.println(instance.toString());
             S = new SimulatedAnnealing(instance);
 //            init = ILP.ILP.sol;
+            S.rand.setSeed(197841684351L);
             init = S.initRepresentation(instance);
-            solution = S.optimize(init, 4000.0, 0.1, 100000, 1);
+            solution = S.optimize(init, 7000.0, 0.1, 100_000, 1, false);
             //solution = S.optimize(init, 0.2, 0.1, 4000000, 1);
             String solutionText = solution.serialize();
-            System.out.println(solutionText);
+//            System.out.println(solutionText);
             System.out.print("Violated Constraints: ");
             for (Distribution dist : instance.distributions) {
                 if (!dist.validate(instance, solution)) {
                     System.out.print(dist.type + ",");
-                    if (dist.required) {
-                        System.out.print("(req)");
-                    }
-                    System.out.print(",");
+                    if (dist.required)
+                        System.out.print("req ");
+                        if (ImplicitDistribution.class.isAssignableFrom(dist.getClass())) {
+                            ImplicitDistribution d = (ImplicitDistribution) dist;
+                            System.out.print(d.getExceededBy());
+                        }
+                    System.out.println(",");
                 }
             }
             System.out.println();
             S.cost(solution);
-            solution.saveToFile(String.format("solution-%d.xml", System.currentTimeMillis()));
+            String outFile  =String.format("solution-%d.xml", System.currentTimeMillis());
+            System.out.println("writing to file " + outFile);
+            solution.saveToFile(outFile);
+            S.pool.shutdown();
 
         } catch (FileNotFoundException e) {
             e.printStackTrace();

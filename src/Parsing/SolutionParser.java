@@ -4,6 +4,7 @@ import entities.Instance;
 import entities.Solution;
 import entities.SolutionClass;
 import entities.SolutionStudent;
+import entities.course.CourseClass;
 import util.BitSets;
 
 import javax.xml.namespace.QName;
@@ -28,7 +29,7 @@ public class SolutionParser {
 
     }
 
-    public Solution parse(){
+    public Solution parse() {
         Solution sol = new Solution(instance);
         XMLInputFactory xmlInputFactory = XMLInputFactory.newInstance();
         try {
@@ -40,7 +41,7 @@ public class SolutionParser {
                     StartElement startElement = ev.asStartElement();
                     String tag = startElement.getName().getLocalPart();
 
-                    if(tag.equals("class")){
+                    if (tag.equals("class")) {
                         Attribute idAttr = startElement.getAttributeByName(QName.valueOf("id"));
                         int id = Integer.parseInt(idAttr.getValue());
                         Attribute daysAttr = startElement.getAttributeByName(QName.valueOf("days"));
@@ -50,7 +51,12 @@ public class SolutionParser {
                         Attribute startAttr = startElement.getAttributeByName(QName.valueOf("start"));
                         int start = Integer.parseInt(startAttr.getValue());
                         Attribute roomAttr = startElement.getAttributeByName(QName.valueOf("room"));
-                        int room = Integer.parseInt(roomAttr.getValue());
+                        int room;
+                        try {
+                            room = Integer.parseInt(roomAttr.getValue());
+                        } catch (NullPointerException e) {
+                            room = -1;
+                        }
 
                         SolutionClass c = new SolutionClass();
                         c.classId = id;
@@ -58,22 +64,22 @@ public class SolutionParser {
                         c.start = start;
                         c.roomId = room;
                         c.weeks = weeks;
-                        c.length = instance.getClassForId(id).times.stream()
-                                .filter(t->t.start == start && BitSets.and(t.days, days).cardinality()>0 && BitSets.and(t.weeks, weeks).cardinality()>0)
-                                .findFirst().get().length;
                         sol.classes.add(c);
+                        CourseClass courseClass = instance.getClassForId(id);
+                        c.length = courseClass.times.stream()
+                                .filter(t -> t.start == start && BitSets.and(t.days, days).cardinality() > 0 && BitSets.and(t.weeks, weeks).cardinality() > 0)
+                                .findFirst().get().length;
+                        c.limit = courseClass.limit;
                         currentClass = c;
-                    }
-                    else if(tag.equals("student")){
+                    } else if (tag.equals("student")) {
                         Attribute idAttr = startElement.getAttributeByName(QName.valueOf("id"));
                         int id = Integer.parseInt(idAttr.getValue());
 
                         SolutionStudent s = new SolutionStudent();
                         s.id = id;
-                        if (currentClass != null){
+                        if (currentClass != null) {
                             currentClass.students.add(s);
-                        }
-                        else{
+                        } else {
                             throw new IllegalStateException("Encountered student tag without a preceding class tag.");
                         }
                     }

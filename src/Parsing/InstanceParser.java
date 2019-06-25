@@ -39,7 +39,7 @@ public class InstanceParser {
 
     private void handleProblem(XMLEventReader xmlEventReader, StartElement startElement) {
         Attribute nameAttr = startElement.getAttributeByName(QName.valueOf("name"));
-        instance.name =  nameAttr.getValue();
+        instance.name = nameAttr.getValue();
         Attribute daysAttr = startElement.getAttributeByName(QName.valueOf("nrDays"));
         instance.days = Integer.parseInt(daysAttr.getValue());
         Attribute slotsAttr = startElement.getAttributeByName(QName.valueOf("slotsPerDay"));
@@ -97,15 +97,17 @@ public class InstanceParser {
     private void AddImplicitContraints() {
         // Adds the implicit constraints
         Distribution[] dists = new Distribution[]{
-        new ImplicitRooms(),
-        new ImplicitTimes(),
-        new ImplicitAvailability(),
-        new ImplicitOverlap()
-//        ,new ImplicitParentClass(),
-//        new ImplicitSubpart()
+                new ImplicitRooms(),
+                new ImplicitTimes(),
+                new ImplicitAvailability(),
+                new ImplicitOverlap()
+        ,new ImplicitParentClass()
+                , new ImplicitSubpart()
+                , new ImplicitClassLimit()
+
         };
         // Add all classes to all the implicit constraints
-        instance.getClasses().forEach(C->{
+        instance.getClasses().forEach(C -> {
             int classId = C.id;
             for (Distribution dist : dists) {
                 dist.idInDistribution.add(classId);
@@ -186,7 +188,7 @@ public class InstanceParser {
         try {
             p = new InstanceParser(
 //                    "lums-sum17.xml");
-                        "pu-cs-fal07.xml");
+                    "pu-cs-fal07.xml");
 //                        "iku-fal17.xml");
 
             Instance x = p.parse();
@@ -195,7 +197,6 @@ public class InstanceParser {
         } catch (FileNotFoundException e) {
             e.printStackTrace();
         }
-
 
 
     }
