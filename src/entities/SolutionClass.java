@@ -71,9 +71,10 @@ public class SolutionClass {
                 classId, BitSets.toBitString(days, numDays), start, BitSets.toBitString(weeks, numWeeks), getRoomId());
     }
 
-<<<<<<< HEAD
     public String getRoomId() {
-=======
+    	return roomId != -1 ? String.format("room=\"%s\"",Integer.toString(roomId)) : "";
+	}
+
     private String serializeStudents() {
         StringJoiner b = new StringJoiner("\n", "\n", "");
         for (SolutionStudent student : students) {
@@ -82,8 +83,5 @@ public class SolutionClass {
         return b.toString();
     }
 
-    private String getRoomId() {
->>>>>>> defaf6d03f74bdb1d6d0e533a71a51ec9434953f
-        return roomId != -1 ? String.format("room=\"%s\"",Integer.toString(roomId)) : "";
-    }
+
 }
