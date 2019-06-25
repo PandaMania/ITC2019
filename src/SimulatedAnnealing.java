@@ -394,6 +394,8 @@ public class SimulatedAnnealing {
         return list.get(idx);
     }
 
+    public String roomSelection = "random";// = "availabilityBased";
+    public String timeSelection = "random";// = constraintBased";
     private Solution getRandomNeighbor(Solution repr, int numChanges) {
         Solution neighbor = this.makeDeepCopy(repr);
         removed = new ArrayList<>(reprRemoved);
@@ -404,31 +406,33 @@ public class SimulatedAnnealing {
             int indexSolutionPart = this.rand.nextInt( 3);
             boolean repeat;
             if (indexSolutionPart == 0) {
-                // change room (done) - add check for unaivailableweeks:
-//                    int i = 0;
-//                    int classId = neighbor.classes.get(indexSolution).classId;
-//                    CourseClass courseClass = instance.getClassForId(classId);
-//                    if(courseClass.roomNeeded && courseClass.roomPenalties.size() > 1){
-//                        while (true) {
-//                            i++;
-//                            //int selectedCourseIdx = neighbor.classes.get(indexSolution).classId - 1;
-//                            int selectedCourseId = neighbor.classes.get(indexSolution).classId;
-//                            int newRoomId = this.rand.nextInt(1, this.numRooms + 1);
-//
-//                            //System.out.println(selectedCourseIdx + " " + newRoomId + " " + indexSolution);
-//                            //if (this.courseClasses.get(selectedCourseIdx).roomPenalties.get(newRoomId) != null
-//                            //System.out.println(selectedCourseIdx);
-//                            if (this.instance.getClassForId(selectedCourseId).roomPenalties.get(newRoomId) != null
-//                                    && isAvailableWeeks(this.instance.rooms.get(newRoomId - 1).unaivailableweeks, newRoomId - 1, neighbor, indexSolution)) {
-//                                neighbor.classes.get(indexSolution).roomId = newRoomId;
-//                                break;
-//                            }
-//                            if(i > 10000){
-//                                break;
-//                            }
-//
-//                        }
-//                    }
+                if(roomSelection.equals("availabilityBased")) {
+                    // change room (done) - add check for unaivailableweeks:
+                    int i = 0;
+                    int classId = neighbor.classes.get(indexSolution).classId;
+                    CourseClass courseClass = instance.getClassForId(classId);
+                    if(courseClass.roomNeeded && courseClass.roomPenalties.size() > 1){
+                        while (true) {
+                            i++;
+                            //int selectedCourseIdx = neighbor.classes.get(indexSolution).classId - 1;
+                            int selectedCourseId = neighbor.classes.get(indexSolution).classId;
+                            int newRoomId = this.rand.nextInt(this.numRooms)+1;
+
+                            //System.out.println(selectedCourseIdx + " " + newRoomId + " " + indexSolution);
+                            //if (this.courseClasses.get(selectedCourseIdx).roomPenalties.get(newRoomId) != null
+                            //System.out.println(selectedCourseIdx);
+                            if (this.instance.getClassForId(selectedCourseId).roomPenalties.get(newRoomId) != null
+                                    && isAvailableWeeks(this.instance.rooms.get(newRoomId - 1).unaivailableweeks, newRoomId - 1, neighbor, indexSolution)) {
+                                neighbor.classes.get(indexSolution).roomId = newRoomId;
+                                break;
+                            }
+                            if(i > 10000){
+                                break;
+                            }
+
+                        }
+                    }
+                }
 //                  ###### Changed to randomly pick an available room instead of picking any room and checking whether it is available
 //                SolutionClass changeClass = neighbor.classes.get(indexSolution);
 //
@@ -491,33 +495,43 @@ public class SimulatedAnnealing {
 //                        }
 //                    }
                 // #### penalty probability ####
+                else if(roomSelection.equals("random")) {
                     SolutionClass changeClass = neighbor.classes.get(indexSolution);
                     CourseClass courseClass = instance.getClassForId(changeClass.classId);
-                    if(courseClass.roomNeeded) {
+                    if (courseClass.roomNeeded) {
                         int newRoom = selectRandomRoom(changeClass);
                         changeClass.roomId = newRoom;
                     }
+                }
+                else{
+                    throw new IllegalStateException("Illegal Room selection "+roomSelection);
+                }
             } else if (indexSolutionPart == 1) {
-                // change time (done):
-                // TODO: maybe change this to choose times that are available (like in the rooms)
-                SolutionClass solutionClass = neighbor.classes.get(indexSolution);
-                CourseClass courseClass = instance.getClassForId(solutionClass.classId);
-                ArrayList<CourseTime> times = courseClass.times;
-                CourseTime newTime = getRandomFromList(times);
-                solutionClass.start = newTime.start;
-                solutionClass.length = newTime.length;
-                solutionClass.days = newTime.days;
-                solutionClass.weeks = newTime.weeks;
+                if(timeSelection.equals("random")) {
+                    // change time (done):
+                    // TODO: maybe change this to choose times that are available (like in the rooms)
+                    SolutionClass solutionClass = neighbor.classes.get(indexSolution);
+                    CourseClass courseClass = instance.getClassForId(solutionClass.classId);
+                    ArrayList<CourseTime> times = courseClass.times;
+                    CourseTime newTime = getRandomFromList(times);
+                    solutionClass.start = newTime.start;
+                    solutionClass.length = newTime.length;
+                    solutionClass.days = newTime.days;
+                    solutionClass.weeks = newTime.weeks;
+                }
+                else if(timeSelection.equals("constraintBased")) {
+
+
 //                int selectedCourseIdx = neighbor.classes.get(indexSolution).classId - 1;
-//                int idxNewTime = this.rand.nextInt(0, this.courseTimes.get(selectedCourseIdx).size());
+//                int idxNewTime = this.rand.nextInt(this.courseTimes.get(selectedCourseIdx).size());
 //                neighbor.classes.get(indexSolution).days = this.getBitSetFromString(this.courseTimes.get(selectedCourseIdx).get(idxNewTime).get(0));
 //                neighbor.classes.get(indexSolution).weeks = this.getBitSetFromString(this.courseTimes.get(selectedCourseIdx).get(idxNewTime).get(1));
 //                neighbor.classes.get(indexSolution).start = Integer.parseInt(this.courseTimes.get(selectedCourseIdx).get(idxNewTime).get(2));
-                    /*repeat = true;
+                    repeat = true;
                     while (repeat){
                         repeat = false;
                         ArrayList<CourseTime> times = instance.getClassForId(neighbor.classes.get(indexSolution).classId).times;
-                        int idxNewTime = this.rand.nextInt(0, times.size());
+                        int idxNewTime = this.rand.nextInt(times.size());
                         CourseTime newTime = times.get(idxNewTime);
                         neighbor.classes.get(indexSolution).days = newTime.days;
                         neighbor.classes.get(indexSolution).weeks = newTime.weeks;
@@ -544,7 +558,7 @@ public class SimulatedAnnealing {
                                         repeat = true;
                                         continue;
                                     }
-                                    int idxNewTime2 = this.rand.nextInt(0, times2.size());
+                                    int idxNewTime2 = this.rand.nextInt(times2.size());
                                     CourseTime newTime2 = times2.get(idxNewTime2);
                                     neighbor.classes.get(indexSolution2).days = newTime2.days;
                                     neighbor.classes.get(indexSolution2).weeks = newTime2.weeks;
@@ -575,7 +589,7 @@ public class SimulatedAnnealing {
                                         repeat = true;
                                         continue;
                                     }
-                                    int idxNewTime2 = this.rand.nextInt(0, times2.size());
+                                    int idxNewTime2 = this.rand.nextInt(times2.size());
                                     CourseTime newTime2 = times2.get(idxNewTime2);
                                     neighbor.classes.get(indexSolution2).days = newTime2.days;
                                     neighbor.classes.get(indexSolution2).weeks = newTime2.weeks;
@@ -605,7 +619,7 @@ public class SimulatedAnnealing {
                                         repeat = true;
                                         continue;
                                     }
-                                    int idxNewTime2 = this.rand.nextInt(0, times2.size());
+                                    int idxNewTime2 = this.rand.nextInt(times2.size());
                                     CourseTime newTime2 = times2.get(idxNewTime2);
                                     neighbor.classes.get(indexSolution2).days = newTime2.days;
                                     neighbor.classes.get(indexSolution2).weeks = newTime2.weeks;
@@ -638,7 +652,7 @@ public class SimulatedAnnealing {
                                         repeat = true;
                                         continue;
                                     }
-                                    int idxNewTime2 = this.rand.nextInt(0, times2.size());
+                                    int idxNewTime2 = this.rand.nextInt(times2.size());
                                     CourseTime newTime2 = times2.get(idxNewTime2);
                                     neighbor.classes.get(indexSolution2).days = newTime2.days;
                                     neighbor.classes.get(indexSolution2).weeks = newTime2.weeks;
@@ -691,8 +705,12 @@ public class SimulatedAnnealing {
                                     neighbor.classes.get(indexSolution2).start = newTime2.start;
                                     neighbor.classes.get(indexSolution2).length = newTime2.length;
                                 }
-                            }
-                        }*/
+                            }*/
+                        }
+                }
+                else{
+                    throw new IllegalStateException("Illegal timeSelection method " + timeSelection);
+                }
             }
             else if(indexSolutionPart == 2) {
                 // change students:

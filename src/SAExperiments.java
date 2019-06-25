@@ -7,19 +7,24 @@ import entities.distribution.ImplicitDistribution;
 import java.io.*;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.concurrent.ThreadLocalRandom;
 
 public class SAExperiments {
 
     private static final int numIterations = 10_000;
+//    private static final int numIterations = 100;
     private static final long seed = 197841684351L;
-    static String file = "wbg-fal10.xml";
+//    static String file = "wbg-fal10.xml"; // Testing
+//    static String file = "muni-fsps-spr17.xml";
+    static String file = "bet-sum18.xml";
+//    static String file = "pu-cs-fal07.xml";
     static int n = 10;
 
     public static void main(String[] args) {
         tempExperiment();
         neighbourExp();
-//        tempDecayExp();
+        tempDecayExp();
+        roomSelectExp();
+        timeSelectExp();
     }
 
     static void tempExperiment() {
@@ -138,9 +143,78 @@ public class SAExperiments {
         }
     }
 
+    static void roomSelectExp() {
+        InstanceParser parser;
+        Instance instance;
+        SimulatedAnnealing S = null;
+        Solution init;
+        Solution solution = null;
+        try {
+            String instanceFileName = file;
+            parser = new InstanceParser(instanceFileName);
+            instance = parser.parse();
+            String[] methods = new String[]{"random", "availabilityBased"};
+            for (String x : methods) {
+                ArrayList<String> infeasibles = new ArrayList<>();
+                double[][] costs = new double[n][numIterations];
+                for (int i = 0; i < n; i++) {
+                    StringWriter w = new StringWriter();
+                    S = new SimulatedAnnealing(instance);
+//                    S.rand.setSeed(seed);
+                    init = S.initRepresentation(instance);
+                    S.roomSelection = x;
+                    solution = S.optimize(init, 200.0, 0.1, numIterations, 1, false);
+                    costs[i] = S.costs;
+                    writeInfeasible(instance, solution, w);
+                    S.pool.shutdown();
+                    infeasibles.add(w.toString());
+                }
+                writeToFile(infeasibles, costs, "roomSelect" + x + ".txt");
+            }
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    static void timeSelectExp() {
+        InstanceParser parser;
+        Instance instance;
+        SimulatedAnnealing S = null;
+        Solution init;
+        Solution solution = null;
+        try {
+            String instanceFileName = file;
+            parser = new InstanceParser(instanceFileName);
+            instance = parser.parse();
+            String[] methods = new String[]{"random", "constraintBased"};
+            for (String x : methods) {
+                ArrayList<String> infeasibles = new ArrayList<>();
+                double[][] costs = new double[n][numIterations];
+                for (int i = 0; i < n; i++) {
+                    StringWriter w = new StringWriter();
+                    S = new SimulatedAnnealing(instance);
+//                    S.rand.setSeed(seed);
+                    init = S.initRepresentation(instance);
+                    S.timeSelection = x;
+                    solution = S.optimize(init, 200.0, 0.1, numIterations, 1, false);
+                    costs[i] = S.costs;
+                    writeInfeasible(instance, solution, w);
+                    S.pool.shutdown();
+                    infeasibles.add(w.toString());
+                }
+                writeToFile(infeasibles, costs, "timeSelect" + x + ".txt");
+            }
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
     private static void writeToFile(ArrayList<String> infeasibles, double[][] costs, String fileName) throws IOException {
         double[] avgCosts = average(costs);
-        FileOutputStream f = new FileOutputStream(fileName);
+
+        FileOutputStream f = new FileOutputStream(new File(file + "-" + fileName));
         OutputStreamWriter out = new OutputStreamWriter(f);
         out.append(Arrays.toString(avgCosts));
         out.append("\n");
