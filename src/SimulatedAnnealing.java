@@ -923,12 +923,17 @@ ArrayList<SolutionClass> removed;
         return new ValidationResult(cost, infeasibleViolated, infeasibleViolated == 0);
     }
 
+    boolean exp = true;
     private double getTemperature(double startTemperature, double endTemperature, int numIteration, int numIterations) {
-        // linear:
-        //return startTemperature - numIteration * startTemperature / numIterations;
 
-        // exponential:
-        return startTemperature * Math.exp((double) numIteration / (double) numIterations * Math.log(endTemperature / startTemperature));
+
+        if(exp){
+            // exponential:
+            return startTemperature * Math.exp((double) numIteration / (double) numIterations * Math.log(endTemperature / startTemperature));
+        }else{
+            // linear:
+            return startTemperature - numIteration * startTemperature / numIterations;
+        }
     }
 
     private int getNumChanges(int numChangesStart, int numIteration, int numIterations) {
@@ -1046,10 +1051,10 @@ public  double[] costs;
         Solution solution;
 
         try {
-            String instanceFileName = "bet-sum18.xml";
+//            String instanceFileName = "bet-sum18.xml";
 //            ILP.ILP.main(null);
 //            String instanceFileName = "lums-sum17.xml";
-//            String instanceFileName = "tg-fal17.xml";
+            String instanceFileName = "tg-fal17.xml";
 //            String instanceFileName = "pu-cs-fal07.xml";
 //            String instanceFileName = "iku-fal17.xml";
 //            String instanceFileName = "pu-c8-spr07.xml";
@@ -1063,7 +1068,7 @@ public  double[] costs;
 //            init = ILP.ILP.sol;
             S.rand.setSeed(197841684351L);
             init = S.initRepresentation(instance);
-            solution = S.optimize(init, 7000.0, 0.1, 100_000, 1, false);
+            solution = S.optimize(init, 2000.0, 0.1, 1_000_000, 1, false);
             //solution = S.optimize(init, 0.2, 0.1, 4000000, 1);
             String solutionText = solution.serialize();
 //            System.out.println(solutionText);
