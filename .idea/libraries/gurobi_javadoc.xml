@@ -2,7 +2,7 @@
   <library name="gurobi-javadoc">
     <CLASSES />
     <JAVADOC>
-      <root url="jar://C:/gurobi810/win64/lib/gurobi-javadoc.jar!/" />
+      <root url="jar://$USER_HOME$/gurobi810/linux64/lib/gurobi-javadoc.jar!/" />
     </JAVADOC>
     <SOURCES />
   </library>
