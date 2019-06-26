@@ -78,9 +78,11 @@ public class GeneticAlgorithm {
 			for (int j=0; j<this.numPopulation; j++) {
 				int[] tournament = new Random().ints(0, numPopulation).distinct().limit(5).toArray();
 				Solution best = this.population[tournament[0]];
-				double bestCost = cost(best).cost;
+				ValidationResult vrbestCost = cost(best);
+				double bestCost = vrbestCost.cost + 1000 * vrbestCost.numInfeasible;
 				for (int k=1; k<5; k++) {
-					double c = cost(this.population[tournament[k]]).cost;
+					ValidationResult vrc = cost(this.population[tournament[k]]);
+					double c = vrc.cost + 1000 * vrc.numInfeasible;
 					if (bestCost < c) {
 						best = this.population[tournament[k]];
 						bestCost = c;
@@ -89,9 +91,11 @@ public class GeneticAlgorithm {
 				}
 				int[] tournament2 = new Random().ints(0, numPopulation).distinct().limit(5).toArray();
 				Solution best2 = this.population[tournament2[0]];
-				double bestCost2 = cost(best2).cost;
+				ValidationResult vrbestCost2 = cost(best2);
+				double bestCost2 = vrbestCost2.cost + 5000 * vrbestCost2.numInfeasible;
 				for (int k=1; k<5; k++) {
-					double c2 = cost(this.population[tournament2[k]]).cost;
+					ValidationResult vrc2 = cost(this.population[tournament[k]]);
+					double c2 = vrc2.cost + 5000 * vrc2.numInfeasible;
 					if (bestCost2 < c2) {
 						best2 = this.population[tournament2[k]];
 						bestCost2 = c2;
@@ -108,12 +112,15 @@ public class GeneticAlgorithm {
 				this.population[j] = makeDeepCopy(genePool[j]);
 			}
 		}
-		Solution best = repair(this.population[0], 7000, 0.1, 100_000, 1);
+		for (int j=0; j<this.numPopulation; j++) {
+			this.population[j] = repair(this.population[j], 7000, 0.1, 100_000, 1);
+		}
+		Solution best = population[0];
 		double bestCost = cost(best).cost;
 		for (int k=1; k<this.numPopulation; k++) {
 			double c = cost(this.population[k]).cost;
 			if (bestCost < c) {
-				best = repair(this.population[k], 7000, 0.1, 100_000, 1);
+				best = population[k];
 				bestCost = c;
 			}
 		}
@@ -803,8 +810,8 @@ ArrayList<SolutionClass> removed;
         Solution solution;
 
         try {
-        	String instanceFileName = "wbg-fal10.xml";
-//            String instanceFileName = "bet-sum18.xml";
+//        	String instanceFileName = "wbg-fal10.xml";
+            String instanceFileName = "bet-sum18.xml";
 //            ILP.ILP.main(null);
 //            String instanceFileName = "lums-sum17.xml";
 //            String instanceFileName = "tg-fal17.xml";
@@ -852,7 +859,7 @@ ArrayList<SolutionClass> removed;
 //    def __init__(self, numGenerations=100, numPopulation=100, max_time_steps=1000):
 //        self.numGenerations = numGenerations
 //        self.numPopulation = numPopulation
-//        self.max_time_steps = max_time_steps
+//        se	lf.max_time_steps = max_time_steps
 //        self.fitnessOverTime = np.zeros((numGenerations, numPopulation))
 //        self.diversityOverTime = np.zeros(numGenerations)
 //        # population = "genes"(ANNs) of the robots
