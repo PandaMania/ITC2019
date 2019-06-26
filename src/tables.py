@@ -1,5 +1,5 @@
-instance = "pu-cs-fal07.xml"
-folder_name = "pu-cs"
+instance = "bet-sum18.xml"
+folder_name = "bet-sum"
 
 class experiment():
     def __init__(self, id, T_S, T_E, num_iterations, num_changes, temp_decay, room_select, time_select, path):
@@ -14,23 +14,25 @@ class experiment():
         self.path = path
         self.get_costs_constraints()
 
-
     def get_costs_constraints(self):
         with open(self.path, 'r') as file:
             data = file.read().strip().split("\n")
         self.costs = data[0].replace('[', '').replace(']', '').split(', ')
         self.constraints = []
         for i in range(1, len(data)):
-            self.constraints += data[i].split(',')
-        self.num_infeasible = 0
-        for item in self.constraints:
-            if "req" in item:
-                self.num_infeasible += 1
-        self.constraints.remove('')
-        self.num_violated = len(self.constraints)
-        self.constraints = list(set(self.constraints))
-        self.constraints.remove('')
-        return  self.costs, self.constraints
+            self.constraints.append(data[i].split(','))
+        self.num_infeasible = [0 for x in range(10)]
+        self.num_violated = [0 for x in range(10)]
+        for i in range(len(self.constraints)):
+            self.constraints[i].remove('')
+        for idx, item in enumerate(self.constraints):
+            self.num_violated[idx] = len(item)
+            for j in range(len(item)):
+                if "req" in item[j]:
+                    self.num_infeasible[idx] += 1
+        self.num_infeasible = sum(self.num_infeasible) / len(self.num_infeasible)
+        self.num_violated = sum(self.num_violated) / len(self.num_violated)
+
 
     def __print__(self):
         line = "{0} & {1} & {2} & {3} & {4} & {5} & {6} & {7} & {8} \\\\ \\hline".format(self.id, self.T_S, self.num_changes, self.temp_decay, self.room_select,
@@ -43,7 +45,8 @@ header = """\\begin{figure}[H]
 \\centering
 \\begin{tabular}{|l|l|l|l|l|l||l|l|l|l|l|l|l|l|l|}
 \\hline
-Id & $T_S$ & $n_{\\text{changes}}$ & temp decay & room select & time select & cost & infeasible & violated \\\\ \\hline
+ &  &  &  &  &  &  & avg num & avg num \\\\
+ Id & $T_S$ & $n_{\\text{changes}}$ & temp decay & room select & time select & avg cost & infeasible & violated \\\\ \\hline
 """
 print(header, end='')
 
