@@ -19,6 +19,7 @@ public class Mip1 {
 
     public static void main(String[] args) {
         try {
+            long begin= System.currentTimeMillis();
             int unavailable=0;
             // Create empty environment, set options, and start
             GRBEnv env = new GRBEnv(true);
@@ -35,8 +36,10 @@ public class Mip1 {
             try {
                 p = new InstanceParser(//"bet-sum18.xml");
                         //            p.parse("pu-cs-fal07.xml");
-                        "iku-fal17.xml");
+                            //"wbg-fal10.xml");
                // "output4.xml");
+                        //"iku-fal17_main_3.xml");
+                "tg-fal17.xml");
                 Instance x = p.parse();
                 // System.out.println(x);
                 System.out.println("Courses= " + x.courses.size());
@@ -59,9 +62,7 @@ public class Mip1 {
 
                 int week= 5;
                     BitSet a= BitSet.valueOf(x.courses.get(0).configs.get(0).subparts.get(0).classes.get(0).times.get(0).days.getBytes());
-                    if(!a.get(week)){
-                        System.out.println("fuck yeah");
-                    }
+
 
 
 
@@ -133,10 +134,7 @@ public class Mip1 {
                                             // System.out.println(x.rooms.get((Integer) finallist[o]).id + " ==== " + (Integer) finallist[o] );
 
                                             while (n < x.courses.get(j).configs.get(k).subparts.get(l).classes.get(m).times.size() && combi.singlecheck(x.rooms.get(currRoom-1).unaivailableweeks, x.courses.get(j).configs.get(k).subparts.get(l).classes.get(m).times.get(n))) {
-                                                if(x.courses.get(j).configs.get(k).subparts.get(l).classes.get(m).id.equals("634")){
-                                                    System.out.println("FUCK YOU");
-                                                    System.out.println(x.rooms.get(currRoom-1).unaivailableweeks.size());
-                                                }
+
                                                 unavailable++;
                                                 n++;
                                                 if(x.courses.get(j).configs.get(k).subparts.get(l).classes.get(m).times.size()==1){
@@ -211,12 +209,12 @@ public class Mip1 {
                     for (int i = 1; i <= x.rooms.size(); i++) {
 
                         System.out.println("overlapcheck room " + i);
-                        combi.OverlapInARoom(overlapCheck.get(i), x, model);
+                       combi.OverlapInARoom(overlapCheck.get(i), x, model);
                         //O.computeAllOverlaps(overlapCheck.get(i), model, sameAttendance, x);
                     }
 
                     System.out.println("model size " + model.getConstrs().length);
-
+               // GRBLinExpr happytime = new GRBLinExpr();
 
                     model.setObjective(objectiveFunc, GRB.MINIMIZE);
                     //model.feasRelax(GRB.FEASRELAX_LINEAR, true, false, true);
@@ -226,7 +224,7 @@ public class Mip1 {
                     Long endtime = System.currentTimeMillis();
 
                     System.out.println("time to get solution= " + (endtime - timer));
-                 /* TODO COMMENT THIS BACK IN WHEN ITS INFEASIBLE
+                //TODO COMMENT THIS BACK IN WHEN ITS INFEASIBLE
 
                     int status = model.get(GRB.IntAttr.Status);
                 if (status == GRB.Status.UNBOUNDED) {
@@ -293,7 +291,10 @@ public class Mip1 {
                 System.out.println("we removed " + counter + "constraints");
                 System.out.println("number of unavailable removals= " + unavailable);
 
-                 TODO  the other part to delete*/
+                long end = System.currentTimeMillis();
+                System.out.println("time to run the whole thing= " + (end-begin));
+
+             //    TODO  the other part to delete */
                 for (int j = 0; j < allvariables.size(); j++) {
                         for (int k = 0; k < allvariables.get(j).size(); k++) {
                             for (int l = 0; l < allvariables.get(j).get(k).size(); l++) {

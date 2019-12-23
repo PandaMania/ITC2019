@@ -33,50 +33,52 @@ public class combiOverlap {
         // we need to run this for every week and every day
         // first loop weeks
 
-        for(int i=1; i<= instance.weeks; i++){
-            for(int j=1; j<=instance.days; j++){
+        for(int i=0; i< instance.weeks; i++){
+            for(int j=0; j<instance.days; j++){
                 runThroughInd(orderedByStart,orderedByEnd,instance, j, i, model );
+              //  System.out.println(orderedByStart.size());
             }
         }
     }
 
     public void runThroughInd(ArrayList<GRBcombi> orderedByStart, ArrayList<GRBcombi> orderedByEnd, Instance instance, int day, int week, GRBModel model) {
 
+
         int timer = 0;
         int orderstart = 0;
         int orderend = 0;
         boolean start = true;
         boolean increment=false;
+        ArrayList<GRBcombi> toremoveStart= new ArrayList<>();
+        ArrayList<GRBcombi> toremoveend= new ArrayList<>();
+
         ArrayList<GRBcombi> current = new ArrayList<>();
 
         for(int i=0; i<orderedByStart.size(); i++){
             BitSet a= fromString(orderedByStart.get(i).courseTime.weeks);
-            if(!a.get(week-1)){
-                orderedByStart.remove(i);
+            if(a.get(week)){
+                BitSet b= fromString(orderedByStart.get(i).courseTime.days);
+                if(b.get(day)){
+                    toremoveStart.add(orderedByStart.get(i));
+                }
+                toremoveStart.add(orderedByStart.get(i));
             }
 
         }
-        for(int i=0; i<orderedByStart.size(); i++){
-            BitSet a= fromString(orderedByStart.get(i).courseTime.days);
-            if(!a.get(day-1)){
-                orderedByStart.remove(i);
-            }
 
-        }
+
+
         for(int i=0; i<orderedByEnd.size(); i++){
             BitSet a= fromString(orderedByEnd.get(i).courseTime.weeks);
-            if(!a.get(week-1)){
-                orderedByEnd.remove(i);
-            }
+            if(a.get(week)){
+                BitSet b= fromString(orderedByEnd.get(i).courseTime.days);
+                if(b.get(day)){
+                    toremoveend.add(orderedByEnd.get(i));
+                }
 
-        }for(int i=0; i<orderedByEnd.size(); i++){
-            BitSet a= fromString(orderedByEnd.get(i).courseTime.days);
-            if(!a.get(day-1)){
-                orderedByEnd.remove(i);
             }
 
         }
-
 
 
         if(orderedByStart.size()!=0 && orderedByEnd.size()!=0) {
@@ -91,28 +93,28 @@ public class combiOverlap {
             while (timer <= instance.slotsPerDay) {
 
                 while (increment == false) {
-                    if (orderend < orderedByEnd.size() && (orderedByEnd.get(orderend).courseTime.start + orderedByEnd.get(orderend).courseTime.length) == timer && !start) {
-                        current.remove(orderedByEnd.get(orderend));
+                    if (orderend < toremoveend.size() && (toremoveend.get(orderend).courseTime.start + toremoveend.get(orderend).courseTime.length) == timer && !start) {
+                        current.remove(toremoveend.get(orderend));
                         orderend++;
-                    } else if (orderstart < orderedByStart.size() && orderedByStart.get(orderstart).courseTime.start == timer && start) {
-                        current.add(orderedByStart.get(orderstart));
+                    } else if (orderstart < toremoveStart.size() && toremoveStart.get(orderstart).courseTime.start == timer && start) {
+                        current.add(toremoveStart.get(orderstart));
                         orderstart++;
                         //System.out.println("first");
 
 
 
-                    } else    if (orderstart < orderedByStart.size() && orderedByStart.get(orderstart).courseTime.start == timer && !start) {
+                    } else    if (orderstart < toremoveStart.size() && toremoveStart.get(orderstart).courseTime.start == timer && !start) {
 
-                        addconstraint(current, model);
-                        current.add(orderedByStart.get(orderstart));
+                       // addconstraint(current, model);
+                        current.add(toremoveStart.get(orderstart));
                         orderstart++;
 
                         //System.out.println("third");
                         start = true;
-                    } else if (orderend < orderedByEnd.size() && (orderedByEnd.get(orderend).courseTime.start + orderedByEnd.get(orderend).courseTime.length) == timer && start) {
+                    } else if (orderend < toremoveend.size() && (toremoveend.get(orderend).courseTime.start + toremoveend.get(orderend).courseTime.length) == timer && start) {
                         addconstraint(current, model);
 
-                        current.remove(orderedByEnd.get(orderend));
+                        current.remove(toremoveend.get(orderend));
                         //    System.out.println("after removing" + current.size());
                         orderend++;
                         start = false;
@@ -125,9 +127,9 @@ public class combiOverlap {
                         increment = true;
 
                     }
-                    if (timer == 168 && orderedByStart.get(0).room == 20) {
+                    if (timer == 168 && toremoveStart.get(0).room == 20) {
                         for (int i = 0; i < current.size(); i++) {
-                               System.out.println( current.get(i).getName());
+                          //     System.out.println( current.get(i).getName());
                         }
                     }
                 }
@@ -154,13 +156,15 @@ public class combiOverlap {
 
      public void addconstraint(ArrayList<GRBcombi> list,  GRBModel model){
         counter++;
+
          GRBLinExpr overlapConstraint = new GRBLinExpr();
          for(int i=0; i<list.size(); i++){
+
              overlapConstraint.addTerm(1, list.get(i).grbVar);
 
          } try {
              model.addConstr(overlapConstraint, GRB.LESS_EQUAL, 1, "c" + counter );
-             counter++;
+
          } catch (GRBException e) {
              System.out.println("Error code: " + e.getErrorCode() + ". " +
                      e.getMessage());
